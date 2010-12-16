@@ -91,6 +91,10 @@ public:
   /// demo purposes only
   void disableOutputWindow();
 
+  /// Dangerous option that reenables the debug output window, intended for
+  /// demo purposes only
+  void enableOutputWindow();
+
   /// Provides access to the command line options object.
   pqOptions* getOptions() const
     { return this->Options; }
