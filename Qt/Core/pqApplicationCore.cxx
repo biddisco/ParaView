@@ -713,6 +713,12 @@ void pqApplicationCore::disableOutputWindow()
 }
 
 //-----------------------------------------------------------------------------
+void pqApplicationCore::enableOutputWindow()
+{
+  this->OutputWindowAdapter->setActive(true);
+}
+
+//-----------------------------------------------------------------------------
 void pqApplicationCore::loadConfiguration(const QString& filename)
 {
   QFile xml(filename);
