@@ -101,6 +101,7 @@ public:
   /// Returns the pqScalarOpacityFunction object for the piecewise
   /// function used to map scalars to opacity.
   virtual pqScalarOpacityFunction* getScalarOpacityFunction() {return 0;}
+  virtual pqScalarOpacityFunction* getGradientOpacityFunction() {return 0;}
 
   /// Sets default values for the underlying proxy.
   /// This is during the initialization stage of the pqProxy
