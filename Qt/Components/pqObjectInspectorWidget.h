@@ -106,6 +106,9 @@ public slots:
   /// set the visibility of the delete button.
   void setDeleteButtonVisibility(bool visible);
 
+  /// set the visibility of the delete button.
+  void setHelpButtonVisibility(bool visible);
+
   /// sets the enabled state of the delete button.
   void updateDeleteButtonState();
 
