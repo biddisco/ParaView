@@ -88,12 +88,14 @@ class pqPipelineRepresentation::pqInternal
 public:
   vtkSmartPointer<vtkSMRepresentationProxy> RepresentationProxy;
   vtkSmartPointer<vtkEventQtSlotConnect> VTKConnect;
-//  pqScalarOpacityFunction *Opacity;
+  pqScalarOpacityFunction *Opacity;
+  pqScalarOpacityFunction *GradientOpacity;
 
   pqInternal()
     {
     this->VTKConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-//    this->Opacity = 0;
+    this->Opacity = 0;
+    this->GradientOpacity = 0;
     }
 
   static vtkPVArrayInformation* getArrayInformation(const pqPipelineRepresentation* repr,
@@ -200,6 +202,14 @@ vtkSMProxy* pqPipelineRepresentation::getScalarOpacityFunctionProxy()
 }
 
 //-----------------------------------------------------------------------------
+vtkSMProxy* pqPipelineRepresentation::getGradientOpacityFunctionProxy()
+{
+  // We may want to create a new proxy is none exists.
+  return pqSMAdaptor::getProxyProperty(
+    this->getProxy()->GetProperty("GradientOpacityFunction"));
+}
+
+//-----------------------------------------------------------------------------
 pqScalarOpacityFunction* pqPipelineRepresentation::getScalarOpacityFunction()
 {
   if (this->getRepresentationType().compare("Volume", Qt::CaseInsensitive) == 0)
@@ -213,12 +223,29 @@ pqScalarOpacityFunction* pqPipelineRepresentation::getScalarOpacityFunction()
 
   return 0;
 }
+//-----------------------------------------------------------------------------
+pqScalarOpacityFunction* pqPipelineRepresentation::getGradientOpacityFunction()
+{
+  if(this->getRepresentationType() == vtkSMPVRepresentationProxy::VOLUME)
+    {
+    if(!this->Internal->GradientOpacity)
+      {
+      // TODO: Add the opacity function to the server manager model.
+      this->Internal->GradientOpacity = new pqScalarOpacityFunction(
+        "piecewise_functions", "PiecewiseFunction",
+        this->getGradientOpacityFunctionProxy(), this->getServer(), this);
+      }
 
+    return this->Internal->GradientOpacity;
+    }
+
+  return 0;
+}
 //-----------------------------------------------------------------------------
 void pqPipelineRepresentation::createHelperProxies()
 {
   vtkSMProxy* proxy = this->getProxy();
-
+/*
   if (proxy->GetProperty("ScalarOpacityFunction"))
     {
     vtkSMSessionProxyManager* pxm = this->proxyManager();
@@ -233,6 +260,25 @@ void pqPipelineRepresentation::createHelperProxies()
       proxy->GetProperty("ScalarOpacityFunction"), opacityFunction);
     proxy->UpdateVTKObjects();
     }
+*/
+  if (proxy->GetProperty("GradientOpacityFunction"))
+    {
+    vtkSMProxyManager* pxm = vtkSMProxyManager::GetProxyManager();
+    vtkSMProxy* opacityFunction = 
+      pxm->NewProxy("piecewise_functions", "PiecewiseFunction");
+    opacityFunction->SetConnectionID(this->getServer()->GetConnectionID());
+    opacityFunction->SetServers(
+      vtkProcessModule::CLIENT|vtkProcessModule::RENDER_SERVER);
+    opacityFunction->UpdateVTKObjects();
+
+    this->addHelperProxy("GradientOpacityFunction", opacityFunction);
+    opacityFunction->Delete();
+
+    pqSMAdaptor::setProxyProperty(
+      proxy->GetProperty("GradientOpacityFunction"), opacityFunction);
+    proxy->UpdateVTKObjects();
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -276,7 +322,9 @@ void pqPipelineRepresentation::setDefaultPropertyValues()
 
   // The HelperProxy is not needed any more since now the OpacityFunction is 
   // created from LookupTableManager (Bug# 0008876)
-  // this->createHelperProxies();
+
+  // JB putting it back in so that we can create Gradient Opacity Function
+  this->createHelperProxies();
 
   vtkSMRepresentationProxy* repr = this->getRepresentationProxy();
   if (!repr)
