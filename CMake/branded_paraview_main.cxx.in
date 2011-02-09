@@ -42,6 +42,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef WIN32
  #include <windows.h>
 #endif
+
+#include "vtkPVConfig.h"
+
+#ifdef PARAVIEW_USE_MPI
+ #include "vtkMPI.h"
+ #include "vtkMPIController.h"
+ #include "vtkMPICommunicator.h"
+#endif
+#include "vtkSmartPointer.h"
+
 #ifdef Q_WS_X11
 #include <QPlastiqueStyle>
 #endif
@@ -73,6 +83,32 @@ int main(int argc, char* argv[])
  freopen("conout$", "w", stdout);
  freopen("conout$", "w", stderr);
 #endif
+
+#if defined(VTK_USE_MPI) && defined(WIN32)
+  int flag = 0;
+  MPI_Initialized(&flag);
+  vtkSmartPointer<vtkMPIController> controller = vtkSmartPointer<vtkMPIController>::New();
+  if (flag == 0)
+  {
+    int provided, rank, size;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    //
+    if (rank == 0) {
+      if (provided != MPI_THREAD_MULTIPLE) {
+        std::cout << "MPI_THREAD_MULTIPLE not set, you may need to recompile your "
+          << "MPI distribution with threads enabled" << std::endl;
+      }
+      else {
+        std::cout << "MPI_THREAD_MULTIPLE is OK" << std::endl;
+      }
+    }
+    controller->Initialize(&argc, &argv, 1);
+//    vtkMPIController::SetGlobalController(controller);
+  }
+#endif
+
 #ifdef Q_WS_X11
   // Using motif style gives us test failures (and its ugly).
   // Using cleanlooks style gives us errors when using valgrind (Trolltech's bug #179200)
@@ -96,14 +132,20 @@ int main(int argc, char* argv[])
   QApplication::setApplicationVersion("@BPC_VERSION_MAJOR@.@BPC_VERSION_MINOR@.@BPC_VERSION_PATCH@");
   QApplication::setOrganizationName("@BPC_ORGANIZATION@");
 
-  QApplication qtapp(argc, argv);
-  setlocale(LC_NUMERIC,"C");
-  pq@BPC_NAME@Initializer pvInitializer;
-  if (!pvInitializer.Initialize(argc, argv))
-    {
-    return 1;
-    }
-
-  return qtapp.exec();
+  int ret;
+  {
+    QApplication qtapp(argc, argv);
+    setlocale(LC_NUMERIC,"C");
+    pq@BPC_NAME@Initializer pvInitializer;
+    if (!pvInitializer.Initialize(argc, argv))
+      {
+      return 1;
+      }
+    ret = qtapp.exec();
+  }
+#if defined(VTK_USE_MPI) && defined(WIN32)
+  controller->Finalize(0);
+#endif
+  return ret;
 }
 // ***************** DO NOT EDIT ***********************************
