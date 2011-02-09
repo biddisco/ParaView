@@ -671,6 +671,11 @@ void pqObjectInspectorWidget::setDeleteButtonVisibility(bool visible)
 {
   this->DeleteButton->setVisible(visible);
 }
+//-----------------------------------------------------------------------------
+void pqObjectInspectorWidget::setHelpButtonVisibility(bool visible)
+{
+  this->HelpButton->setVisible(visible);
+}
 
 //-----------------------------------------------------------------------------
 void pqObjectInspectorWidget::handleConnectionChanged(pqPipelineSource* in,
