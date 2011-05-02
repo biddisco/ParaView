@@ -226,7 +226,7 @@ pqScalarOpacityFunction* pqPipelineRepresentation::getScalarOpacityFunction()
 //-----------------------------------------------------------------------------
 pqScalarOpacityFunction* pqPipelineRepresentation::getGradientOpacityFunction()
 {
-  if(this->getRepresentationType() == vtkSMPVRepresentationProxy::VOLUME)
+  if (this->getRepresentationType().compare("Volume", Qt::CaseInsensitive))
     {
     if(!this->Internal->GradientOpacity)
       {
