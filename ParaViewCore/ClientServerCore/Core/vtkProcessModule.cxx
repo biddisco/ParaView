@@ -63,6 +63,11 @@ vtkSmartPointer<vtkMultiProcessController> vtkProcessModule::GlobalController;
 //----------------------------------------------------------------------------
 bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv)
 {
+  return vtkProcessModule::Initialize(type, false, argc, argv);
+}
+//----------------------------------------------------------------------------
+bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char** &argv)
+{
   setlocale(LC_NUMERIC,"C");
 
   vtkProcessModule::ProcessType = type;
@@ -98,6 +103,15 @@ bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv)
     vtkProcessModule::GlobalController = vtkSmartPointer<vtkMPIController>::New();
     vtkProcessModule::GlobalController->Initialize(
       &argc, &argv, /*initializedExternally*/1);
+    if (dsm) {
+      vtkProcessModule::GlobalController->Initialize(
+        &argc, &argv, 2);
+    }
+    else {
+      vtkProcessModule::GlobalController->Initialize(
+        &argc, &argv, /*initializedExternally*/1);
+    }
+
     }
 #else
   static_cast<void>(argc); // unused warning when MPI is off
@@ -205,6 +219,8 @@ bool vtkProcessModule::Finalize()
     }
 #endif
 
+  int useDSM = vtkProcessModule::Singleton ? 
+    vtkProcessModule::Singleton->Options->GetUseDSM() : 0;
   if(vtkProcessModule::Singleton)
     {
     // Make sure no session are kept inside ProcessModule so SessionProxyManager
