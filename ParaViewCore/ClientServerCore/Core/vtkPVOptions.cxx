@@ -33,6 +33,8 @@ vtkPVOptions::vtkPVOptions()
 {
   this->SetProcessType(ALLPROCESS);
 
+  this->UseDSM = 0;
+
   // Initialize vtksys::CommandLineArguments
   this->CaveConfigurationFileName = 0;
   this->MachinesFileName = 0;
@@ -160,6 +162,10 @@ void vtkPVOptions::Initialize()
   default:
     break;
     }
+
+  this->AddBooleanArgument("--enable-dsm", 0, &this->UseDSM,
+                           "Enable pvserver DSM and split communicator ",
+                           vtkPVOptions::PVSERVER);
 
   this->AddArgument("--cslog", 0, &this->LogFileName,
                     "ClientServerStream log file.",

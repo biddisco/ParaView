@@ -38,6 +38,7 @@ public:
   vtkTypeMacro(vtkPVOptions,vtkCommandOptions);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  vtkGetMacro(UseDSM, int);
   vtkGetMacro(ServerMode, int);
   vtkGetMacro(RenderServerMode, int);
   vtkGetMacro(ConnectID, int);
@@ -238,6 +239,7 @@ protected:
 
 private:
   // Options:
+  int UseDSM;
   int ClientRenderServer;
   int ConnectRenderToData;
   int ConnectDataToRender;

@@ -128,11 +128,16 @@ void vtkInitializationHelper::Initialize(int argc, char**argv,
   // compatible with the version of the headers we compiled against.
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
+//  vtkClientServerInterpreterInitializer::GetInitializer()->
+//    RegisterCallback(&::vtkInitializationHelperInit);
+
+  bool optionsOK = options->Parse(argc, argv);
+
   vtkProcessModule::Initialize(
-    static_cast<vtkProcessModule::ProcessTypes>(type), argc, argv);
+    static_cast<vtkProcessModule::ProcessTypes>(type), options->GetUseDSM(), argc, argv);
 
   vtksys_ios::ostringstream sscerr;
-  if (argv && !options->Parse(argc, argv) )
+  if (argv && !optionsOK)
     {
     if ( options->GetUnknownArgument() )
       {
