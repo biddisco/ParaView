@@ -40,6 +40,7 @@ vtkPVOptions::vtkPVOptions()
     sys_info.GetHostname() : "localhost";
   this->HostName= 0;
   this->SetHostName(sys_hostname);
+  this->UseDSM = 0;
 
   // Initialize vtksys::CommandLineArguments
   this->UseRenderingGroup = 0;
@@ -137,6 +138,10 @@ void vtkPVOptions::Initialize()
     "Override the hostname to be used to connect to this process. "
     "By default, the hostname is determined using appropriate system calls.",
     vtkPVOptions::ALLPROCESS);
+    
+  this->AddBooleanArgument("--enable-dsm", 0, &this->UseDSM,
+                           "Enable pvserver DSM and split communicator ",
+                           vtkPVOptions::PVSERVER);
 
   this->AddArgument("--cslog", 0, &this->LogFileName,
                     "ClientServerStream log file.",

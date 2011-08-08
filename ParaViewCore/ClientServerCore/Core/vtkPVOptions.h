@@ -42,6 +42,7 @@ public:
   // Convenience method to get the local process's host name.
   vtkGetStringMacro(HostName);
 
+  vtkGetMacro(UseDSM, int);
   vtkGetMacro(ConnectID, int);
   vtkGetMacro(UseOffscreenRendering, int);
   vtkGetMacro(UseStereoRendering, int);
@@ -207,6 +208,8 @@ protected:
   vtkSetStringMacro(TestPluginPath);
 
 private:
+  // Options:
+  int UseDSM;
   int ConnectID;
   int UseOffscreenRendering;
   int UseStereoRendering;
