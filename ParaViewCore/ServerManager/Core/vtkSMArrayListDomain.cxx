@@ -35,6 +35,7 @@
 #include <string>
 #include "vtksys/ios/sstream"
 #include "vtkStdString.h"
+#include "vtkStringList.h"
 
 vtkStandardNewMacro(vtkSMArrayListDomain);
 
@@ -648,15 +649,29 @@ int vtkSMArrayListDomain::SetDefaultValues(vtkSMProperty* prop)
   std::string array;
   if (this->GetNumberOfStrings() > 0)
     {
-    array = this->GetString(this->DefaultElement)?
-      this->GetString(this->DefaultElement): "";
-    const char* defaultValue = svp->GetDefaultValue(0);
-    unsigned int temp;
-    if (defaultValue && this->IsInDomain(defaultValue, temp))
+    unsigned int temp = 0;
+    if (svp->GetDefaultUsesRegex())
       {
-      array = defaultValue;
+        vtkStringList *list = vtkStringList::New();
+        unsigned int size = this->GetNumberOfStrings();
+        for(unsigned int i=0; i<size; i++)
+          {
+          list->AddString(this->GetString(i));
+          }
+        // all char *s are invalid after list->Delete, so use local copy
+        const char *temp = svp->GetDefaultValue(list);
+        array = temp ? temp : "";
+        list->Delete();
       }
-    }
+    if (array.size()==0) 
+      {
+      array = this->GetString(this->DefaultElement);
+      const char* defaultValue = svp->GetDefaultValue(0);
+      if (defaultValue && this->IsInDomain(defaultValue, temp))
+        {
+        array = defaultValue;
+        }
+      }
 
     if (svp->GetNumberOfElements() == 5)
       {
@@ -679,7 +694,7 @@ int vtkSMArrayListDomain::SetDefaultValues(vtkSMProperty* prop)
       svp->SetElement(0, array.c_str());
       return 1;
       }
-
+    }
   return this->Superclass::SetDefaultValues(prop);
 }
 
