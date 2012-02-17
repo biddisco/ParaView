@@ -24,6 +24,7 @@
 #include "vtkSMStateLocator.h"
 
 #include <vtksys/ios/sstream>
+#include <vtksys/RegularExpression.hxx>
 
 vtkStandardNewMacro(vtkSMStringVectorProperty);
 
@@ -32,6 +33,7 @@ class vtkSMStringVectorProperty::vtkInternals :
 {
 public:
   std::vector<int> ElementTypes;
+  std::vector<vtkStdString> RegexDefaults;
 
   vtkInternals(vtkSMStringVectorProperty* ivp):
     vtkSMVectorPropertyTemplate<vtkStdString>(ivp)
@@ -239,6 +241,29 @@ unsigned int vtkSMStringVectorProperty::GetElementIndex(
 }
 
 //---------------------------------------------------------------------------
+bool vtkSMStringVectorProperty::GetDefaultUsesRegex()
+{
+  return this->Internals->RegexDefaults.size()>0;
+}
+//---------------------------------------------------------------------------
+const char* vtkSMStringVectorProperty::GetDefaultValue(vtkStringList *list)
+{
+  std::vector<vtksys::RegularExpression> regex;
+  for (unsigned int i=0; i<this->Internals->RegexDefaults.size(); i++) 
+    {
+    vtksys::RegularExpression regex(this->Internals->RegexDefaults[i]);
+    for (int j=0; j<list->GetNumberOfStrings(); j++) 
+      {
+      if (regex.find(list->GetString(j)))
+        {
+        return list->GetString(j);
+        }
+      }
+    }
+  return NULL;
+}
+
+//---------------------------------------------------------------------------
 int vtkSMStringVectorProperty::ReadXMLAttributes(vtkSMProxy* proxy,
                                                  vtkPVXMLElement* element)
 {
@@ -266,6 +291,37 @@ int vtkSMStringVectorProperty::ReadXMLAttributes(vtkSMProxy* proxy,
   delete[] eTypes;
 
   numEls = this->GetNumberOfElements();
+  //
+  // We only allow regex searches for 1 element string selection (array lists)
+  //
+  if (numEls==1)
+    {
+    const char* tmp = element->GetAttribute("default_regex");
+    const char* delimiter = element->GetAttribute("default_regex_delimiter");
+    if(tmp && delimiter)
+      {
+      vtkStdString initVal = tmp;
+      vtkStdString delim = delimiter;
+      vtkStdString::size_type pos1 = 0;
+      vtkStdString::size_type pos2 = 0;
+      for(int i=0; pos2 != vtkStdString::npos; i++)
+        {
+        if(i != 0)
+          {
+          pos1 += delim.size();
+          }
+        pos2 = initVal.find(delimiter, pos1);
+        vtkStdString v = pos1 == pos2 ? "" : initVal.substr(pos1, pos2-pos1);
+        this->Internals->RegexDefaults.push_back(v);
+        pos1 = pos2;
+        }
+      }
+    else if(tmp)
+      {
+      this->Internals->DefaultValues.push_back(tmp);
+      }
+    }
+
   if (numEls > 0)
     {
     const char* tmp = element->GetAttribute("default_values");
