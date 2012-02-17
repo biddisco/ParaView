@@ -33,6 +33,7 @@
 #include <string>
 #include "vtksys/ios/sstream"
 #include "vtkStdString.h"
+#include "vtkStringList.h"
 
 vtkStandardNewMacro(vtkSMArrayListDomain);
 
@@ -643,35 +644,50 @@ int vtkSMArrayListDomain::SetDefaultValues(vtkSMProperty* prop)
     return 0;
     }
 
-  const char* array = 0;
+  vtkStdString default_string;
   if (this->GetNumberOfStrings() > 0)
     {
-    array = this->GetString(this->DefaultElement);
-    const char* defaultValue = svp->GetDefaultValue(0);
-    unsigned int temp;
-    if (defaultValue && this->IsInDomain(defaultValue, temp))
+    unsigned int temp = 0;
+    if (svp->GetDefaultUsesRegex())
       {
-      array = defaultValue;
+        vtkStringList *list = vtkStringList::New();
+        unsigned int size = this->GetNumberOfStrings();
+        for(unsigned int i=0; i<size; i++)
+          {
+          list->AddString(this->GetString(i));
+          }
+        // all char *s are invalid after list->Delete, so use local copy
+        const char *temp = svp->GetDefaultValue(list);
+        default_string = temp ? temp : "";
+        list->Delete();
       }
-    }
+    if (default_string.size()==0) 
+      {
+      default_string = this->GetString(this->DefaultElement);
+      const char* defaultValue = svp->GetDefaultValue(0);
+      if (defaultValue && this->IsInDomain(defaultValue, temp))
+        {
+        default_string = defaultValue;
+        }
+      }
 
     if (svp->GetNumberOfElements() == 5)
       {
       vtksys_ios::ostringstream ass;
       ass << this->Association;
       svp->SetElement(3, ass.str().c_str());
-      if (array)
+      if (default_string.size())
         {
-        svp->SetElement(4, array);
+        svp->SetElement(4, default_string);
         return 1;
         }
       }
-    else if (svp->GetNumberOfElements() == 1 && array)
+    else if (svp->GetNumberOfElements() == 1 && default_string.size())
       {
-      svp->SetElement(0, array);
+      svp->SetElement(0, default_string);
       return 1;
       }
-
+    }
   return this->Superclass::SetDefaultValues(prop);
 }
 
