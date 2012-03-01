@@ -74,6 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMStringVectorProperty.h"
 #include "vtkSMUncheckedPropertyHelper.h"
 #include "vtkSMVectorProperty.h"
+#include "vtkSMCommandProperty.h"
 
 // ParaView includes
 #include "pqSMProxy.h"
@@ -124,7 +125,7 @@ pqSMAdaptor::PropertyType pqSMAdaptor::getPropertyType(vtkSMProperty* Property)
   vtkSMProxyProperty* proxy = vtkSMProxyProperty::SafeDownCast(Property);
   vtkSMVectorProperty* VectorProperty = 
     vtkSMVectorProperty::SafeDownCast(Property);
-  
+
   if(proxy)
     {
     vtkSMInputProperty* input = vtkSMInputProperty::SafeDownCast(Property);
@@ -141,6 +142,10 @@ pqSMAdaptor::PropertyType pqSMAdaptor::getPropertyType(vtkSMProperty* Property)
   else if(Property->GetDomain("field_list"))
     {
     type = pqSMAdaptor::FIELD_SELECTION;
+    }
+  else if (vtkSMCommandProperty::SafeDownCast(Property)) 
+    {
+    type = pqSMAdaptor::COMMAND;
     }
   else
     {
@@ -214,7 +219,7 @@ pqSMAdaptor::PropertyType pqSMAdaptor::getPropertyType(vtkSMProperty* Property)
       {
       type = pqSMAdaptor::SELECTION;
       }
-    else if(booleanDomain || enumerationDomain || 
+    else if(booleanDomain || enumerationDomain ||
             proxyGroupDomain || stringListDomain)
       {
       type = pqSMAdaptor::ENUMERATION;
@@ -1623,6 +1628,16 @@ QList<QVariant> pqSMAdaptor::getMultipleElementPropertyDomain(
 
   return domain;
 }
+
+void pqSMAdaptor::setCommandProperty(vtkSMProperty* Property,
+                                 PropertyValueType Type)
+{
+  if (Type==CHECKED) 
+    {
+    Property->Modified();
+    }
+}
+
 
 QStringList pqSMAdaptor::getFileListProperty(vtkSMProperty* Property,
                                              PropertyValueType Type)
