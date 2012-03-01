@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPushButton>
+#include <QToolButton>
 #include <QSlider>
 #include <QtDebug>
 #include <QTextEdit>
@@ -66,6 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMStringListDomain.h"
 #include "vtkSMIntVectorProperty.h"
 #include "vtkSMSILDomain.h"
+#include "vtkSMCommandProperty.h"
 
 // ParaView includes
 #include "pq3DWidget.h"
@@ -414,6 +416,15 @@ void pqNamedWidgets::linkObject(QObject* object, pqSMProxy proxy,
         proxy, SMProperty);
       }
     }
+  else if (pt == pqSMAdaptor::COMMAND)
+    {
+    QString userProperty, userSignal;
+    if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
+      {
+      pqNamedWidgets::linkObject(object, userProperty, userSignal,
+        proxy, SMProperty, -1, property_manager);
+      }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -678,6 +689,15 @@ void pqNamedWidgets::unlinkObject(QObject* object, pqSMProxy proxy,
         
         delete adaptor;
         }
+      }
+    }
+  else if (pt == pqSMAdaptor::COMMAND)
+    {
+    QString userProperty, userSignal;
+    if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
+      {
+      pqNamedWidgets::unlinkObject(object, userProperty, userSignal,
+        proxy, SMProperty, -1, property_manager);
       }
     }
 }
@@ -960,7 +980,7 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
         {
         // check box for true/false
         QCheckBox* check;
-        check = new QCheckBox(propertyLabel, 
+        check = new QCheckBox(propertyLabel,
                               panelLayout->parentWidget());
         if(informationOnly)
           {
@@ -989,7 +1009,7 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
           h->setData(0, Qt::DisplayRole, propertyLabel);
           tw->setHeaderItem(h);
           tw->setObjectName(propertyName);
-          pqTreeWidgetSelectionHelper* helper = 
+          pqTreeWidgetSelectionHelper* helper =
             new pqTreeWidgetSelectionHelper(tw);
           helper->setObjectName(QString("%1Helper").arg(propertyName));
           panelLayout->addWidget(tw, rowCount, 0, 1, 2);
@@ -1005,8 +1025,8 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
             }
           combo->setObjectName(propertyName);
           QLabel* label = createPanelLabel(panelLayout->parentWidget(),
-                                           propertyLabel,
-                                           propertyName);
+                                            propertyLabel,
+                                            propertyName);
           panelLayout->addWidget(label, rowCount, 0, 1, 1);
           panelLayout->addWidget(combo, rowCount, 1, 1, 1);
           }
@@ -1400,6 +1420,17 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
       row_streched = true;
       rowCount++;
       }
+    else if (pt == pqSMAdaptor::COMMAND)
+      {
+      vtkSMCommandProperty* cp = vtkSMCommandProperty::SafeDownCast(SMProperty);
+      QPushButton* button;
+      button = new QPushButton(propertyLabel, panelLayout->parentWidget());
+      button->setCheckable(0);
+      button->setObjectName(propertyName);
+      panelLayout->addWidget(button, rowCount, 0, 1, 2);
+      button->show();
+      rowCount++;
+      }
     }
   iter->Delete();
   if (!row_streched && !summaryOnly)
@@ -1452,6 +1483,12 @@ bool pqNamedWidgets::propertyInformation(QObject* object,
      {
      property = "checked";
      signal = SIGNAL(toggled(bool));
+     return true;
+     }
+  if(btn && !btn->isCheckable())
+     {
+     property = "checked";
+     signal = SIGNAL(clicked(bool));
      return true;
      }
 

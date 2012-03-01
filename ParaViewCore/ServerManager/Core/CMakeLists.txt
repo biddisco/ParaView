@@ -36,6 +36,7 @@ set (Module_SRCS
   vtkSMBooleanDomain.cxx
   vtkSMBoundsDomain.cxx
   vtkSMCollaborationManager.cxx
+  vtkSMCommandProperty.cxx
   vtkSMCompositeTreeDomain.cxx
   vtkSMCompoundProxyDefinitionLoader.cxx
   vtkSMCompoundSourceProxy.cxx
