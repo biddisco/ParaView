@@ -71,6 +71,7 @@ public:
     FIELD_SELECTION,
     COMPOSITE_TREE,
     SIL,
+    COMMAND,
     };
 
   enum PropertyValueType
@@ -184,6 +185,11 @@ public:
   static QList<QVariant> getMultipleElementPropertyDomain(vtkSMProperty* Property,
                                                           unsigned int Index);
 
+  /// Set/Get a Command Property, this has no state so simply triggers a modified
+  /// on the property itself
+  static void setCommandProperty(vtkSMProperty* Property,
+                                 PropertyValueType Type = CHECKED);
+
   /// get the single element of a property (integer, string, real, etc..)
   static QStringList getFileListProperty(vtkSMProperty* Property,
                                          PropertyValueType Type = CHECKED);
@@ -215,7 +221,6 @@ public:
                                       PropertyValueType Type = CHECKED);
   static QList<QString> getFieldSelectionScalarDomain(vtkSMProperty*);
   static QList<QPair<QString, bool> > getFieldSelectionScalarDomainWithPartialArrays(vtkSMProperty*);
-
 
   /// Returns a list of domains types for the property. eg.
   /// if a property has vtkSMBoundsDomain and vtkSMArrayListDomain then

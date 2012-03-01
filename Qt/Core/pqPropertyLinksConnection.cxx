@@ -312,6 +312,12 @@ void pqPropertyLinksConnection::copyValuesFromQtToServerManager(bool use_uncheck
       this->PropertySM, currentQtValue.toStringList(), value_type);
     break;
 
+  case pqSMAdaptor::COMMAND:
+    // a click must be sent directly, accept changes are ignore, so our flags are
+    // the opposite way around from usual
+    pqSMAdaptor::setCommandProperty(this->PropertySM, (use_unchecked ? pqSMAdaptor::CHECKED : pqSMAdaptor::UNCHECKED));
+    break;
+
   case pqSMAdaptor::UNKNOWN:
   case pqSMAdaptor::PROXYLIST:
     break;
