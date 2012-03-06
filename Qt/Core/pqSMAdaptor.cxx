@@ -147,6 +147,10 @@ pqSMAdaptor::PropertyType pqSMAdaptor::getPropertyType(vtkSMProperty* Property)
     {
     type = pqSMAdaptor::COMMAND;
     }
+  else if(Property->GetDomain("data_export"))
+    {
+    type = pqSMAdaptor::DATA_EXPORT;
+    }
   else
     {
     vtkSMBooleanDomain* booleanDomain = NULL;
