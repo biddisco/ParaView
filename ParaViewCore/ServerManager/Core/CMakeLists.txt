@@ -42,6 +42,8 @@ set (Module_SRCS
   vtkSMCompoundSourceProxy.cxx
   vtkSMCompoundSourceProxyDefinitionBuilder.cxx
   vtkSMCoreUtilities.cxx
+  vtkSMDataExportDomain.cxx
+  vtkSMDataExportProperty.cxx
   vtkSMDataSourceProxy.cxx
   vtkSMDataTypeDomain.cxx
   vtkSMDeserializer.cxx

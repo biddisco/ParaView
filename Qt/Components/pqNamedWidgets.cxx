@@ -68,6 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMIntVectorProperty.h"
 #include "vtkSMSILDomain.h"
 #include "vtkSMCommandProperty.h"
+#include "vtkSMDataExportDomain.h"
 
 // ParaView includes
 #include "pq3DWidget.h"
@@ -100,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqTreeWidget.h"
 #include "pqTreeWidgetSelectionHelper.h"
 #include "pqWidgetRangeDomain.h"
+#include "pqDataExportWidget.h"
 
 //-----------------------------------------------------------------------------
 void pqNamedWidgets::link(QWidget* parent, pqSMProxy proxy, 
@@ -416,7 +418,7 @@ void pqNamedWidgets::linkObject(QObject* object, pqSMProxy proxy,
         proxy, SMProperty);
       }
     }
-  else if (pt == pqSMAdaptor::COMMAND)
+  else if ((pt == pqSMAdaptor::COMMAND) || (pt == pqSMAdaptor::DATA_EXPORT))
     {
     QString userProperty, userSignal;
     if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
@@ -691,7 +693,7 @@ void pqNamedWidgets::unlinkObject(QObject* object, pqSMProxy proxy,
         }
       }
     }
-  else if (pt == pqSMAdaptor::COMMAND)
+  else if ((pt == pqSMAdaptor::COMMAND) || (pt == pqSMAdaptor::DATA_EXPORT))
     {
     QString userProperty, userSignal;
     if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
@@ -1429,6 +1431,23 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
       button->setObjectName(propertyName);
       panelLayout->addWidget(button, rowCount, 0, 1, 2);
       button->show();
+      rowCount++;
+      }
+    else if (pt == pqSMAdaptor::DATA_EXPORT)
+      {
+      vtkSMDataExportDomain* doDomain = vtkSMDataExportDomain::SafeDownCast(
+        SMProperty->GetDomain("data_export"));
+      pqCollapsedGroup* group = new pqCollapsedGroup(panelLayout->parentWidget());
+      pqDataExportWidget* dow = new pqDataExportWidget(group);
+      dow->setObjectName(propertyName);
+      dow->setCommandProperty(doDomain->getCommandProperty());
+      group->setLayout(new QVBoxLayout(group));
+      group->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+      group->setTitle(propertyLabel);
+      group->layout()->addWidget(dow);
+      panelLayout->addWidget(group, rowCount, 0, 1, 2); 
+      panelLayout->setRowStretch(rowCount, 1);
+      row_streched = true;
       rowCount++;
       }
     }

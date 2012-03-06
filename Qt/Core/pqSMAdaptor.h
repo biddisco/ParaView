@@ -72,6 +72,7 @@ public:
     COMPOSITE_TREE,
     SIL,
     COMMAND,
+    DATA_EXPORT,
     };
 
   enum PropertyValueType
