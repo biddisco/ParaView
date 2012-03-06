@@ -71,6 +71,7 @@ public:
     FIELD_SELECTION,
     COMPOSITE_TREE,
     SIL,
+    DATA_EXPORT,
     };
 
   enum PropertyValueType
