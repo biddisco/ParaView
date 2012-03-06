@@ -140,6 +140,8 @@ set (Module_SRCS
   pqCustomViewButtonDialog.h
   pqCutPanel.cxx
   pqCutPanel.h
+  pqDataExportWidget.cxx
+  pqDataExportWidget.h
   pqDataInformationModel.cxx
   pqDataInformationModel.h
   pqDataInformationWidget.cxx
@@ -478,6 +480,7 @@ set (Module_MOC_HDRS
   pqCustomFilterManagerModel.h
   pqCustomViewButtonDialog.h
   pqCutPanel.h
+  pqDataExportWidget.h
   pqDataInformationModel.h
   pqDataInformationWidget.h
   pqDialog.h
@@ -640,6 +643,7 @@ set (Module_UI_FILES
   Resources/UI/pqCustomFilterDefinitionWizard.ui
   Resources/UI/pqCustomFilterManager.ui
   Resources/UI/pqCustomViewButtonDialog.ui
+  Resources/UI/pqDataExportWidget.ui
   Resources/UI/pqDisplayProxyEditor.ui
   Resources/UI/pqDisplayProxyEditorWidget.ui
   Resources/UI/pqDisplayRepresentationWidget.ui
