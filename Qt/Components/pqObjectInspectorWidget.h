@@ -151,8 +151,6 @@ protected:
   /// shows the source.
   void show(pqPipelineSource*);
   
-private:
-
   pqObjectPanelInterface* StandardCustomPanels;
 
   QWidget* PanelArea;
