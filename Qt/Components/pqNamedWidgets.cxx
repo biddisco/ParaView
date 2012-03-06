@@ -66,6 +66,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMStringListDomain.h"
 #include "vtkSMIntVectorProperty.h"
 #include "vtkSMSILDomain.h"
+#include "vtkSMDataExportDomain.h"
 
 // ParaView includes
 #include "pq3DWidget.h"
@@ -98,6 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqTreeWidget.h"
 #include "pqTreeWidgetSelectionHelper.h"
 #include "pqWidgetRangeDomain.h"
+#include "pqDataExportWidget.h"
 
 //-----------------------------------------------------------------------------
 void pqNamedWidgets::link(QWidget* parent, pqSMProxy proxy, 
@@ -411,6 +413,15 @@ void pqNamedWidgets::linkObject(QObject* object, pqSMProxy proxy,
         proxy, SMProperty);
       }
     }
+  else if (pt == pqSMAdaptor::DATA_EXPORT)
+    {
+    QString userProperty, userSignal;
+    if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
+      {
+      pqNamedWidgets::linkObject(object, userProperty, userSignal,
+        proxy, SMProperty, -1, property_manager);
+      }
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -675,6 +686,15 @@ void pqNamedWidgets::unlinkObject(QObject* object, pqSMProxy proxy,
         
         delete adaptor;
         }
+      }
+    }
+  else if (pt == pqSMAdaptor::DATA_EXPORT)
+    {
+    QString userProperty, userSignal;
+    if(pqNamedWidgets::propertyInformation(object, userProperty, userSignal))
+      {
+      pqNamedWidgets::unlinkObject(object, userProperty, userSignal,
+        proxy, SMProperty, -1, property_manager);
       }
     }
 }
@@ -1394,6 +1414,23 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
       row_streched = true;
       rowCount++;
       }
+      rowCount++;
+      }
+    else if (pt == pqSMAdaptor::DATA_EXPORT)
+      {
+      vtkSMDataExportDomain* doDomain = vtkSMDataExportDomain::SafeDownCast(
+        SMProperty->GetDomain("data_export"));
+      pqCollapsedGroup* group = new pqCollapsedGroup(panelLayout->parentWidget());
+      pqDataExportWidget* dow = new pqDataExportWidget(group);
+      dow->setObjectName(propertyName);
+      dow->setCommandProperty(doDomain->getCommandProperty());
+      group->setLayout(new QVBoxLayout(group));
+      group->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+      group->setTitle(propertyLabel);
+      group->layout()->addWidget(dow);
+      panelLayout->addWidget(group, rowCount, 0, 1, 2); 
+      panelLayout->setRowStretch(rowCount, 1);
+      row_streched = true;
     }
   iter->Delete();
   if (!row_streched && !summaryOnly)
