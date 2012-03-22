@@ -56,6 +56,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParaViewDocumentationInitializer.h"
 
+#ifdef PARAVIEW_ENABLE_PYTHON
+#include "pqPythonDebugLeaksView.h"
+#define DebugLeaksViewType pqPythonDebugLeaksView;
+#else
+#define DebugLeaksViewType vtkQtDebugLeaksView;
+#endif
+
 class ParaViewMainWindow::pqInternals : public Ui::pqClientMainWindow
 {
 };
@@ -63,6 +70,7 @@ class ParaViewMainWindow::pqInternals : public Ui::pqClientMainWindow
 //-----------------------------------------------------------------------------
 ParaViewMainWindow::ParaViewMainWindow()
 {
+
 #ifndef BUILD_SHARED_LIBS
 #ifdef PARAVIEW_ENABLE_PYTHON
   CMakeLoadAllPythonModules();
@@ -71,6 +79,9 @@ ParaViewMainWindow::ParaViewMainWindow()
   // init the ParaView embedded documentation.
   PARAVIEW_DOCUMENTATION_INIT();
 
+  vtkQtDebugLeaksView* leaksView = new DebugLeaksViewType(this);
+    leaksView->show();  
+    
   this->Internals = new pqInternals();
   this->Internals->setupUi(this);
 
