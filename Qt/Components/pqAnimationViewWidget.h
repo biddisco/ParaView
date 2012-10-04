@@ -53,6 +53,7 @@ public:
   pqAnimationViewWidget(QWidget* parent=0);
   virtual ~pqAnimationViewWidget();
 
+  void addCustomProxy(const char *name, vtkSMProxy* pxy);
 public slots:
 
   /// set the scene to view

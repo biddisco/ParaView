@@ -77,6 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMPropertyHelper.h"
 #include "vtkSMProxy.h"
 #include "vtkSMRenderViewProxy.h"
+#include "vtkSMProxyManager.h"
 
 //-----------------------------------------------------------------------------
 class pqAnimationViewWidget::pqInternal
@@ -835,6 +836,16 @@ void pqAnimationViewWidget::setActiveView(pqView* view)
   if (rview && this->Internal->CreateSource->findText("Camera") == -1)
     {
     this->Internal->CreateSource->addProxy(0, "Camera", rview->getProxy());
+    }
+}
+
+//-----------------------------------------------------------------------------
+void pqAnimationViewWidget::addCustomProxy(const char *name, vtkSMProxy* pxy)
+{
+  this->Internal->CreateSource->removeProxy(name);
+  if (pxy && this->Internal->CreateSource->findText(name) == -1)
+    {
+    this->Internal->CreateSource->addProxy(0, name, pxy);
     }
 }
 
