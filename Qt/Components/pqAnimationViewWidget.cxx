@@ -916,6 +916,16 @@ void pqAnimationViewWidget::setActiveView(pqView* view)
 }
 
 //-----------------------------------------------------------------------------
+void pqAnimationViewWidget::addCustomProxy(const char *name, vtkSMProxy* pxy)
+{
+  this->Internal->CreateSource->removeProxy(name);
+  if (pxy && this->Internal->CreateSource->findText(name) == -1)
+    {
+    this->Internal->CreateSource->addProxy(0, name, pxy);
+    }
+}
+
+//-----------------------------------------------------------------------------
 void pqAnimationViewWidget::setCurrentSelection(pqPipelineSource* pxy)
 {
   if (pxy)
