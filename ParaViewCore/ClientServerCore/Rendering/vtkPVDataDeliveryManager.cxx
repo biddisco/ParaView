@@ -297,14 +297,14 @@ void vtkPVDataDeliveryManager::SetDeliverToAllProcesses(
 
 //----------------------------------------------------------------------------
 void vtkPVDataDeliveryManager::MarkAsRedistributable(
-  vtkPVDataRepresentation* repr)
+  vtkPVDataRepresentation* repr, bool redistributable)
 {
   vtkInternals::vtkItem* item = this->Internals->GetItem(repr, false);
   vtkInternals::vtkItem* low_item = this->Internals->GetItem(repr, true);
   if (item)
     {
-    item->Redistributable = true;
-    low_item->Redistributable = true;
+    item->Redistributable = redistributable;
+    low_item->Redistributable = redistributable;
     }
   else
     {
@@ -590,7 +590,7 @@ void vtkPVDataDeliveryManager::RedistributeDataForOrderedCompositing(
     redistributor->SetController(vtkMultiProcessController::GetGlobalController());
     redistributor->SetInputData(item.GetDeliveredDataObject());
     redistributor->SetPKdTree(this->KdTree);
-    redistributor->SetPassThrough(0);
+    redistributor->SetPassThrough(item.OrderedCompositingInfo.Translator!=NULL);
     redistributor->Update();
     item.SetRedistributedDataObject(redistributor->GetOutputDataObject(0));
     }
