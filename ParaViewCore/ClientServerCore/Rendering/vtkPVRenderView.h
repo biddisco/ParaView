@@ -52,6 +52,7 @@ class vtkRenderer;
 class vtkRenderViewBase;
 class vtkRenderWindow;
 class vtkTexture;
+class vtkPKdTree;
 
 class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkPVRenderView : public vtkPVView
 {
@@ -332,7 +333,7 @@ public:
   static void SetOrderedCompositingInformation(
     vtkInformation* info, vtkPVDataRepresentation* repr,
     vtkExtentTranslator* translator,
-    const int whole_extents[6], const double origin[3], const double spacing[3]);
+    const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree=NULL);
 
   // Description:
   // Representations that support hardware (render-buffer based) selection,
