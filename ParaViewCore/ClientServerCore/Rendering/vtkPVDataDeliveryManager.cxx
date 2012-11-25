@@ -71,7 +71,7 @@ public:
     {
   public:
     vtkSmartPointer<vtkExtentTranslator> Translator;
-    vtkPKdTree *KdTree;
+    vtkSmartPointer<vtkPKdTree>  KdTree;
     double Origin[3];
     double Spacing[3];
     int WholeExtent[6];
