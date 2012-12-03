@@ -47,6 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif
 
+#ifdef WIN32
+ #include <windows.h>
+#endif
 #ifdef Q_WS_X11
 #include <QPlastiqueStyle>
 #endif
@@ -72,6 +75,12 @@ static bool checkenv(const char* vname)
 
 int main(int argc, char* argv[])
 {
+#ifdef WIN32
+ AllocConsole();
+ freopen("conin$", "r", stdin);
+ freopen("conout$", "w", stdout);
+ freopen("conout$", "w", stderr);
+#endif
 #ifdef Q_WS_X11
   // Using motif style gives us test failures (and its ugly).
   // Using cleanlooks style gives us errors when using valgrind (Trolltech's bug #179200)
