@@ -32,10 +32,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _pqPythonDebugLeaksView_h
 #define _pqPythonDebugLeaksView_h
 
-#include "QtPythonExport.h"
+#include "pqPythonModule.h"
 #include "vtkQtDebugLeaksView.h"
 
-class QTPYTHON_EXPORT pqPythonDebugLeaksView : public vtkQtDebugLeaksView
+class PQPYTHON_EXPORT pqPythonDebugLeaksView : public vtkQtDebugLeaksView
 {
   Q_OBJECT
 
