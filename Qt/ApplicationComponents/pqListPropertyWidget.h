@@ -36,6 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqPropertyWidget.h"
 
 #include <QList>
+#include <QVariant>
 
 class QTableWidget;
 
