@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMPropertyHelper.h"
 #include "vtkPVCompositeDataInformation.h"
 #include "vtkPVCompositeDataInformationIterator.h"
+#include <algorithm>
 
 //-----------------------------------------------------------------------------
 pqSILWidget::pqSILWidget(const QString& activeCategory, QWidget* parentObject)
