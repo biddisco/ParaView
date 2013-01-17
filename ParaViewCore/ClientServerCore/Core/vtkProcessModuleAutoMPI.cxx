@@ -207,7 +207,8 @@ int vtkProcessModuleAutoMPI::ConnectToRemoteBuiltInSelf()
   int port = freePort->GetFreePort();
   if (port <= 0 )
     {
-    vtkErrorMacro("Failed to determine free port number.");
+   freePort->Delete();
+   vtkErrorMacro("Failed to determine free port number.");
     return 0;
     }
 
