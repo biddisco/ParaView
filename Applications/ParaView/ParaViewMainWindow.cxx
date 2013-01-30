@@ -78,10 +78,7 @@ ParaViewMainWindow::ParaViewMainWindow()
 #endif
   // init the ParaView embedded documentation.
   PARAVIEW_DOCUMENTATION_INIT();
-
-  vtkQtDebugLeaksView* leaksView = new DebugLeaksViewType(this);
-    leaksView->show();  
-    
+  
   this->Internals = new pqInternals();
   this->Internals->setupUi(this);
 
