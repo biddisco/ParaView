@@ -174,10 +174,10 @@ void vtkGeometryRepresentation::SetupDefaults()
   
   this->LODOutlineFilter->SetUseOutline(1);
 
-  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetUseOutline(0);
+  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetUseOutline(1);
   vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetNonlinearSubdivisionLevel(1);
-  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetPassThroughCellIds(1);
-  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetPassThroughPointIds(1);
+  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetPassThroughCellIds(0);
+  vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter)->SetPassThroughPointIds(0);
 
   this->MultiBlockMaker->SetInputConnection(this->GeometryFilter->GetOutputPort());
   this->CacheKeeper->SetInputConnection(this->MultiBlockMaker->GetOutputPort());
