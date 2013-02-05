@@ -177,7 +177,7 @@ void vtkGeometryRepresentation::SetupDefaults()
   vtkPVGeometryFilter *geomFilter = vtkPVGeometryFilter::SafeDownCast(this->GeometryFilter);
   if (geomFilter)
     {
-    geomFilter->SetUseOutline(0);
+    geomFilter->SetUseOutline(1);
     geomFilter->SetNonlinearSubdivisionLevel(1);
     geomFilter->SetPassThroughCellIds(1);
     geomFilter->SetPassThroughPointIds(1);
