@@ -68,6 +68,7 @@ class vtkTextRepresentation;
 class vtkTexture;
 class vtkTimerLog;
 class vtkWindowToImageFilter;
+class vtkPKdTree;
 
 class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkPVRenderView : public vtkPVView
 {
@@ -513,17 +514,15 @@ public:
   static void SetDeliverToClientAndRenderingProcesses(vtkInformation* info,
     vtkPVDataRepresentation* repr, bool deliver_to_client, bool gather_before_delivery);
 
-  //@{
-  /**
-   * Pass the structured-meta-data for determining rendering order for ordered
-   * compositing.
-   */
-  static void SetOrderedCompositingInformation(vtkInformation* info, vtkPVDataRepresentation* repr,
-    vtkExtentTranslator* translator, const int whole_extents[6], const double origin[3],
-    const double spacing[3]);
+  // Description:
+  // Pass the structured-meta-data for determining rendering order for ordered
+  // compositing.
+  static void SetOrderedCompositingInformation(
+    vtkInformation* info, vtkPVDataRepresentation* repr,
+    vtkExtentTranslator* translator,
+    const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree=NULL);
   static void SetOrderedCompositingInformation(vtkInformation* info, const double bounds[6]);
   void ClearOrderedCompositingInformation();
-  //@}
 
   //@{
   /**
