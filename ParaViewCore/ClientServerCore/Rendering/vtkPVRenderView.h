@@ -55,6 +55,7 @@ class vtkRenderViewBase;
 class vtkRenderWindow;
 class vtkTextRepresentation;
 class vtkTexture;
+class vtkPKdTree;
 
 class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkPVRenderView : public vtkPVView
 {
@@ -371,7 +372,7 @@ public:
   static void SetOrderedCompositingInformation(
     vtkInformation* info, vtkPVDataRepresentation* repr,
     vtkExtentTranslator* translator,
-    const int whole_extents[6], const double origin[3], const double spacing[3]);
+    const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree=NULL);
 
   // Description:
   // Some representation only work when remote rendering or local rendering. Use
