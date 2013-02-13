@@ -509,7 +509,7 @@
       </IntVectorProperty>
 
       <IntVectorProperty command="SetStereoCapableWindow"
-                         default_values="none"
+                         default_values="0"
                          name="StereoCapableWindow"
                          panel_visibility="never"
                          number_of_elements="1">
