@@ -136,7 +136,7 @@ public:
   // compositing.
   void SetOrderedCompositingInformation(
     vtkPVDataRepresentation* repr, vtkExtentTranslator* translator,
-    const int whole_extents[6], const double origin[3], const double spacing[3]);
+    const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree=NULL);
 
 //BTX
   // Description:
