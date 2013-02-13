@@ -71,6 +71,7 @@ public:
     {
   public:
     vtkSmartPointer<vtkExtentTranslator> Translator;
+    vtkSmartPointer<vtkPKdTree>  KdTree;
     double Origin[3];
     double Spacing[3];
     int WholeExtent[6];
@@ -407,12 +408,13 @@ void vtkPVDataDeliveryManager::SetPiece(unsigned int id, vtkDataObject* data, bo
 //----------------------------------------------------------------------------
 void vtkPVDataDeliveryManager::SetOrderedCompositingInformation(
   vtkPVDataRepresentation* repr, vtkExtentTranslator* translator,
-  const int whole_extents[6], const double origin[3], const double spacing[3])
+  const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree)
 {
   vtkInternals::vtkItem* item = this->Internals->GetItem(repr, false);
   if (item)
     {
     vtkInternals::vtkOrderedCompositingInfo info;
+    info.KdTree = tree;
     info.Translator = translator;
     memcpy(info.WholeExtent, whole_extents, sizeof(int)*6);
     memcpy(info.Origin, origin, sizeof(double)*3);
@@ -545,6 +547,7 @@ void vtkPVDataDeliveryManager::Deliver(int use_lod, unsigned int size, unsigned 
 void vtkPVDataDeliveryManager::RedistributeDataForOrderedCompositing(
   bool use_lod)
 {
+  vtkPKdTree *userKdTree = NULL;
   if (this->RenderView->GetUpdateTimeStamp() > this->RedistributionTimeStamp)
     {
     vtkTimerLog::MarkStartEvent("Regenerate Kd-Tree");
@@ -560,7 +563,13 @@ void vtkPVDataDeliveryManager::RedistributeDataForOrderedCompositing(
       if (item.Representation &&
         item.Representation->GetVisibility())
         {
-        if (item.OrderedCompositingInfo.Translator)
+        if (item.OrderedCompositingInfo.KdTree)
+        {
+          // implies that the representation is providing us with means to
+          // override how the ordered compositing happens.
+          userKdTree = item.OrderedCompositingInfo.KdTree;
+        }
+        else if (item.OrderedCompositingInfo.Translator)
           {
           // implies that the representation is providing us with means to
           // override how the ordered compositing happens.
@@ -575,9 +584,13 @@ void vtkPVDataDeliveryManager::RedistributeDataForOrderedCompositing(
           }
         }
       }
-    cutsGenerator->GenerateKdTree();
-    this->KdTree = cutsGenerator->GetKdTree();
-
+      if (userKdTree) {
+        this->KdTree = userKdTree;
+      }
+      else {
+        cutsGenerator->GenerateKdTree();
+        this->KdTree = cutsGenerator->GetKdTree();
+      }
     vtkTimerLog::MarkEndEvent("Regenerate Kd-Tree");
     }
 
