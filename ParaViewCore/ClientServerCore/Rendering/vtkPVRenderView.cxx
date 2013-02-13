@@ -1248,7 +1248,7 @@ vtkAlgorithmOutput* vtkPVRenderView::GetPieceProducerLOD(vtkInformation* info,
 
 //----------------------------------------------------------------------------
 void vtkPVRenderView::MarkAsRedistributable(
-  vtkInformation* info, vtkPVDataRepresentation* repr)
+  vtkInformation* info, vtkPVDataRepresentation* repr, bool redistributable)
 {
   vtkPVRenderView* view = vtkPVRenderView::SafeDownCast(info->Get(VIEW()));
   if (!view)
@@ -1257,7 +1257,7 @@ void vtkPVRenderView::MarkAsRedistributable(
     return;
     }
 
-  view->GetDeliveryManager()->MarkAsRedistributable(repr);
+  view->GetDeliveryManager()->MarkAsRedistributable(repr,redistributable);
 }
 
 //----------------------------------------------------------------------------
@@ -1278,7 +1278,7 @@ void vtkPVRenderView::SetStreamable(
 void vtkPVRenderView::SetOrderedCompositingInformation(
   vtkInformation* info, vtkPVDataRepresentation* repr,
   vtkExtentTranslator* translator,
-  const int whole_extents[6], const double origin[3], const double spacing[3])
+  const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree)
 {
   vtkPVRenderView* view = vtkPVRenderView::SafeDownCast(info->Get(VIEW()));
   if (!view)
@@ -1287,7 +1287,7 @@ void vtkPVRenderView::SetOrderedCompositingInformation(
     return;
     }
   view->GetDeliveryManager()->SetOrderedCompositingInformation(
-    repr, translator, whole_extents, origin, spacing);
+    repr, translator, whole_extents, origin, spacing, tree);
 }
 
 //----------------------------------------------------------------------------
