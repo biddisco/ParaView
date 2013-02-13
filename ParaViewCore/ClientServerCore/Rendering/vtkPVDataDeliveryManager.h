@@ -92,7 +92,8 @@ public:
   // a representation as redistributable makes it possible for this class to
   // redistribute the geometry as needed. Only vtkPolyData, vtkUnstructuredGrid
   // or a multi-block comprising of vtkPolyData is currently supported.
-  void MarkAsRedistributable(vtkPVDataRepresentation*);
+  // By default one passes true, but the redistribution may be disabled too.
+  void MarkAsRedistributable(vtkPVDataRepresentation*, bool redistributable=true);
 
   // Description:
   // Returns the size for all visible geometry. If low_res is true, and low-res
@@ -122,7 +123,7 @@ public:
   // compositing.
   void SetOrderedCompositingInformation(
     vtkPVDataRepresentation* repr, vtkExtentTranslator* translator,
-    const int whole_extents[6], const double origin[3], const double spacing[3]);
+    const int whole_extents[6], const double origin[3], const double spacing[3], vtkPKdTree *tree=NULL);
 
 //BTX
   // Description:
