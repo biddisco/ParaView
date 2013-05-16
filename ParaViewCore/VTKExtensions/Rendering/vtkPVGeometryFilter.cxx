@@ -165,7 +165,6 @@ vtkPVGeometryFilter::vtkPVGeometryFilter ()
   this->SetController(vtkMultiProcessController::GetGlobalController());
   this->GenerateProcessIds = (this->Controller &&
     this->Controller->GetNumberOfProcesses() > 1);
-  this->GenerateProcessIds = 0;
 
   this->OutlineSource = vtkOutlineSource::New();
 
@@ -572,7 +571,7 @@ int vtkPVGeometryFilter::RequestData(vtkInformation* request,
 void vtkPVGeometryFilter::CleanupOutputData(
   vtkPolyData* output, int doCommunicate)
 {
-//  this->ExecuteCellNormals(output, doCommunicate);
+  this->ExecuteCellNormals(output, doCommunicate);
   this->RemoveGhostCells(output);
   if (this->GenerateProcessIds && output && output->GetNumberOfPoints() > 0)
     {
