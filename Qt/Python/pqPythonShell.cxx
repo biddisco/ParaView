@@ -380,6 +380,12 @@ void pqPythonShell::pushScript(const QString& script)
 }
 
 //-----------------------------------------------------------------------------
+void* pqPythonShell::consoleLocals()
+{
+  return this->Interpreter->GetInteractiveConsoleLocalsPyObject();
+}
+
+//-----------------------------------------------------------------------------
 void pqPythonShell::HandleInterpreterEvents(
   vtkObject*, unsigned long eventid, void* calldata)
 {
