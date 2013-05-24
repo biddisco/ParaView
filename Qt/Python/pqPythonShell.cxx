@@ -267,6 +267,7 @@ void pqPythonShell::setupInterpreter()
   this->printString(
     QString("Python %1 on %2\n").arg(Py_GetVersion()).arg(Py_GetPlatform()),
     OUTPUT);
+  this->prompt();
   this->printString("from paraview.simple import *\n");
   this->pushScript("from paraview.simple import *");
   this->prompt();
@@ -349,38 +350,32 @@ void pqPythonShell::clear()
 void pqPythonShell::executeScript(const QString& script)
 {
   emit this->executing(true);  
-  vtkPythonInterpreter::RunSimpleString(script.toAscii().data());
+  this->Interpreter->RunStringWithConsoleLocals(script.toAscii().data());
   emit this->executing(false);
   CLEAR_UNDO_STACK();
 
-  this->printString("\n", STATUS);
   this->prompt();
 }
 
 //-----------------------------------------------------------------------------
 void pqPythonShell::pushScript(const QString& script)
 {
-  emit this->executing(true);
-
-  // remove terminal "\n" from the script. (refer to Python code.push()).
   QString command = script;
-  command.replace(QRegExp("\\n$"), "");
-  // cout << "Push [" << script.toAscii().data() << "]" << endl;
+  command.replace("\r\n", "\n");
+  command.replace("\r", "\n");
+  QStringList lines = command.split("\n");
 
   this->Prompted = false;
-  bool more_input_needed = this->Interpreter->Push(script.toAscii().data());
-  this->Prompt = more_input_needed? pqPythonShell::PS2() : pqPythonShell::PS1();
+
+  emit this->executing(true);
+  foreach (QString line, lines)
+    {
+    bool isMultilineStatement = this->Interpreter->Push(line.toAscii().data());
+    this->Prompt = isMultilineStatement ? pqPythonShell::PS2() : pqPythonShell::PS1();
+    }
   emit this->executing(false);
 
-  // Find the indent for the command.
-  QRegExp regExp("^(\\s+)");
-  QString indent;
-  if (more_input_needed && regExp.indexIn(command) != -1)
-    {
-    indent = regExp.cap(1);
-    }
-
-  this->prompt(indent);
+  this->prompt();
   CLEAR_UNDO_STACK();
 }
 
