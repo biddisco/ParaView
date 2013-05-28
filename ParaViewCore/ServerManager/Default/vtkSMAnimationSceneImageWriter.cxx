@@ -358,7 +358,7 @@ bool vtkSMAnimationSceneImageWriter::CreateWriter()
     }
 # endif
 #endif
-#ifdef VTK_HAS_OGGTHEORA_SUPPORT
+#ifdef VTK_USE_OGGTHEORA_ENCODER
   else if (extension == ".ogv" || extension == ".ogg")
     {
     vtkOggTheoraWriter *ogvwriter = vtkOggTheoraWriter::New();
