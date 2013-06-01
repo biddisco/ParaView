@@ -101,8 +101,6 @@ bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char**
       }
 
     vtkProcessModule::GlobalController = vtkSmartPointer<vtkMPIController>::New();
-    vtkProcessModule::GlobalController->Initialize(
-      &argc, &argv, /*initializedExternally*/1);
     if (dsm) {
       vtkProcessModule::GlobalController->Initialize(
         &argc, &argv, 2);
