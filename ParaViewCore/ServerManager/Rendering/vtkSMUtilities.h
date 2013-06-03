@@ -67,6 +67,9 @@ public:
   static vtkPoints* CreateOrbit(const double center[3], const double normal[3],
                                 double radius, int resolution);
 
+  static vtkPoints* CreateHelix(const double center[3],
+    const double normal[3], double radius, double height, int resolution);
+
   // Description:
   // Convenience method used to merge a smaller image (\c src) into a 
   // larger one (\c dest). The location of the smaller image in the larger image
