@@ -38,6 +38,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkPoints.h"
 #include "vtkSMProxySelectionModel.h"
 #include "vtkSMUtilities.h"
+#include "vtkMath.h"
 
 #include <QDoubleValidator>
 
@@ -64,6 +65,9 @@ pqOrbitCreatorDialog::pqOrbitCreatorDialog(QWidget* parentObject)
   this->Internals->origin0->setValidator(new QDoubleValidator(this));
   this->Internals->origin1->setValidator(new QDoubleValidator(this));
   this->Internals->origin2->setValidator(new QDoubleValidator(this));
+
+  this->Internals->height0->setValidator(new QDoubleValidator(this));
+  this->Internals->turns0->setValidator( new QDoubleValidator(this));
 
   QObject::connect(this->Internals->resetBounds, SIGNAL(clicked()),
     this, SLOT(resetBounds()));
@@ -98,7 +102,21 @@ void pqOrbitCreatorDialog::setCenter(double xyz[3])
   this->Internals->center1->setText(QString::number(xyz[1]));
   this->Internals->center2->setText(QString::number(xyz[2]));
 }
-
+//-----------------------------------------------------------------------------
+void pqOrbitCreatorDialog::setHeight(double x)
+{
+  this->Internals->height0->setText(QString::number(x));
+}
+//-----------------------------------------------------------------------------
+void pqOrbitCreatorDialog::setNumberOfTurns(double x)
+{
+  this->Internals->turns0->setText(QString::number(x));
+}
+//-----------------------------------------------------------------------------
+void pqOrbitCreatorDialog::setHelix(bool x)
+{
+  this->Internals->helix->setChecked(x);
+}
 //-----------------------------------------------------------------------------
 void pqOrbitCreatorDialog::resetBounds()
 {
@@ -121,6 +139,7 @@ void pqOrbitCreatorDialog::resetBounds()
     this->Internals->origin0->setText("0");
     this->Internals->origin1->setText("0");
     this->Internals->origin2->setText("10");
+    this->Internals->height0->setText(QString::number(box.GetLength(2)/2.0));
     }
 }
 
@@ -133,13 +152,19 @@ QList<QVariant> pqOrbitCreatorDialog::center() const
   value << this->Internals->center2->text().toDouble();
   return value;
 }
-
+//-----------------------------------------------------------------------------
+bool pqOrbitCreatorDialog::isHelix() const
+{
+  return this->Internals->helix->isChecked();
+}
 //-----------------------------------------------------------------------------
 QList<QVariant> pqOrbitCreatorDialog::orbitPoints(int resolution) const
 {
   double box_center[3];
   double normal[3];
   double origin[3];
+  double height;
+  double turns;
 
   box_center[0] = this->Internals->center0->text().toDouble();
   box_center[1] = this->Internals->center1->text().toDouble();
@@ -153,9 +178,23 @@ QList<QVariant> pqOrbitCreatorDialog::orbitPoints(int resolution) const
   origin[1] = this->Internals->origin1->text().toDouble();
   origin[2] = this->Internals->origin2->text().toDouble();
 
+  height = this->Internals->height0->text().toDouble();
+  turns = this->Internals->turns0->text().toDouble(); 
+
   QList<QVariant> points;
-  vtkPoints* pts = vtkSMUtilities::CreateOrbit(
-    box_center, normal, resolution, origin);
+  vtkPoints* pts;
+  if (this->Internals->helix->isChecked()) 
+    {
+    resolution = this->Internals->resolution0->text().toInt();
+    pts = vtkSMUtilities::CreateHelix(
+      box_center, normal, std::sqrt(vtkMath::Distance2BetweenPoints(box_center,origin)), 
+      height, turns, resolution);
+    }
+  else
+    {
+    pts = vtkSMUtilities::CreateOrbit(
+      box_center, normal, resolution, origin);
+    }
   for (vtkIdType cc=0; cc < pts->GetNumberOfPoints(); cc++)
     {
     double coords[3];

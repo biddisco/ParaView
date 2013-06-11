@@ -217,7 +217,7 @@ vtkPoints* vtkSMUtilities::CreateOrbit(const double center[3],
 
 //----------------------------------------------------------------------------
 vtkPoints* vtkSMUtilities::CreateHelix(const double center[3],
-  const double in_normal[3], double radius, double height, int resolution)
+  const double in_normal[3], double radius, double height, double turns, int resolution)
 {
   vtkPoints* pts = vtkPoints::New(VTK_DOUBLE);
   pts->SetNumberOfPoints(resolution);
@@ -243,12 +243,12 @@ vtkPoints* vtkSMUtilities::CreateHelix(const double center[3],
 
   for (int i=0; i < resolution; i++)
     {
-    double a = radius*cos(i*2*3.141592/resolution);
-    double b = radius*sin(i*2*3.141592/resolution);
+    double a = radius*cos(turns*i*2*3.141592/resolution);
+    double b = radius*sin(turns*i*2*3.141592/resolution);
     double point[3];
     point[0] = a;
     point[1] = b;
-    point[2] = i*height/resolution;
+    point[2] = (i*height/resolution) - height/2.0;
 
     // Now this point is in the XY plane (with normal (0, 0, 1). We need to
     // rotate it to match the normal.
