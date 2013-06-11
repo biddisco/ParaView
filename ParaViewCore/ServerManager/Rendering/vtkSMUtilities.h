@@ -68,7 +68,7 @@ public:
                                 double radius, int resolution);
 
   static vtkPoints* CreateHelix(const double center[3],
-    const double normal[3], double radius, double height, int resolution);
+    const double normal[3], double radius, double height, double turns, int resolution);
 
   // Description:
   // Convenience method used to merge a smaller image (\c src) into a 
