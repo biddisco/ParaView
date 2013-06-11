@@ -55,9 +55,15 @@ public:
   /// Returns the center for the orbit.
   QList<QVariant> center() const;
 
+  /// Returns the center for the orbit.
+  bool isHelix() const;
+
   void setNormal(double xyz[3]);
   void setCenter(double xyz[3]);
   void setOrigin(double xyz[3]);
+  void setHeight(double x);
+  void setNumberOfTurns(double x);
+  void setHelix(bool x);
 
 protected slots:
   void resetBounds();

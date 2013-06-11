@@ -1028,7 +1028,7 @@ void pqAnimationViewWidget::createTrack()
         kf->GetProperty("FocalPathPoints"),
         creator.center());
       pqSMAdaptor::setElementProperty(
-        kf->GetProperty("ClosedPositionPath"), 1);
+        kf->GetProperty("ClosedPositionPath"), creator.isHelix());
       kf->UpdateVTKObjects();
       }
     }
