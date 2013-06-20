@@ -131,13 +131,23 @@ void vtkInitializationHelper::Initialize(int argc, char**argv,
 //  vtkClientServerInterpreterInitializer::GetInitializer()->
 //    RegisterCallback(&::vtkInitializationHelperInit);
 
-  bool optionsOK = options->Parse(argc, argv);
-
+  //
+  // We should use options->Parse() to get the dsm option, but internally it does some setup steps
+  // and we must only call it after vtkProcessModule::Initialize has been called. Unfortunately, we need
+  // to pass the dsm flag to vtkProcessModule::Initialize so parse the option manually as a quick fix.
+  //
+  bool usedsm = false;
+  for (int i=0; i<argc; i++) {
+    if (strstr(argv[i],"use-dsm")) {
+      usedsm = true;
+      break;
+    }
+  }
   vtkProcessModule::Initialize(
-    static_cast<vtkProcessModule::ProcessTypes>(type), options->GetUseDSM(), argc, argv);
+    static_cast<vtkProcessModule::ProcessTypes>(type), usedsm, argc, argv);
 
   vtksys_ios::ostringstream sscerr;
-  if (argv && !optionsOK)
+  if (argv && !options->Parse(argc, argv))
     {
     if ( options->GetUnknownArgument() )
       {
