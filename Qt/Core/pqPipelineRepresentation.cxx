@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMProxyProperty.h"
 #include "vtkScalarsToColors.h"
 #include "vtkSmartPointer.h"
+#include "vtkSMProxyManager.h"
 
 // Qt includes.
 #include <QList>
@@ -266,8 +267,8 @@ void pqPipelineRepresentation::createHelperProxies()
     vtkSMProxyManager* pxm = vtkSMProxyManager::GetProxyManager();
     vtkSMProxy* opacityFunction = 
       pxm->NewProxy("piecewise_functions", "PiecewiseFunction");
-    opacityFunction->SetConnectionID(this->getServer()->GetConnectionID());
-    opacityFunction->SetServers(
+//    opacityFunction->SetConnectionID(this->getServer()->GetConnectionID());
+    opacityFunction->SetLocation(
       vtkProcessModule::CLIENT|vtkProcessModule::RENDER_SERVER);
     opacityFunction->UpdateVTKObjects();
 
