@@ -1534,6 +1534,8 @@
                       panel_visibility="never" />
             <Property name="ScalarOpacityFunction"
                       panel_visibility="never" />
+            <Property name="GradientOpacityFunction"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />
@@ -2022,6 +2024,14 @@
           <Group name="piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
+      <ProxyProperty command="SetGradientOpacity"
+                     name="GradientOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+            
       <IntVectorProperty command="SetRequestedRenderMode"
                          default_values="0"
                          name="VolumeRenderingMode"
@@ -5028,8 +5038,8 @@
         <IntRangeDomain name="range" />
       </IntVectorProperty>
       <ProxyProperty command="SetScalarOpacity"
-                     name="ScalarOpacityFunction">
-        <ProxyGroupDomain name="groups">
+                     name="ScalarOpacityFunction">    
+         <ProxyGroupDomain name="groups">
           <Group name="piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>

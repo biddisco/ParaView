@@ -92,6 +92,9 @@ public:
   /// Returns true if the scalar range is locked.
   bool lockScalarRange() const;
 
+
+  void gibberish();
+
 public slots:
   /// Sets the xvmsPoints that control the opacity transfer function.
   void setXvmsPoints(const QList<QVariant>&);
