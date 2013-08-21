@@ -215,7 +215,7 @@ protected:
   virtual void onInputChanged();
 
   /// Creates a default proxy for volume opacity function.
-  vtkSMProxy* createOpacityFunctionProxy(
+  vtkSMProxy* createOpacityFunctionProxy(const char *name,
     vtkSMRepresentationProxy* repr);
  
   bool UpdateLUTRangesOnDataUpdate;

@@ -116,13 +116,6 @@ public:
     }
 };
 
-//----------------------------
-void pqColorOpacityEditorWidget::gibberish()
-{
-
-}
-
-
 //-----------------------------------------------------------------------------
 pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   vtkSMProxy* smproxy, vtkSMPropertyGroup* smgroup, QWidget* parentObject)
@@ -162,7 +155,7 @@ else{std::cout <<"not found" << std::endl;}
 
   QObject::connect(
       ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
-      this, SLOT(opacityCurrentChanged(vtkIdType)));
+      this, SLOT(gradientCurrentChanged(vtkIdType)));
   QObject::connect(
     ui.OpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
     this, SLOT(opacityCurrentChanged(vtkIdType)));
@@ -178,7 +171,7 @@ else{std::cout <<"not found" << std::endl;}
     this, SIGNAL(xvmsPointsChanged()));
   QObject::connect(
       ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
-      this, SIGNAL(xvmsPointsChanged()));
+      this, SIGNAL(gvmsPointsChanged()));
 
   QObject::connect(
     ui.ColorEditor, SIGNAL(controlPointsModified()),
@@ -186,9 +179,9 @@ else{std::cout <<"not found" << std::endl;}
   QObject::connect(
     ui.OpacityEditor, SIGNAL(controlPointsModified()),
     this, SLOT(updateCurrentData()));
-  QObject::connect(
-    ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
-    this, SLOT(updateCurrentData()));
+  //QObject::connect(
+  //  ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
+  //  this, SLOT(updateCurrentData()));
 
   QObject::connect(
     ui.ResetRangeToData, SIGNAL(clicked()),
@@ -230,6 +223,32 @@ else{std::cout <<"not found" << std::endl;}
     {
     qCritical("Missing 'XRGBPoints' property. Widget may not function correctly.");
     }
+
+  //change to gradient
+  smproperty = smgroup->GetProperty("GradientOpacityFunction");
+  if (smproperty)
+    {
+	  std::cout << smproperty << std::endl;
+    // TODO: T
+    vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+    std::cout << pwfProxy << std::endl;
+    if (pwfProxy ) //&& pwfProxy->GetProperty("Points")
+      {
+      this->addPropertyLink(
+        this, "gvmsPoints", SIGNAL(gvmsPointsChanged()),
+        pwfProxy, pwfProxy->GetProperty("Points"));
+      }
+    else
+      {
+      ui.GradientOpacityEditor->hide();
+      }
+    }
+  else
+    {
+    ui.OpacityEditor->hide();
+    }
+  std::cout<< "exited gradient smproperty"<< std::endl;
+  //change to gradient
 
   smproperty = smgroup->GetProperty("ScalarOpacityFunction");
   if (smproperty)
@@ -310,35 +329,6 @@ else{std::cout <<"not found" << std::endl;}
     this->addDecorator(this->Internals->Decorator);
     }
 
-
-  //change to gradient
-  gibberish();
-  smproperty = smgroup->GetProperty("GradientOpacityFunction");
-   if (smproperty)
-     {
-	   std::cout << smproperty << std::endl;
-     // TODO: T
-     vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
-     std::cout << pwfProxy << std::endl;
-     if (pwfProxy ) //&& pwfProxy->GetProperty("Points")
-       {
-       this->addPropertyLink(
-         this, "xvmsPoints", SIGNAL(xvmsPointsChanged()),
-         pwfProxy, pwfProxy->GetProperty("Points"));
-       }
-     else
-       {
-       ui.GradientOpacityEditor->hide();
-       }
-     }
-   else
-     {
-     ui.OpacityEditor->hide();
-     }
-   std::cout<< "exited gradient smproperty"<< std::endl;
-   //change to gradient
-
-
   this->updateCurrentData();
 }
 
@@ -368,6 +358,17 @@ void pqColorOpacityEditorWidget::opacityCurrentChanged(vtkIdType index)
     ui.ColorEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
+}
+
+//-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::gradientCurrentChanged(vtkIdType index)
+{
+  if (index != -1)
+    {
+    Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+    ui.GradientOpacityEditor->setCurrentPoint(-1);
+    }
+//  this->updateCurrentData();
 }
 
 //-----------------------------------------------------------------------------
@@ -465,6 +466,27 @@ QList<QVariant> pqColorOpacityEditorWidget::xvmsPoints() const
 }
 
 //-----------------------------------------------------------------------------
+QList<QVariant> pqColorOpacityEditorWidget::gvmsPoints() const
+{
+  vtkDiscretizableColorTransferFunction* stc =
+    vtkDiscretizableColorTransferFunction::SafeDownCast(
+      this->proxy()->GetClientSideObject());
+  vtkPiecewiseFunction* pwf = stc? stc->GetGradientOpacityFunction() : NULL;
+
+  QList<QVariant> values;
+  for (int cc=0; pwf != NULL && cc < pwf->GetSize(); cc++)
+    {
+    double xvms[4];
+    pwf->GetNodeValue(cc, xvms);
+    values.push_back(xvms[0]);
+    values.push_back(xvms[1]);
+    values.push_back(xvms[2]);
+    values.push_back(xvms[3]);
+    }
+  return values;
+}
+
+//-----------------------------------------------------------------------------
 bool pqColorOpacityEditorWidget::useLogScale() const
 {
   return this->Internals->Ui.UseLogScale->isChecked();
@@ -510,6 +532,15 @@ void pqColorOpacityEditorWidget::setLockScalarRange(bool val)
 
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::setXvmsPoints(const QList<QVariant>& values)
+{
+  Q_UNUSED(values);
+  // Since the vtkPiecewiseFunction connected to the widget is directly obtained
+  // from the proxy, we don't need to do anything here. The widget will be
+  // updated when the proxy updates.
+}
+
+//-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::setGvmsPoints(const QList<QVariant>& values)
 {
   Q_UNUSED(values);
   // Since the vtkPiecewiseFunction connected to the widget is directly obtained

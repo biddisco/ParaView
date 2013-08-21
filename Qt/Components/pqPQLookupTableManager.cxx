@@ -431,6 +431,11 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   pqScalarOpacityFunction* sof =
     this->createOpacityFunction(server, arrayname, number_of_components, component);
   vtkSMPropertyHelper(lutProxy, "ScalarOpacityFunction").Set(sof->getProxy());
+
+  // An opacity function is created as a "slave" to this lookup table
+  pqScalarOpacityFunction* gof =
+    this->createOpacityFunction(server, "Gradient_Stuff", 1, 0);
+  vtkSMPropertyHelper(lutProxy, "GradientOpacityFunction").Set(gof->getProxy());
   lutProxy->UpdateVTKObjects();
   
   return this->Internal->LookupTables[key];
