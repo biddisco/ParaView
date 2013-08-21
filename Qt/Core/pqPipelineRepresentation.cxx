@@ -246,40 +246,6 @@ pqScalarOpacityFunction* pqPipelineRepresentation::getGradientOpacityFunction()
 void pqPipelineRepresentation::createHelperProxies()
 {
   vtkSMProxy* proxy = this->getProxy();
-/*
-  if (proxy->GetProperty("ScalarOpacityFunction"))
-    {
-    vtkSMSessionProxyManager* pxm = this->proxyManager();
-    vtkSMProxy* opacityFunction = 
-      pxm->NewProxy("piecewise_functions", "PiecewiseFunction");
-    opacityFunction->UpdateVTKObjects();
-
-    this->addHelperProxy("ScalarOpacityFunction", opacityFunction);
-    opacityFunction->Delete();
-
-    pqSMAdaptor::setProxyProperty(
-      proxy->GetProperty("ScalarOpacityFunction"), opacityFunction);
-    proxy->UpdateVTKObjects();
-    }
-*/
-  if (proxy->GetProperty("GradientOpacityFunction"))
-    {
-    vtkSMProxyManager* pxm = vtkSMProxyManager::GetProxyManager();
-    vtkSMProxy* opacityFunction = 
-      pxm->NewProxy("piecewise_functions", "PiecewiseFunction");
-//    opacityFunction->SetConnectionID(this->getServer()->GetConnectionID());
-    opacityFunction->SetLocation(
-      vtkProcessModule::CLIENT|vtkProcessModule::RENDER_SERVER);
-    opacityFunction->UpdateVTKObjects();
-
-    this->addHelperProxy("GradientOpacityFunction", opacityFunction);
-    opacityFunction->Delete();
-
-    pqSMAdaptor::setProxyProperty(
-      proxy->GetProperty("GradientOpacityFunction"), opacityFunction);
-    proxy->UpdateVTKObjects();
-    }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -674,6 +640,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
   pqLookupTableManager* lut_mgr = core->getLookupTableManager();
   vtkSMProxy* lut = 0;
   vtkSMProxy* opf = 0;
+  vtkSMProxy* gpf = 0;
   if (lut_mgr)
     {
     int number_of_components = this->getNumberOfComponents(
@@ -714,7 +681,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       lut = pp->GetProxy(0);
       }
       
-    opf = this->createOpacityFunctionProxy(repr);
+    opf = this->createOpacityFunctionProxy("ScalarOpacityFunction", repr);
     }
 
   if (!lut)
@@ -739,6 +706,13 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       repr->GetProperty("ScalarOpacityFunction"), opf);
     repr->UpdateVTKObjects();
     }
+
+  if (!gpf) {
+    gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
+    pqSMAdaptor::setProxyProperty(
+      repr->GetProperty("GradientOpacityFunction"), gpf);
+    repr->UpdateVTKObjects();
+  }
 
   bool current_scalar_bar_visibility = false;
   // If old LUT was present update the visibility of the scalar bars
@@ -1341,17 +1315,17 @@ double pqPipelineRepresentation::getUnstructuredGridOutlineThreshold()
 }
 
 //-----------------------------------------------------------------------------
-vtkSMProxy* pqPipelineRepresentation::createOpacityFunctionProxy(
+vtkSMProxy* pqPipelineRepresentation::createOpacityFunctionProxy(const char *name,
   vtkSMRepresentationProxy* repr)
 {
-  if (!repr || !repr->GetProperty("ScalarOpacityFunction"))
+  if (!repr || !repr->GetProperty(name))
     {
     return NULL;
     }
 
   vtkSMProxy* opacityFunction = 0;
   vtkSMProxyProperty* pp = vtkSMProxyProperty::SafeDownCast(
-    repr->GetProperty("ScalarOpacityFunction"));
+    repr->GetProperty(name));
   if (pp->GetNumberOfProxies() == 0)
     {
     pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
