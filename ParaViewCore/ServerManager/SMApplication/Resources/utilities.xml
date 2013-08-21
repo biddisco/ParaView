@@ -100,6 +100,10 @@
                      command="SetScalarOpacityFunction">
       </ProxyProperty>
 
+       <ProxyProperty name="GradientOpacityFunction"
+                     command="SetGradientOpacityFunction">
+      </ProxyProperty>
+
       <DoubleVectorProperty clean_command="RemoveAllPoints"
                             command="AddRGBPoint"
                             name="RGBPoints"
@@ -251,6 +255,7 @@
         <Property name="EnableOpacityMapping" function="EnableOpacityMapping" />
         <Property name="RGBPoints" function="XRGBPoints" />
         <Property name="ScalarOpacityFunction" function="ScalarOpacityFunction" />
+        <Property name="GradientOpacityFunction" function="GradientOpacityFunction" />
         <Property name="UseLogScale" function="UseLogScale" />
         <Property name="LockScalarRange" function="LockScalarRange" />
       </PropertyGroup>

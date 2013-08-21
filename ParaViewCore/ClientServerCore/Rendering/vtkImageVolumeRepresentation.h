@@ -97,6 +97,7 @@ public:
   void SetInterpolationType(int val);
   void SetColor(vtkColorTransferFunction* lut);
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
+  void SetGradientOpacity(vtkPiecewiseFunction* pwf);
   void SetScalarOpacityUnitDistance(double val);
   void SetAmbient(double);
   void SetDiffuse(double);

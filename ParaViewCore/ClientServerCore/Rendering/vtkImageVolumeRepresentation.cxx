@@ -315,6 +315,12 @@ void vtkImageVolumeRepresentation::SetScalarOpacity(vtkPiecewiseFunction* pwf)
 }
 
 //----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetGradientOpacity(vtkPiecewiseFunction* pwf)
+{
+  this->Property->SetGradientOpacity(pwf);
+}
+
+//----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetScalarOpacityUnitDistance(double val)
 {
   this->Property->SetScalarOpacityUnitDistance(val);

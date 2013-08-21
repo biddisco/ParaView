@@ -60,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtDebug>
 #include <QTimer>
 #include <QVBoxLayout>
-
+#include <iostream>
 namespace
 {
 //-----------------------------------------------------------------------------
@@ -116,6 +116,13 @@ public:
     }
 };
 
+//----------------------------
+void pqColorOpacityEditorWidget::gibberish()
+{
+
+}
+
+
 //-----------------------------------------------------------------------------
 pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   vtkSMProxy* smproxy, vtkSMPropertyGroup* smgroup, QWidget* parentObject)
@@ -127,20 +134,35 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     vtkDiscretizableColorTransferFunction::SafeDownCast(
       this->proxy()->GetClientSideObject());
 
+  std::cout << this->proxy()->GetClientSideObject()->GetClassName() << std::endl;
+
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
   if (pwf)
     {
     ui.OpacityEditor->initialize(stc, false, pwf, true);
+   
     }
   else
     {
     ui.OpacityEditor->hide();
     }
+
+
+	pwf = stc? stc->GetGradientOpacityFunction() : NULL;
+	if (pwf){
+
+	 ui.GradientOpacityEditor->initialize(stc, false, pwf, true);
+	std::cout << "found, oddly enough" << std::endl;
+	}
+else{std::cout <<"not found" << std::endl;}
   if (stc)
     {
     ui.ColorEditor->initialize(stc, true, NULL, false);
     }
 
+  QObject::connect(
+      ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
+      this, SLOT(opacityCurrentChanged(vtkIdType)));
   QObject::connect(
     ui.OpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
     this, SLOT(opacityCurrentChanged(vtkIdType)));
@@ -154,12 +176,18 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   QObject::connect(
     ui.OpacityEditor, SIGNAL(controlPointsModified()),
     this, SIGNAL(xvmsPointsChanged()));
+  QObject::connect(
+      ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
+      this, SIGNAL(xvmsPointsChanged()));
 
   QObject::connect(
     ui.ColorEditor, SIGNAL(controlPointsModified()),
     this, SLOT(updateCurrentData()));
   QObject::connect(
     ui.OpacityEditor, SIGNAL(controlPointsModified()),
+    this, SLOT(updateCurrentData()));
+  QObject::connect(
+    ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
     this, SLOT(updateCurrentData()));
 
   QObject::connect(
@@ -207,7 +235,9 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   if (smproperty)
     {
     // TODO: T
+	  std::cout << "scalar smproperty" << smproperty << std::endl;
     vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+    std::cout << "scalar pwfProxy" << pwfProxy << std::endl;
     if (pwfProxy && pwfProxy->GetProperty("Points"))
       {
       this->addPropertyLink(
@@ -223,6 +253,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     {
     ui.OpacityEditor->hide();
     }
+  std::cout<< "exited scalar smproperty"<< std::endl;
 
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
   if (smproperty)
@@ -278,6 +309,35 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     // Add decorator so the widget can be hidden when IndexedLookup is ON.
     this->addDecorator(this->Internals->Decorator);
     }
+
+
+  //change to gradient
+  gibberish();
+  smproperty = smgroup->GetProperty("GradientOpacityFunction");
+   if (smproperty)
+     {
+	   std::cout << smproperty << std::endl;
+     // TODO: T
+     vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+     std::cout << pwfProxy << std::endl;
+     if (pwfProxy ) //&& pwfProxy->GetProperty("Points")
+       {
+       this->addPropertyLink(
+         this, "xvmsPoints", SIGNAL(xvmsPointsChanged()),
+         pwfProxy, pwfProxy->GetProperty("Points"));
+       }
+     else
+       {
+       ui.GradientOpacityEditor->hide();
+       }
+     }
+   else
+     {
+     ui.OpacityEditor->hide();
+     }
+   std::cout<< "exited gradient smproperty"<< std::endl;
+   //change to gradient
+
 
   this->updateCurrentData();
 }
