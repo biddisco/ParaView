@@ -179,9 +179,9 @@ else{std::cout <<"not found" << std::endl;}
   QObject::connect(
     ui.OpacityEditor, SIGNAL(controlPointsModified()),
     this, SLOT(updateCurrentData()));
-  //QObject::connect(
-  //  ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
-  //  this, SLOT(updateCurrentData()));
+  QObject::connect(
+    ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
+    this, SLOT(updateCurrentData()));
 
   QObject::connect(
     ui.ResetRangeToData, SIGNAL(clicked()),
@@ -368,7 +368,7 @@ void pqColorOpacityEditorWidget::gradientCurrentChanged(vtkIdType index)
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.GradientOpacityEditor->setCurrentPoint(-1);
     }
-//  this->updateCurrentData();
+  this->updateCurrentData();
 }
 
 //-----------------------------------------------------------------------------
@@ -389,6 +389,7 @@ void pqColorOpacityEditorWidget::updateCurrentData()
     vtkDiscretizableColorTransferFunction::SafeDownCast(
       this->proxy()->GetClientSideObject());
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
+  vtkPiecewiseFunction* gof = stc? stc->GetGradientOpacityFunction() : NULL;
 
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   if (ui.ColorEditor->currentPoint() >= 0 && stc)
@@ -403,6 +404,13 @@ void pqColorOpacityEditorWidget::updateCurrentData()
       ui.ColorEditor->currentPoint() != 0 &&
       ui.ColorEditor->currentPoint() !=
       (ui.ColorEditor->numberOfControlPoints()-1));
+    }
+  else if (ui.GradientOpacityEditor->currentPoint() >= 0 && gof)
+    {
+    double xvms[4];
+    gof->GetNodeValue(ui.GradientOpacityEditor->currentPoint(), xvms);
+    ui.CurrentDataValue->setEnabled(true);
+    ui.CurrentDataValue->setText(QString::number(xvms[0]));
     }
   else if (ui.OpacityEditor->currentPoint() >= 0 && pwf)
     {
