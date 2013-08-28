@@ -56,6 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqPipelineRepresentation.h"
 #include "pqScalarBarRepresentation.h"
 #include "pqScalarOpacityFunction.h"
+#include "pqGradientOpacityFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServer.h"
 #include "pqServerManagerModel.h"
@@ -399,6 +400,9 @@ void pqPQLookupTableManager::setLUTDefaultState(vtkSMProxy* lutProxy)
 pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   const QString& arrayname, int number_of_components, int component)
 {
+
+	std::string removeme = arrayname.toStdString();
+
   vtkSMSessionProxyManager* pxm = server->proxyManager();
   vtkSMProxy* lutProxy =
     pxm->NewProxy("lookup_tables", "PVLookupTable");
@@ -454,6 +458,25 @@ void pqPQLookupTableManager::updateLookupTableScalarRanges()
     repr->updateLookupTableScalarRange();
     }
 }
+
+//-----------------------------------------------------------------------------
+pqGradientOpacityFunction* pqPQLookupTableManager::getGradientOpacityFunction(
+  pqServer* server, const QString& arrayname,
+  int number_of_components, int component)
+{
+  pqInternal::Key key(
+    server->GetConnectionID(), arrayname, number_of_components);
+
+  if (this->Internal->OpacityFuncs.contains(key))
+    {
+    return dynamic_cast <pqGradientOpacityFunction*> (this->Internal->OpacityFuncs[key].data());
+    }
+
+  // Create a new opactiy function.
+  return dynamic_cast <pqGradientOpacityFunction*> (this->createOpacityFunction(
+    server, arrayname, number_of_components, component));
+}
+
 
 //-----------------------------------------------------------------------------
 pqScalarOpacityFunction* pqPQLookupTableManager::getScalarOpacityFunction(

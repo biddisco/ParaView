@@ -58,6 +58,8 @@ public:
   /// function used to map scalars to opacity.
   virtual pqScalarOpacityFunction* getScalarOpacityFunction(pqServer* server, 
     const QString& arrayname, int number_of_components, int component);
+  virtual pqGradientOpacityFunction* getGradientOpacityFunction(pqServer* server,
+      const QString& arrayname, int number_of_components, int component);
 
   /// Saves the state of the lut/opacity-function so that the next time a new 
   /// LUT/opacity-function is created, it

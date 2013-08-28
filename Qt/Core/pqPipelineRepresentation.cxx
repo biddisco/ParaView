@@ -651,6 +651,11 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
     pqScalarOpacityFunction* pqOPF = lut_mgr->getScalarOpacityFunction(
       this->getServer(), arrayname, number_of_components, 0);
     opf = (pqOPF)? pqOPF->getProxy() : 0;
+    number_of_components = this->getNumberOfComponents(
+    		"Gradient_Stuff", fieldtype);
+    pqGradientOpacityFunction* pqGPF = lut_mgr->getGradientOpacityFunction(
+         this->getServer(), "Gradient_Stuff", number_of_components, 0);
+       opf = (pqOPF)? pqOPF->getProxy() : 0;
     }
   else
     {
@@ -682,6 +687,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       }
       
     opf = this->createOpacityFunctionProxy("ScalarOpacityFunction", repr);
+    gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
     }
 
   if (!lut)
@@ -707,8 +713,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
     repr->UpdateVTKObjects();
     }
 
-  if (!gpf) {
-    gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
+  if (gpf) {
     pqSMAdaptor::setProxyProperty(
       repr->GetProperty("GradientOpacityFunction"), gpf);
     repr->UpdateVTKObjects();

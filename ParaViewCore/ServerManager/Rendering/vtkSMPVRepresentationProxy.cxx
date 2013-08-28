@@ -281,15 +281,24 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 
   vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
   vtkSMProperty* sofProperty = this->GetProperty("ScalarOpacityFunction");
+  vtkSMProperty* gofProperty = this->GetProperty("GradientOpacityFunction");
   if (!lutProperty && !sofProperty)
     {
     vtkWarningMacro("No 'LookupTable' and 'ScalarOpacityFunction' found.");
     return false;
     }
+  if (!gofProperty){
+	  vtkWarningMacro("No 'GradientOpacityFunction'  found.");
+  }
 
   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
   vtkSMProxy* sof = vtkSMPropertyHelper(sofProperty).GetAsProxy();
+  vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
 
+
+  double gofrange[2];
+	gofrange[0]=0;
+	gofrange[1]=50;
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
@@ -314,16 +323,29 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
         vtkSMTransferFunctionProxy::RescaleTransferFunction(lut, range, extend);
         vtkSMProxy* sof_lut = vtkSMPropertyHelper(
           lut, "ScalarOpacityFunction", true).GetAsProxy();
+        vtkSMProxy* gof_lut = vtkSMPropertyHelper(
+                  lut, "GradientOpacityFunction", true).GetAsProxy();
         if (sof_lut && sof != sof_lut)
           {
           vtkSMTransferFunctionProxy::RescaleTransferFunction(
             sof_lut, range, extend);
           }
+        if (gof_lut && gof != gof_lut)
+		  {
+
+		  vtkSMTransferFunctionProxy::RescaleTransferFunction(
+			gof_lut, gofrange, true);
+		  }
+
         }
       if (sof)
         {
         vtkSMTransferFunctionProxy::RescaleTransferFunction(sof, range, extend);
         }
+      if (gof)
+		  {
+		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange, true);
+		  }
 
       return (lut || sof);
       }
