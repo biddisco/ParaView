@@ -640,7 +640,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
     		"Gradient_Stuff", fieldtype);
     pqGradientOpacityFunction* pqGPF = lut_mgr->getGradientOpacityFunction(
          this->getServer(), "Gradient_Stuff", number_of_components, 0);
-       opf = (pqOPF)? pqOPF->getProxy() : 0;
+       gpf = (pqOPF)? pqOPF->getProxy() : 0;
     }
   else
     {
