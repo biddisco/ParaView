@@ -75,6 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqRenderView.h"
 #include "pqScalarBarRepresentation.h"
 #include "pqScalarOpacityFunction.h"
+#include "pqGradientOpacityFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServer.h"
 #include "pqServerManagerModel.h"
@@ -639,8 +640,8 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
     number_of_components = this->getNumberOfComponents(
     		"Gradient_Stuff", fieldtype);
     pqGradientOpacityFunction* pqGPF = lut_mgr->getGradientOpacityFunction(
-         this->getServer(), "Gradient_Stuff", number_of_components, 0);
-       gpf = (pqOPF)? pqOPF->getProxy() : 0;
+         this->getServer(), "Gradient_Stuff", 1, 0);
+       gpf = (pqGPF)? pqGPF->getProxy() : 0;
     }
   else
     {
