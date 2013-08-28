@@ -469,6 +469,8 @@ pqGradientOpacityFunction* pqPQLookupTableManager::getGradientOpacityFunction(
 
   if (this->Internal->OpacityFuncs.contains(key))
     {
+	  pqScalarOpacityFunction* removeme2 = this->Internal->OpacityFuncs[key];
+	  pqScalarOpacityFunction* removeme = this->Internal->OpacityFuncs[key].data();
     return dynamic_cast <pqGradientOpacityFunction*> (this->Internal->OpacityFuncs[key].data());
     }
 
