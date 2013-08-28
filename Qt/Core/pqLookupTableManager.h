@@ -40,6 +40,7 @@ class pqProxy;
 class pqScalarBarRepresentation;
 class pqScalarsToColors;
 class pqScalarOpacityFunction;
+class pqGradientOpacityFunction;
 class pqServer;
 class vtkSMProxy;
 
@@ -64,6 +65,8 @@ public:
   /// function used to map scalars to opacity.
   virtual pqScalarOpacityFunction* getScalarOpacityFunction(pqServer* server, 
     const QString& arrayname, int number_of_components, int component) = 0;
+  virtual pqGradientOpacityFunction* getGradientOpacityFunction(pqServer* server,
+      const QString& arrayname, int number_of_components, int component) = 0;
 
   /// Saves the state of the lut/opacity-function so that 
   /// the next time a new LUT/opacity-function is created, it

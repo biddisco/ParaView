@@ -144,10 +144,12 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
 	pwf = stc? stc->GetGradientOpacityFunction() : NULL;
 	if (pwf){
 
-	 ui.GradientOpacityEditor->initialize(stc, false, pwf, true);
-	std::cout << "found, oddly enough" << std::endl;
+	 ui.GradientOpacityEditor->initialize(NULL, false, pwf, true);
 	}
-else{std::cout <<"not found" << std::endl;}
+	else
+	{
+	ui.GradientOpacityEditor->hide();
+	}
   if (stc)
     {
     ui.ColorEditor->initialize(stc, true, NULL, false);
@@ -356,6 +358,7 @@ void pqColorOpacityEditorWidget::opacityCurrentChanged(vtkIdType index)
     {
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.ColorEditor->setCurrentPoint(-1);
+    ui.GradientOpacityEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
 }
@@ -366,7 +369,8 @@ void pqColorOpacityEditorWidget::gradientCurrentChanged(vtkIdType index)
   if (index != -1)
     {
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-    ui.GradientOpacityEditor->setCurrentPoint(-1);
+    ui.OpacityEditor->setCurrentPoint(-1);
+    ui.ColorEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
 }
@@ -378,6 +382,7 @@ void pqColorOpacityEditorWidget::colorCurrentChanged(vtkIdType index)
     {
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.OpacityEditor->setCurrentPoint(-1);
+    ui.GradientOpacityEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
 }
@@ -574,6 +579,7 @@ void pqColorOpacityEditorWidget::currentDataEdited()
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
 
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+  std::cout << ui.ColorEditor->currentPoint() <<std::endl;
   if (ui.ColorEditor->currentPoint() >= 0 && stc)
     {
     ui.ColorEditor->setCurrentPointPosition(
@@ -584,6 +590,11 @@ void pqColorOpacityEditorWidget::currentDataEdited()
     ui.OpacityEditor->setCurrentPointPosition(
       ui.CurrentDataValue->text().toDouble());
     }
+  else if (ui.GradientOpacityEditor->currentPoint() >= 0 && pwf)
+      {
+      ui.GradientOpacityEditor->setCurrentPointPosition(
+        ui.CurrentDataValue->text().toDouble());
+      }
 
   this->updateCurrentData();
 }
