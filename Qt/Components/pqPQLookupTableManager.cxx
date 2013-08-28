@@ -471,7 +471,7 @@ pqGradientOpacityFunction* pqPQLookupTableManager::getGradientOpacityFunction(
     {
 	  pqScalarOpacityFunction* removeme2 = this->Internal->OpacityFuncs[key];
 	  pqScalarOpacityFunction* removeme = this->Internal->OpacityFuncs[key].data();
-    return dynamic_cast <pqGradientOpacityFunction*> (this->Internal->OpacityFuncs[key].data());
+    return static_cast<pqGradientOpacityFunction*> (this->Internal->OpacityFuncs[key].data());
     }
 
   // Create a new opactiy function.
