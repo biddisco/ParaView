@@ -318,7 +318,6 @@ void vtkImageVolumeRepresentation::SetScalarOpacity(vtkPiecewiseFunction* pwf)
 void vtkImageVolumeRepresentation::SetGradientOpacity(vtkPiecewiseFunction* pwf)
 {
   this->Property->SetGradientOpacity(pwf);
-  std::cout <<pwf << std::endl;
 }
 
 //----------------------------------------------------------------------------

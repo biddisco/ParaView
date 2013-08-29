@@ -298,7 +298,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 
   double gofrange[2];
 	gofrange[0]=0;
-	gofrange[1]=50;
+	gofrange[1]=310000000;
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
