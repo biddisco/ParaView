@@ -127,7 +127,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     vtkDiscretizableColorTransferFunction::SafeDownCast(
       this->proxy()->GetClientSideObject());
 
-  std::cout << this->proxy()->GetClientSideObject()->GetClassName() << std::endl;
+
 
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
   if (pwf)
@@ -230,10 +230,10 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   smproperty = smgroup->GetProperty("GradientOpacityFunction");
   if (smproperty)
     {
-	  std::cout << smproperty << std::endl;
+
     // TODO: T
     vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
-    std::cout << pwfProxy << std::endl;
+
     if (pwfProxy ) //&& pwfProxy->GetProperty("Points")
       {
       this->addPropertyLink(
@@ -249,16 +249,16 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     {
     ui.OpacityEditor->hide();
     }
-  std::cout<< "exited gradient smproperty"<< std::endl;
+
   //change to gradient
 
   smproperty = smgroup->GetProperty("ScalarOpacityFunction");
   if (smproperty)
     {
     // TODO: T
-	  std::cout << "scalar smproperty" << smproperty << std::endl;
+
     vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
-    std::cout << "scalar pwfProxy" << pwfProxy << std::endl;
+
     if (pwfProxy && pwfProxy->GetProperty("Points"))
       {
       this->addPropertyLink(
@@ -274,7 +274,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     {
     ui.OpacityEditor->hide();
     }
-  std::cout<< "exited scalar smproperty"<< std::endl;
+
 
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
   if (smproperty)
@@ -579,7 +579,7 @@ void pqColorOpacityEditorWidget::currentDataEdited()
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
 
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  std::cout << ui.ColorEditor->currentPoint() <<std::endl;
+
   if (ui.ColorEditor->currentPoint() >= 0 && stc)
     {
     ui.ColorEditor->setCurrentPointPosition(
