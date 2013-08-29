@@ -401,7 +401,6 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   const QString& arrayname, int number_of_components, int component)
 {
 
-	std::string removeme = arrayname.toStdString();
 
   vtkSMSessionProxyManager* pxm = server->proxyManager();
   vtkSMProxy* lutProxy =
@@ -469,8 +468,6 @@ pqGradientOpacityFunction* pqPQLookupTableManager::getGradientOpacityFunction(
 
   if (this->Internal->OpacityFuncs.contains(key))
     {
-	  pqScalarOpacityFunction* removeme2 = this->Internal->OpacityFuncs[key];
-	  pqScalarOpacityFunction* removeme = this->Internal->OpacityFuncs[key].data();
     return static_cast<pqGradientOpacityFunction*> (this->Internal->OpacityFuncs[key].data());
     }
 
