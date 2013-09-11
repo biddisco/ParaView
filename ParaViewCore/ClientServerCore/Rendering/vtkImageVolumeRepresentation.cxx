@@ -14,6 +14,7 @@
 =========================================================================*/
 #include "vtkImageVolumeRepresentation.h"
 
+#include "../../../VTK/Filters/General/vtkGradientFilter.h"
 #include "vtkAlgorithmOutput.h"
 #include "vtkCommand.h"
 #include "vtkExtentTranslator.h"
@@ -32,6 +33,10 @@
 #include "vtkSmartVolumeMapper.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkVolumeProperty.h"
+#include "vtkPointData.h"
+
+//#include "vtkImageAccumulate.h"
+
 
 #include <map>
 #include <string>
@@ -171,6 +176,15 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     this->Actor->SetEnableLOD(0);
     this->VolumeMapper->SetInputConnection(
       this->CacheKeeper->GetOutputPort());
+    this->gradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
+    this->gradientFilter->Update();
+    char* gradientName = gradientFilter->GetResultArrayName();
+   // grads = gradientFilter->GetImageDataOutput()->GetPointData()->GetArray(gradientName);
+    double gradientRange[2];
+    gradientFilter->GetImageDataOutput()->GetPointData()->GetArray(gradientName)->GetRange(gradientRange);
+    ostream & objOstream = cout;
+      vtkIndent indent;
+      gradientFilter->PrintSelf(objOstream, indent);
 
     this->OutlineSource->SetBounds(vtkImageData::SafeDownCast(
         this->CacheKeeper->GetOutputDataObject(0))->GetBounds());

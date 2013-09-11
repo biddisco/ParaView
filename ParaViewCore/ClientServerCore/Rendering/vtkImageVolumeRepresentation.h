@@ -26,6 +26,7 @@
 
 #include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
+#include "vtkVector.h"
 
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
@@ -37,6 +38,10 @@ class vtkPVCacheKeeper;
 class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
+//class vtkImageAccumulate;
+class vtkGradientFilter;
+
+
 
 class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation : public vtkPVDataRepresentation
 {
@@ -64,6 +69,11 @@ public:
   vtkSetStringMacro(ColorArrayName);
   vtkGetStringMacro(ColorArrayName);
 
+
+
+
+
+  vtkGetVector2Macro(GradientRange, double);
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
   // typically called by the vtkView to request meta-data from the
@@ -133,11 +143,16 @@ protected:
   virtual int RequestData(vtkInformation*,
     vtkInformationVector**, vtkInformationVector*);
 
+
+  //vtkDataArray* grads;
+
   // Description:
   // Adds the representation to the view.  This is called from
   // vtkView::AddRepresentation().  Subclasses should override this method.
   // Returns true if the addition succeeds.
   virtual bool AddToView(vtkView* view);
+
+  double GradientRange[2];
 
   // Description:
   // Removes the representation to the view.  This is called from
@@ -160,7 +175,9 @@ protected:
   vtkPVLODVolume* Actor;
 
   vtkOutlineSource* OutlineSource;
-  vtkPolyDataMapper* OutlineMapper;;
+  vtkPolyDataMapper* OutlineMapper;
+  //vtkImageAccumulate *ImageHistgram;
+  vtkGradientFilter *gradientFilter;
 
   int ColorAttributeType;
   char* ColorArrayName;
