@@ -1945,11 +1945,18 @@
                          default_values="1"
                          name="Pickable"
                          number_of_elements="1">
+         </IntVectorProperty>
+         <DoubleVectorProperty command="GetGradientRange"
+                            default_values="0 1"
+                            information_only="1"
+                            name="GradientRange"
+                             number_of_elements="2">
+        <SimpleDoubleInformationHelper />
+      </DoubleVectorProperty>
         <Hints>
           <NoDefault />
         </Hints>
         <BooleanDomain name="bool" />
-      </IntVectorProperty>
       <IntVectorProperty command="SetInterpolationType"
                          default_values="2"
                          name="InterpolationType"
@@ -2053,6 +2060,7 @@
                             default_values="1"
                             name="ScalarOpacityUnitDistance"
                             number_of_elements="1"></DoubleVectorProperty>
+ 	
       <!-- end of UniformGridVolumeRepresentation -->
     </RepresentationProxy>
 

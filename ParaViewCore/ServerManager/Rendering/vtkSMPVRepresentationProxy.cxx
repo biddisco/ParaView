@@ -298,13 +298,17 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 
   double gofrange[2];
 	gofrange[0]=0;
-	gofrange[1]=310000000;
+	gofrange[1]=4;
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
     {
     component = vtkSMPropertyHelper(lut, "VectorComponent").GetAsInt();
     }
+
+  ostream & objOstream = cout;
+  vtkIndent indent;
+  info->PrintSelf(objOstream, indent);
 
   if (component < info->GetNumberOfComponents())
     {
