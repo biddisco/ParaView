@@ -612,6 +612,15 @@ void pqColorOpacityEditorWidget::resetRangeToData()
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());
   emit this->changeFinished();
+
+///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
+
+  double gradientrange[2];
+  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
+  vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,2);
+  
+  std::cout << "Gradient minmax is " << gradientrange[0] << "," << gradientrange[1] << std::endl;
+
   END_UNDO_SET();
 }
 

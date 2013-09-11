@@ -14,7 +14,6 @@
 =========================================================================*/
 #include "vtkImageVolumeRepresentation.h"
 
-#include "../../../VTK/Filters/General/vtkGradientFilter.h"
 #include "vtkAlgorithmOutput.h"
 #include "vtkCommand.h"
 #include "vtkExtentTranslator.h"
@@ -34,9 +33,8 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkVolumeProperty.h"
 #include "vtkPointData.h"
-
-//#include "vtkImageAccumulate.h"
-
+#include "vtkImageGradientMagnitude.h"
+#include "vtkImageAccumulate.h"
 
 #include <map>
 #include <string>
@@ -64,7 +62,12 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   this->CacheKeeper->SetInputData(this->Cache);
   this->Actor->SetLODMapper(this->OutlineMapper);
 
+  this->GradientFilter    = vtkSmartPointer<vtkImageGradientMagnitude>::New();
+  this->AccumulateFilter  = vtkSmartPointer<vtkImageAccumulate>::New();
+
   vtkMath::UninitializeBounds(this->DataBounds);
+  this->GradientVectorComponent = 0;
+  this->GradientArrayName = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -176,15 +179,26 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     this->Actor->SetEnableLOD(0);
     this->VolumeMapper->SetInputConnection(
       this->CacheKeeper->GetOutputPort());
-    this->gradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
-    this->gradientFilter->Update();
-    char* gradientName = gradientFilter->GetResultArrayName();
-   // grads = gradientFilter->GetImageDataOutput()->GetPointData()->GetArray(gradientName);
-    double gradientRange[2];
-    gradientFilter->GetImageDataOutput()->GetPointData()->GetArray(gradientName)->GetRange(gradientRange);
-    ostream & objOstream = cout;
-      vtkIndent indent;
-      gradientFilter->PrintSelf(objOstream, indent);
+    this->GradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
+    this->GradientFilter->Update();
+
+    this->GradientFilter->SetDimensionality(3);
+    this->GradientFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
+    this->GradientFilter->Update();
+    //
+    vtkImageData *gradient = this->GradientFilter->GetOutput();
+
+    vtkDataArray *scalars = input->GetPointData()->GetArray(this->ColorArrayName);
+    if (!scalars) scalars = input->GetPointData()->GetScalars();
+
+    vtkDataArray   *grads = gradient->GetPointData()->GetArray(ColorArrayName); // this->GradientArrayName);
+    if (!grads)     grads = gradient->GetPointData()->GetScalars();
+    //
+    //if (!scalars || !grads) {
+    //  return 0;
+    //}
+
+    grads->GetRange(this->GradientRange);
 
     this->OutlineSource->SetBounds(vtkImageData::SafeDownCast(
         this->CacheKeeper->GetOutputDataObject(0))->GetBounds());
