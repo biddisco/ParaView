@@ -1536,6 +1536,8 @@
                       panel_visibility="never" />
             <Property name="GradientOpacityFunction"
                       panel_visibility="never" />
+            <Property name="GradientRange"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />

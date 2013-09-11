@@ -27,6 +27,7 @@
 #include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
 #include "vtkVector.h"
+#include "vtkSmartPointer.h"
 
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
@@ -38,8 +39,8 @@ class vtkPVCacheKeeper;
 class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
-//class vtkImageAccumulate;
-class vtkGradientFilter;
+class vtkImageAccumulate;
+class vtkImageGradientMagnitude;
 
 
 
@@ -68,10 +69,6 @@ public:
   // Pick the array to color with.
   vtkSetStringMacro(ColorArrayName);
   vtkGetStringMacro(ColorArrayName);
-
-
-
-
 
   vtkGetVector2Macro(GradientRange, double);
   // Description:
@@ -130,6 +127,16 @@ public:
   static void PassOrderedCompositingInformation(
     vtkPVDataRepresentation* self, vtkInformation* inInfo);
 
+   // Description:
+    // Set/Get the name of the array which will be used for gradient opacity mapping
+    vtkSetStringMacro(GradientArrayName);
+    vtkGetStringMacro(GradientArrayName);
+
+    // Description:
+    // If gradient is a vector filed, then specify the component (0=magnitude)
+    vtkSetMacro(GradientVectorComponent, int);
+    vtkGetMacro(GradientVectorComponent, int);
+
 //BTX
 protected:
   vtkImageVolumeRepresentation();
@@ -151,8 +158,6 @@ protected:
   // vtkView::AddRepresentation().  Subclasses should override this method.
   // Returns true if the addition succeeds.
   virtual bool AddToView(vtkView* view);
-
-  double GradientRange[2];
 
   // Description:
   // Removes the representation to the view.  This is called from
@@ -176,12 +181,19 @@ protected:
 
   vtkOutlineSource* OutlineSource;
   vtkPolyDataMapper* OutlineMapper;
-  //vtkImageAccumulate *ImageHistgram;
-  vtkGradientFilter *gradientFilter;
+//BTX
+    vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
+    vtkSmartPointer<vtkImageAccumulate>        AccumulateFilter;
+//ETX
+
 
   int ColorAttributeType;
   char* ColorArrayName;
+  char *GradientArrayName;
+  int   GradientVectorComponent;
   double DataBounds[6];
+  double GradientRange[2];
+
 
 private:
   vtkImageVolumeRepresentation(const vtkImageVolumeRepresentation&); // Not implemented

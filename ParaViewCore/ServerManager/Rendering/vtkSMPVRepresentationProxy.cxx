@@ -296,9 +296,15 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
 
 
-  double gofrange[2];
-	gofrange[0]=0;
-	gofrange[1]=4;
+///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
+
+  double gofrange[2] = {0, 1};;
+  this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+  vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
+  
+  std::cout << "Gradient minmax is " << gofrange[0] << "," << gofrange[1] << std::endl;
+
+
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
