@@ -24,6 +24,7 @@ vtk_module(vtkPVVTKExtensionsRendering
     vtkFiltersGeneric
     vtkFiltersHyperTree
     vtkFiltersParallel
+    vtkImagingStatistics
     vtkInteractionStyle
     vtkInteractionWidgets
     vtkIOExport
