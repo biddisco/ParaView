@@ -71,6 +71,7 @@ public:
   vtkGetStringMacro(ColorArrayName);
 
   vtkGetVector2Macro(GradientRange, double);
+
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
   // typically called by the vtkView to request meta-data from the
@@ -113,6 +114,8 @@ public:
   void SetShade(bool);
   void SetIndependantComponents(bool);
   
+  void SetDisableGradientOpacity(bool use);
+
   //***************************************************************************
   // Forwarded to vtkSmartVolumeMapper.
   void SetRequestedRenderMode(int);
@@ -193,6 +196,7 @@ protected:
   int   GradientVectorComponent;
   double DataBounds[6];
   double GradientRange[2];
+  int UseGradientFunction;
 
 
 private:

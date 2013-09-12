@@ -397,3 +397,10 @@ void vtkImageVolumeRepresentation::SetRequestedRenderMode(int mode)
 {
   this->VolumeMapper->SetRequestedRenderMode(mode);
 }
+
+//----------------------------------------------------------------------------
+
+void vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
+{
+  this->Property->DisableGradientOpacityOn(0);
+}
