@@ -68,6 +68,8 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   vtkMath::UninitializeBounds(this->DataBounds);
   this->GradientVectorComponent = 0;
   this->GradientArrayName = NULL;
+  this->GradientRange[0] = 0.0;
+  this->GradientRange[1] = 1.0;
 }
 
 //----------------------------------------------------------------------------

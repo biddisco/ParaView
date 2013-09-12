@@ -155,6 +155,41 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     ui.ColorEditor->initialize(stc, true, NULL, false);
     }
 
+//--------------------------------------------------------------
+  /*
+   Experimental addition of colour data to Qvis widgets
+  */
+//--------------------------------------------------------------
+  if (stc) {
+    int N = 0;
+    const unsigned char *colors = NULL;
+    double minmax[2] = {0.0, 1.0};
+    vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
+    if (pwf)
+      {
+//      ui.OpacityEditor->initialize(stc, false, pwf, true);
+      }
+    if (stc)
+      {
+        N = stc->GetNumberOfValues();
+        stc->GetRange(minmax);
+        colors = stc->GetTable(minmax[0],minmax[1],N);
+      }
+
+    if (N>0 && colors) {
+      ui.GaussianOpacityEditor->setBackgroundColourData(N, 3, colors);
+      ui.TwoDTransferFunction->setUnderlayColourData(N, 3, colors);
+//      this->Internals->XMin->setValue(minmax[0]);
+//      this->Internals->XMax->setValue(minmax[1]);
+    }
+  }
+
+//--------------------------------------------------------------
+  /*
+   End : Experimental addition of colour data to Qvis widgets
+  */
+//--------------------------------------------------------------
+
   QObject::connect(
       ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
       this, SLOT(gradientCurrentChanged(vtkIdType)));
