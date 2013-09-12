@@ -326,6 +326,10 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
         {
         range[1] = range[0] + 1e-5;
         }
+      if ( (gofrange[1] - gofrange[0] < 1e-5) )
+             {
+             gofrange[1] = gofrange[0] + 1e-5;
+            }
       // If data range is too small then we tweak it a bit so scalar mapping
       // produces valid/reproducible results.
       if (lut)
