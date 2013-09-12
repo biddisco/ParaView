@@ -29,6 +29,16 @@
 #
 #==========================================================================
 set (Module_SRCS
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.cpp
+  #
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  #
   pqAboutDialogReaction.cxx
   pqAboutDialogReaction.h
   pqAlwaysConnectedBehavior.cxx
@@ -230,6 +240,11 @@ set (Module_SRCS
 )
 
 set (Module_MOC_HDRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  #
   pqAboutDialogReaction.h
   pqAlwaysConnectedBehavior.h
   pqAnimationTimeToolbar.h

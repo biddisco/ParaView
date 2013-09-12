@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>395</width>
-    <height>347</height>
+    <width>397</width>
+    <height>448</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <property name="spacing">
-    <number>-1</number>
+    <number>6</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
@@ -23,7 +23,7 @@
       <number>0</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -40,7 +40,7 @@
          </property>
         </widget>
        </item>
-	<item>
+       <item>
         <widget class="pqTransferFunctionWidget" name="GradientOpacityEditor" native="true">
          <property name="minimumSize">
           <size>
@@ -68,6 +68,26 @@
           <size>
            <width>16777215</width>
            <height>40</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QvisGaussianOpacityBar" name="GaussianOpacityEditor" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>64</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Qvis2DTransferFunctionWidget" name="TwoDTransferFunction" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>100</height>
           </size>
          </property>
         </widget>
@@ -258,6 +278,18 @@
    <class>pqLineEdit</class>
    <extends>QLineEdit</extends>
    <header>pqLineEdit.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QvisGaussianOpacityBar</class>
+   <extends>QWidget</extends>
+   <header>Qvis/qvisgaussianopacitybar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Qvis2DTransferFunctionWidget</class>
+   <extends>QWidget</extends>
+   <header>Qvis/qvis2dtransferfunctionwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
