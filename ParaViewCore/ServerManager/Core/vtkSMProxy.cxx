@@ -1428,6 +1428,10 @@ int vtkSMProxy::ReadXMLAttributes( vtkSMSessionProxyManager* pm,
   const char* className = element->GetAttribute("class");
   if(className)
     {
+	  int removeme = 0;
+	  if (strcmp(className, "vtkDiscretizableColorTransferFunction") == 0){
+		  removeme += 1;
+	  }
     this->SetVTKClassName(className);
     }
 

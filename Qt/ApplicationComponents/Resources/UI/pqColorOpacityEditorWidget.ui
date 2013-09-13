@@ -169,6 +169,26 @@
         </spacer>
        </item>
        <item>
+        <widget class="QToolButton" name="DisableOpacityGradient">
+         <property name="toolTip">
+          <string>Disable Gradient Opacity</string>
+         </property>
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../Components/Resources/pqComponents.qrc">
+           <normaloff>:/pqWidgets/Icons/PluginGray.png</normaloff>:/pqWidgets/Icons/PluginGray.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QToolButton" name="ChoosePreset">
          <property name="toolTip">
           <string>Choose preset</string>
@@ -282,13 +302,13 @@
   <customwidget>
    <class>QvisGaussianOpacityBar</class>
    <extends>QWidget</extends>
-   <header>Qvis/qvisgaussianopacitybar.h</header>
+   <header>Qvis/QvisGaussianOpacityBar.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Qvis2DTransferFunctionWidget</class>
    <extends>QWidget</extends>
-   <header>Qvis/qvis2dtransferfunctionwidget.h</header>
+   <header>Qvis/Qvis2DTransferFunctionWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
