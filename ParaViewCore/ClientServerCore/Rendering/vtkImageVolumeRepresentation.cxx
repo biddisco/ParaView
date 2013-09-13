@@ -402,5 +402,8 @@ void vtkImageVolumeRepresentation::SetRequestedRenderMode(int mode)
 
 void vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
 {
-  this->Property->DisableGradientOpacityOn(0);
+	if (use)
+		this->Property->DisableGradientOpacityOff(0);
+	else
+		this->Property->DisableGradientOpacityOn(0);
 }

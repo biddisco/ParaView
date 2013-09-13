@@ -91,6 +91,8 @@ public:
   /// function. This a list of 4-tuples.
   QList<QVariant> gvmsPoints() const;
 
+  QList<QVariant> gaussianPoints() const;
+
   /// Returns the value for use-log-scale.
   bool useLogScale() const;
 
@@ -173,8 +175,14 @@ protected slots:
   /// extra logic to valid ranges convert the color map to log/linear space.
   void useLogScaleClicked(bool);
 
+
+  void disableGradientOpacty();
+
+
 private:
   Q_DISABLE_COPY(pqColorOpacityEditorWidget);
+
+  bool disableGradientOpacity;
 
   class pqInternals;
   pqInternals* Internals;

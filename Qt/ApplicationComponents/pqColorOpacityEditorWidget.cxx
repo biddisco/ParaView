@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMSessionProxyManager.h"
 #include "vtkSMTransferFunctionProxy.h"
 #include "vtkVector.h"
+//#include "QvisGaussianOpacityBar.h"
 
 #include <QDoubleValidator>
 #include <QMessageBox>
@@ -155,6 +156,20 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     ui.ColorEditor->initialize(stc, true, NULL, false);
     }
 
+
+  //change this to gaussian part---
+/*  Ui:QvisGaussianOpacityBar &ui = this->Internals->Ui;
+  QvisGaussianOpacityBar* gaussianEditor =
+     vtkDiscretizableColorTransferFunction::SafeDownCast(
+       this->proxy()->GetClientSideObject());
+       */
+  char* name;
+  name = this->proxy()->GetVTKClassName();
+  std::cout << name << std::endl;
+   //----
+
+
+
 //--------------------------------------------------------------
   /*
    Experimental addition of colour data to Qvis widgets
@@ -189,6 +204,18 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
    End : Experimental addition of colour data to Qvis widgets
   */
 //--------------------------------------------------------------
+
+  disableGradientOpacity = false;
+
+//  ui.DisableOpacityGradient->setCheckable(true);
+  pqDataRepresentation* repr =
+    pqActiveObjects::instance().activeRepresentation();
+
+  QObject::connect(
+        ui.DisableOpacityGradient, SIGNAL(clicked()),
+        this, SLOT(disableGradientOpacty()));
+  this->addPropertyLink(
+		  ui.DisableOpacityGradient, "checked", SIGNAL(clicked()), repr->getProxy(), repr->getProxy()->GetProperty("DisableGradientOpacity"));
 
   QObject::connect(
       ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
@@ -492,6 +519,11 @@ QList<QVariant> pqColorOpacityEditorWidget::xrgbPoints() const
   return values;
 }
 
+
+/*QList<QVariant> pqColorOpacityEidtorWidget::gaussianPoints() const{
+
+}*/
+
 //-----------------------------------------------------------------------------
 QList<QVariant> pqColorOpacityEditorWidget::xvmsPoints() const
 {
@@ -539,6 +571,18 @@ bool pqColorOpacityEditorWidget::useLogScale() const
 {
   return this->Internals->Ui.UseLogScale->isChecked();
 }
+
+void pqColorOpacityEditorWidget::disableGradientOpacty(){
+
+	 pqDataRepresentation* repr =
+	    pqActiveObjects::instance().activeRepresentation();
+
+	// repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
+//	 disableGradientOpacity = !disableGradientOpacity;
+//	   vtkSMPropertyHelper(repr->getProxy(), "DisableGradientOpacity").Set(disableGradientOpacity);
+//	 repr->getProxy()->UpdateVTKObjects();
+}
+
 
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::setUseLogScale(bool val)

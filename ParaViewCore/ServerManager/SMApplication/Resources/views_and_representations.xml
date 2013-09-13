@@ -1538,6 +1538,8 @@
                       panel_visibility="never" />
             <Property name="GradientRange"
                       panel_visibility="never" />
+          	<Property name="DisableGradientOpacity"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />
@@ -2040,6 +2042,14 @@
           <Group name="piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
+      <IntVectorProperty command="SetDisableGradientOpacity"
+                         default_values="1"
+                         name="DisableGradientOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Enable/Disable the use of the gradient opacity function
+        </Documentation>
+      </IntVectorProperty>
             
       <IntVectorProperty command="SetRequestedRenderMode"
                          default_values="0"
