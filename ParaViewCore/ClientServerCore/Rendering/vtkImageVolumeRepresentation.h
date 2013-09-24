@@ -34,6 +34,7 @@ class vtkFixedPointVolumeRayCastMapper;
 class vtkImageData;
 class vtkOutlineSource;
 class vtkPiecewiseFunction;
+class vtkGaussianPiecewiseFunction;
 class vtkPolyDataMapper;
 class vtkPVCacheKeeper;
 class vtkPVLODVolume;
@@ -106,6 +107,8 @@ public:
   void SetColor(vtkColorTransferFunction* lut);
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
   void SetGradientOpacity(vtkPiecewiseFunction* pwf);
+  void SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
+  void SetSwitchGradientOpacity(bool GaussOrPwf);
   void SetScalarOpacityUnitDistance(double val);
   void SetAmbient(double);
   void SetDiffuse(double);

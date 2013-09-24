@@ -39,8 +39,12 @@
 #define QVIS_GAUSSIAN_OPACITY_BAR_H
 
 #include "QvisAbstractOpacityBar.h"
+#include "vtkType.h"
+#include "vtkSmartPointer.h"
 
 class QPixmap;
+class vtkGaussianPiecewiseFunction;
+
 
 // ****************************************************************************
 //  Class:  QvisGaussianOpacityBar
@@ -61,6 +65,7 @@ class QvisGaussianOpacityBar : public QvisAbstractOpacityBar
   public:
                   QvisGaussianOpacityBar(QWidget *parent=NULL, const char *name=NULL);
                  ~QvisGaussianOpacityBar();
+    void 		  initialize(vtkGaussianPiecewiseFunction* gpwf);
     void          getRawOpacities(int, float*);
     int           getNumberOfGaussians();
     void          getGaussian(int, float*,float*,float*,float*,float*);
@@ -68,6 +73,9 @@ class QvisGaussianOpacityBar : public QvisAbstractOpacityBar
     void          setAllGaussians(int, float*);
     void          setMaximumNumberOfGaussians(int);
     void          setMinimumNumberOfGaussians(int);
+    void		  setCurrentGaussian(int);
+
+    void setFunctionRange(double range[2]);
 
   protected:
     void          mouseMoveEvent(QMouseEvent*);
@@ -76,9 +84,19 @@ class QvisGaussianOpacityBar : public QvisAbstractOpacityBar
     void          paintToPixmap(int,int);
     void          drawControlPoints(QPainter &painter);
 
+
+
+
+
   signals:
     void          mouseReleased();
     void          mouseMoved();
+  /// signal fired when the \c current selected control point changes.
+    void          currentPointChanged(int index);
+
+  /// signal fired to indicate that the control points changed i.e. either they
+  /// were moved, orone was added/deleted, or edited to change color, etc.
+  void controlPointsModified();
 
   private:
     enum Mode     {modeNone, modeX, modeH, modeW, modeWR, modeWL, modeB};
@@ -97,9 +115,28 @@ class QvisGaussianOpacityBar : public QvisAbstractOpacityBar
         ~Gaussian() {};
     };
 
+    void 		  convertGaussianToImageSpace(int index, Gaussian &gauss);
+    void		  convertGaussianToDataSpace(int index, Gaussian &gauss);
+	void 		  preparePointsForDrawing(std::vector<Gaussian> &gaussians);
+
+
+
+    enum gaussvalue{gaussX,gaussH,gaussW,gaussBx,gaussBy};
+
+	vtkSmartPointer<vtkGaussianPiecewiseFunction> gaussianFunctionGroup;
+
+	Gaussian getNode(int index);
+	void setNode(int index, Gaussian &gauss);
+	void removeNode(int index);
+	void setGaussValue(int index, double value, gaussvalue v);
+	double getGaussValue(int index, gaussvalue v);
+
+
+
+
     // the list of gaussians
     int         ngaussian;
-    Gaussian    gaussian[200];
+    std::vector<Gaussian>    gaussian;
 
     // the current interaction mode and the current gaussian
     Mode        currentMode;
@@ -117,7 +154,7 @@ class QvisGaussianOpacityBar : public QvisAbstractOpacityBar
     // helper functions
     bool findGaussianControlPoint(int,int, int*,Mode*);
     void removeGaussian(int);
-    void addGaussian(float,float,float,float,float);
+    int addGaussian(float,float,float,float,float);
 };
 
 #endif

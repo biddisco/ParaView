@@ -91,6 +91,8 @@ set(Module_SRCS
   pqFlatTreeViewEventTranslator.h
   pqFormBuilder.cxx
   pqFormBuilder.h
+  pqGaussianOpacityFunction.cxx
+  pqGaussianOpacityFunction.h
   pqGradientOpacityFunction.cxx
   pqGradientOpacityFunction.h
   pqGraphLayoutStrategyInterface.cxx
@@ -269,6 +271,7 @@ set (Module_MOC_HDRS
   pqFileDialogRecentDirsModel.h
   pqFlatTreeViewEventTranslator.h
   pqFormBuilder.h
+  pqGaussianOpacityFunction.h
   pqGradientOpacityFunction.h
   pqHelperProxyStateLoader.h
   pqHistogramTableModel.h

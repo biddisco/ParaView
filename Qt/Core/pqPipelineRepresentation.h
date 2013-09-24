@@ -219,6 +219,9 @@ protected:
   /// Creates a default proxy for volume opacity function.
   vtkSMProxy* createOpacityFunctionProxy(const char *name,
     vtkSMRepresentationProxy* repr);
+  /// Creates a default proxy for gaussian volume opacity function.
+  vtkSMProxy* createGaussianOpacityFunctionProxy(const char *name,
+    vtkSMRepresentationProxy* repr);
  
   bool UpdateLUTRangesOnDataUpdate;
 

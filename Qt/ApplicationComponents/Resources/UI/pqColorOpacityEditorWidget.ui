@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>397</width>
-    <height>448</height>
+    <height>488</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -152,6 +152,30 @@
          <property name="icon">
           <iconset resource="../../../Components/Resources/pqComponents.qrc">
            <normaloff>:/pqWidgets/Icons/pqInvert24.png</normaloff>:/pqWidgets/Icons/pqInvert24.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>1</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QToolButton" name="gaussorgrad">
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
