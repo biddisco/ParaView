@@ -617,7 +617,8 @@ int
 QvisGaussianOpacityBar::addGaussian(float _x,float h,float w,float bx,float by)
 {
 	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
-		return gaussianFunctionGroup->AddGaussian(_x*rangemagnitude,h,w*rangemagnitude,bx,by);
+		return gaussianFunctionGroup->AddGaussian(std::min(std::max(_x*rangemagnitude, gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1))
+		,h,w*rangemagnitude,bx,by);
 }
 
 
