@@ -41,10 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqTransferFunctionWidget.h"
 #include "pqUndoStack.h"
 #include "vtkCommand.h"
-#include "vtkDiscretizableColorTransferFunction.h"
+#include "vtkDiscretizableColorTransferFunctionCollection.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkNew.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkGaussianPiecewiseFunction.h"
 #include "vtkPVXMLElement.h"
 #include "vtkSMPropertyGroup.h"
 #include "vtkSMProperty.h"
@@ -124,13 +125,14 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   Internals(new pqInternals(this))
 {
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
 
 
 
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
+  int size = pwf->GetSize();
   if (pwf)
     {
     ui.OpacityEditor->initialize(stc, false, pwf, true);
@@ -143,6 +145,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
 
 
 	pwf = stc? stc->GetGradientOpacityFunction() : NULL;
+	size = pwf->GetSize();
 	if (pwf){
 
 	 ui.GradientOpacityEditor->initialize(NULL, false, pwf, true);
@@ -157,15 +160,28 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     }
 
 
+  vtkGaussianPiecewiseFunction* gpwf = stc? stc->GetGaussianOpacityFunction() : NULL;
+  	size = pwf->GetSize();
+  	if (pwf){
+  		//TBD initialize stuff for gaussian
+  	 ui.GaussianOpacityEditor->initialize(gpwf);
+  	}
+  	else
+  	{
+  	ui.GaussianOpacityEditor->hide();
+  	}
+
+
+
+
+
+
   //change this to gaussian part---
 /*  Ui:QvisGaussianOpacityBar &ui = this->Internals->Ui;
   QvisGaussianOpacityBar* gaussianEditor =
      vtkDiscretizableColorTransferFunction::SafeDownCast(
        this->proxy()->GetClientSideObject());
        */
-  char* name;
-  name = this->proxy()->GetVTKClassName();
-  std::cout << name << std::endl;
    //----
 
 
@@ -192,7 +208,9 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
       }
 
     if (N>0 && colors) {
-      ui.GaussianOpacityEditor->setBackgroundColourData(N, 3, colors);
+    	//TBD uncomment the gaussian line after the guassian stuff is finished. Currently
+    	//I'm worried that it somehow might cause problems (though I think it doesn't).
+     // ui.GaussianOpacityEditor->setBackgroundColourData(N, 3, colors);
       ui.TwoDTransferFunction->setUnderlayColourData(N, 3, colors);
 //      this->Internals->XMin->setValue(minmax[0]);
 //      this->Internals->XMax->setValue(minmax[1]);
@@ -217,15 +235,26 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   this->addPropertyLink(
 		  ui.DisableOpacityGradient, "checked", SIGNAL(clicked()), repr->getProxy(), repr->getProxy()->GetProperty("DisableGradientOpacity"));
 
+
   QObject::connect(
-      ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
-      this, SLOT(gradientCurrentChanged(vtkIdType)));
+          ui.gaussorgrad, SIGNAL(clicked()),
+          this, SLOT(switchGradientOpacity()));
+    this->addPropertyLink(
+  		  ui.gaussorgrad, "checked", SIGNAL(clicked()), repr->getProxy(), repr->getProxy()->GetProperty("SwitchGradientOpacity"));
+
+
   QObject::connect(
     ui.OpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
     this, SLOT(opacityCurrentChanged(vtkIdType)));
   QObject::connect(
     ui.ColorEditor, SIGNAL(currentPointChanged(vtkIdType)),
     this, SLOT(colorCurrentChanged(vtkIdType)));
+  QObject::connect(
+       ui.GradientOpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
+       this, SLOT(gradientCurrentChanged(vtkIdType)));
+  QObject::connect(
+         ui.GaussianOpacityEditor, SIGNAL(currentPointChanged(int)),
+         this, SLOT(gaussianCurrentChanged(int)));
 
   QObject::connect(
     ui.ColorEditor, SIGNAL(controlPointsModified()),
@@ -236,6 +265,10 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   QObject::connect(
       ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
       this, SIGNAL(gvmsPointsChanged()));
+  QObject::connect(
+        ui.GaussianOpacityEditor, SIGNAL(controlPointsModified()),
+        this, SIGNAL(xhwbbPointsChanged()));
+
 
   QObject::connect(
     ui.ColorEditor, SIGNAL(controlPointsModified()),
@@ -246,6 +279,9 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   QObject::connect(
     ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
     this, SLOT(updateCurrentData()));
+  QObject::connect(
+     ui.GaussianOpacityEditor, SIGNAL(controlPointsModified()),
+     this, SLOT(updateCurrentData()));
 
   QObject::connect(
     ui.ResetRangeToData, SIGNAL(clicked()),
@@ -288,7 +324,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     qCritical("Missing 'XRGBPoints' property. Widget may not function correctly.");
     }
 
-  //change to gradient
+
   smproperty = smgroup->GetProperty("GradientOpacityFunction");
   if (smproperty)
     {
@@ -309,7 +345,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     }
   else
     {
-    ui.OpacityEditor->hide();
+    ui.GradientOpacityEditor->hide();
     }
 
   //change to gradient
@@ -336,6 +372,30 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     {
     ui.OpacityEditor->hide();
     }
+
+  smproperty = smgroup->GetProperty("GaussianOpacityFunction");
+    if (smproperty)
+      {
+      // TODO: T
+
+      vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+
+      if (pwfProxy && pwfProxy->GetProperty("Points"))
+        {
+        this->addPropertyLink(
+          this, "xhwbbPoints", SIGNAL(xhwbbPointsChanged()),
+          pwfProxy, pwfProxy->GetProperty("Points"));
+        }
+      else
+        {
+        ui.GaussianOpacityEditor->hide();
+        }
+      }
+    else
+      {
+      ui.GaussianOpacityEditor->hide();
+      }
+
 
 
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
@@ -421,6 +481,7 @@ void pqColorOpacityEditorWidget::opacityCurrentChanged(vtkIdType index)
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.ColorEditor->setCurrentPoint(-1);
     ui.GradientOpacityEditor->setCurrentPoint(-1);
+    ui.GaussianOpacityEditor->setCurrentGaussian(-1);
     }
   this->updateCurrentData();
 }
@@ -433,6 +494,7 @@ void pqColorOpacityEditorWidget::gradientCurrentChanged(vtkIdType index)
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.OpacityEditor->setCurrentPoint(-1);
     ui.ColorEditor->setCurrentPoint(-1);
+    ui.GaussianOpacityEditor->setCurrentGaussian(-1);
     }
   this->updateCurrentData();
 }
@@ -445,6 +507,20 @@ void pqColorOpacityEditorWidget::colorCurrentChanged(vtkIdType index)
     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
     ui.OpacityEditor->setCurrentPoint(-1);
     ui.GradientOpacityEditor->setCurrentPoint(-1);
+    ui.GaussianOpacityEditor->setCurrentGaussian(-1);
+    }
+  this->updateCurrentData();
+}
+
+//-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::gaussianCurrentChanged(int index)
+{
+  if (index != -1)
+    {
+    Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+    ui.OpacityEditor->setCurrentPoint(-1);
+    ui.GradientOpacityEditor->setCurrentPoint(-1);
+    ui.ColorEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
 }
@@ -452,8 +528,8 @@ void pqColorOpacityEditorWidget::colorCurrentChanged(vtkIdType index)
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::updateCurrentData()
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
   vtkPiecewiseFunction* gof = stc? stc->GetGradientOpacityFunction() : NULL;
@@ -501,8 +577,8 @@ void pqColorOpacityEditorWidget::updateCurrentData()
 //-----------------------------------------------------------------------------
 QList<QVariant> pqColorOpacityEditorWidget::xrgbPoints() const
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   QList<QVariant> values;
   for (int cc=0; stc != NULL && cc < stc->GetSize(); cc++)
@@ -519,16 +595,33 @@ QList<QVariant> pqColorOpacityEditorWidget::xrgbPoints() const
   return values;
 }
 
+//----------------------------------------------------------------------------------------
 
-/*QList<QVariant> pqColorOpacityEidtorWidget::gaussianPoints() const{
+QList<QVariant> pqColorOpacityEditorWidget::xhwbbPoints() const{
+	vtkDiscretizableColorTransferFunctionCollection* stc =
+	    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
+	      this->proxy()->GetClientSideObject());
+	  vtkGaussianPiecewiseFunction* pwf = stc? stc->GetGaussianOpacityFunction() : NULL;
 
-}*/
+	  QList<QVariant> values;
+	  for (int cc=0; pwf != NULL && cc < pwf->GetSize(); cc++)
+	    {
+	    double xhwbb[5];
+	    pwf->GetNodeValue(cc, xhwbb);
+	    values.push_back(xhwbb[0]);
+	    values.push_back(xhwbb[1]);
+	    values.push_back(xhwbb[2]);
+	    values.push_back(xhwbb[3]);
+	    values.push_back(xhwbb[4]);
+	    }
+	  return values;
+}
 
 //-----------------------------------------------------------------------------
 QList<QVariant> pqColorOpacityEditorWidget::xvmsPoints() const
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
 
@@ -548,8 +641,8 @@ QList<QVariant> pqColorOpacityEditorWidget::xvmsPoints() const
 //-----------------------------------------------------------------------------
 QList<QVariant> pqColorOpacityEditorWidget::gvmsPoints() const
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   vtkPiecewiseFunction* pwf = stc? stc->GetGradientOpacityFunction() : NULL;
 
@@ -582,6 +675,11 @@ void pqColorOpacityEditorWidget::disableGradientOpacty(){
 //	   vtkSMPropertyHelper(repr->getProxy(), "DisableGradientOpacity").Set(disableGradientOpacity);
 //	 repr->getProxy()->UpdateVTKObjects();
 }
+
+
+void pqColorOpacityEditorWidget::switchGradientOpacity(){
+}
+
 
 
 //-----------------------------------------------------------------------------
@@ -650,10 +748,19 @@ void pqColorOpacityEditorWidget::setXrgbPoints(const QList<QVariant>& values)
 }
 
 //-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::setXhwbbPoints(const QList<QVariant>& values)
+{
+  Q_UNUSED(values);
+  // Since the vtkColorTransferFunction connected to the widget is directly obtained
+  // from the proxy, we don't need to do anything here. The widget will be
+  // updated when the proxy updates.
+}
+
+//-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::currentDataEdited()
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   vtkPiecewiseFunction* pwf = stc? stc->GetScalarOpacityFunction() : NULL;
 
@@ -675,6 +782,7 @@ void pqColorOpacityEditorWidget::currentDataEdited()
         ui.CurrentDataValue->text().toDouble());
       }
 
+
   this->updateCurrentData();
 }
 
@@ -688,17 +796,11 @@ void pqColorOpacityEditorWidget::resetRangeToData()
     qDebug("No active representation.");
     return;
     }
+  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
+
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());
   emit this->changeFinished();
-
-///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
-
-  double gradientrange[2];
-  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
-  vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,2);
-  
-  std::cout << "Gradient minmax is " << gradientrange[0] << "," << gradientrange[1] << std::endl;
 
   END_UNDO_SET();
 }
@@ -730,8 +832,8 @@ void pqColorOpacityEditorWidget::resetRangeToDataOverTime()
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::resetRangeToCustom()
 {
-  vtkDiscretizableColorTransferFunction* stc =
-    vtkDiscretizableColorTransferFunction::SafeDownCast(
+  vtkDiscretizableColorTransferFunctionCollection* stc =
+    vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
       this->proxy()->GetClientSideObject());
   double range[2];
   stc->GetRange(range);
@@ -742,6 +844,10 @@ void pqColorOpacityEditorWidget::resetRangeToCustom()
     {
     this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum());
     }
+
+
+
+
 }
 
 //-----------------------------------------------------------------------------

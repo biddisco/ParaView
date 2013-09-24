@@ -282,6 +282,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
   vtkSMProperty* sofProperty = this->GetProperty("ScalarOpacityFunction");
   vtkSMProperty* gofProperty = this->GetProperty("GradientOpacityFunction");
+  vtkSMProperty* gaussfProperty = this->GetProperty("GaussianOpacityFunction");
   if (!lutProperty && !sofProperty)
     {
     vtkWarningMacro("No 'LookupTable' and 'ScalarOpacityFunction' found.");
@@ -294,15 +295,16 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
   vtkSMProxy* sof = vtkSMPropertyHelper(sofProperty).GetAsProxy();
   vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
+  vtkSMProxy* gaussf = vtkSMPropertyHelper(gaussfProperty).GetAsProxy();
 
 
 ///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
 
-  double gofrange[2] = {0, 1};;
+  double gofrange[2] = {0, 1};
   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
   
-  std::cout << "Gradient minmax is " << gofrange[0] << "," << gofrange[1] << std::endl;
+
 
 
   // We need to determine the component number to use from the lut.
@@ -312,9 +314,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
     component = vtkSMPropertyHelper(lut, "VectorComponent").GetAsInt();
     }
 
-  ostream & objOstream = cout;
-  vtkIndent indent;
-  info->PrintSelf(objOstream, indent);
+
 
   if (component < info->GetNumberOfComponents())
     {
@@ -339,6 +339,8 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
           lut, "ScalarOpacityFunction", true).GetAsProxy();
         vtkSMProxy* gof_lut = vtkSMPropertyHelper(
                   lut, "GradientOpacityFunction", true).GetAsProxy();
+        vtkSMProxy* gaussf_lut = vtkSMPropertyHelper(
+                          lut, "GaussianOpacityFunction", true).GetAsProxy();
         if (sof_lut && sof != sof_lut)
           {
           vtkSMTransferFunctionProxy::RescaleTransferFunction(
@@ -350,6 +352,12 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(
 			gof_lut, gofrange, true);
 		  }
+        if (gaussf_lut && gaussf != gaussf_lut)
+        		  {
+
+        		  vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+        			gaussf_lut, gofrange, true);
+        		  }
 
         }
       if (sof)
@@ -360,6 +368,10 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		  {
 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange, true);
 		  }
+      if (gaussf)
+      		  {
+      		  vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(gaussf, gofrange, true);
+      		  }
 
       return (lut || sof);
       }

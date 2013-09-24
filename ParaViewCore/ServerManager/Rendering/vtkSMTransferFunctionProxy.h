@@ -41,6 +41,10 @@ public:
     { return this->RescaleTransferFunction(range[0], range[1], extend); }
   virtual bool RescaleTransferFunction(double rangeMin, double rangeMax, bool extend=false);
 
+  virtual bool RescaleGaussianTransferFunction(const double range[2], bool extend=false)
+      { return this->RescaleTransferFunction(range[0], range[1], extend); }
+    virtual bool RescaleGaussianTransferFunction(double rangeMin, double rangeMax, bool extend=false);
+
   // Description:
   // Safely call RescaleTransferFunction() after casting the proxy to
   // appropriate type.
@@ -52,6 +56,14 @@ public:
     return vtkSMTransferFunctionProxy::RescaleTransferFunction(
       proxy, range[0], range[1], extend);
     }
+  static bool RescaleGaussianTransferFunction(vtkSMProxy* proxy,
+      double rangeMin, double rangeMax, bool extend=false);
+  static bool RescaleGaussianTransferFunction(vtkSMProxy* proxy,
+      const double range[2], bool extend=false)
+      {
+      return vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(proxy, range[0], range[1], extend);
+
+      }
 
   // Description:
   // Invert the transfer function. Returns true if successful.

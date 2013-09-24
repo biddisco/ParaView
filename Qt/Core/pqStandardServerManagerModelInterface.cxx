@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqScalarBarRepresentation.h"
 #include "pqScalarsToColors.h"
 #include "pqScalarOpacityFunction.h"
+#include "pqGaussianOpacityFunction.h"
 //#include "pqScatterPlotRepresentation.h"
 #include "pqTimeKeeper.h"
 #include "pqViewModuleInterface.h"
@@ -117,6 +118,10 @@ pqProxy* pqStandardServerManagerModelInterface::createPQProxy(
     {
     return new pqScalarOpacityFunction(group, name, proxy, server, 0);
     }
+  else if (group == "gaussian_piecewise_functions")
+      {
+      return new pqGaussianOpacityFunction(group, name, proxy, server, 0);
+      }
   else if (group == "scalar_bars")
     {
     return new pqScalarBarRepresentation(group, name, proxy, server, 0);

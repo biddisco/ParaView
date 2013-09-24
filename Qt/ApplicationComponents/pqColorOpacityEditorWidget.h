@@ -72,6 +72,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqColorOpacityEditorWidget :
   Q_PROPERTY(QList<QVariant> xrgbPoints READ xrgbPoints WRITE setXrgbPoints)
   Q_PROPERTY(QList<QVariant> xvmsPoints READ xvmsPoints WRITE setXvmsPoints)
   Q_PROPERTY(QList<QVariant> gvmsPoints READ gvmsPoints WRITE setGvmsPoints)
+  Q_PROPERTY(QList<QVariant> xhwbbPoints READ xhwbbPoints WRITE setXhwbbPoints)
   Q_PROPERTY(bool useLogScale READ useLogScale WRITE setUseLogScale)
   Q_PROPERTY(bool lockScalarRange READ lockScalarRange WRITE setLockScalarRange)
   typedef pqPropertyWidget Superclass;
@@ -91,7 +92,7 @@ public:
   /// function. This a list of 4-tuples.
   QList<QVariant> gvmsPoints() const;
 
-  QList<QVariant> gaussianPoints() const;
+  QList<QVariant> xhwbbPoints() const;
 
   /// Returns the value for use-log-scale.
   bool useLogScale() const;
@@ -108,6 +109,9 @@ public slots:
 
   /// Sets the xrgbPoints that control the color transfer function.
   void setXrgbPoints(const QList<QVariant>&);
+
+  /// Sets the xrgbPoints that control the color transfer function.
+  void setXhwbbPoints(const QList<QVariant>& values);
 
   /// Set whether to use-log scale.
   void setUseLogScale(bool value);
@@ -135,6 +139,8 @@ public slots:
   /// save current transfer function as preset.
   void saveAsPreset();
 
+  void switchGradientOpacity();
+
 signals:
   /// Signal fired when the xrgbPoints change.
   void xrgbPointsChanged();
@@ -144,6 +150,9 @@ signals:
 
   /// Signal fired when the gradient points change.
   void gvmsPointsChanged();
+
+  /// Signal fired when the gradient points change.
+  void xhwbbPointsChanged();
 
   /// Signal fired when useLogScale changes.
   void useLogScaleChanged();
@@ -157,6 +166,7 @@ protected slots:
   void opacityCurrentChanged(vtkIdType);
   void gradientCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
+  void gaussianCurrentChanged(int index);
 
   /// updates the text shown in the "current data" input.
   void updateCurrentData();

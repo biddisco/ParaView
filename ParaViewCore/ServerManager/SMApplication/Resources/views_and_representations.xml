@@ -1540,6 +1540,10 @@
                       panel_visibility="never" />
           	<Property name="DisableGradientOpacity"
                       panel_visibility="never" />
+                      <Property name="SwitchGradientOpacity"
+                      panel_visibility="never" />
+            <Property name="GaussianOpacityFunction"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />
@@ -2050,6 +2054,21 @@
         <Documentation>Enable/Disable the use of the gradient opacity function
         </Documentation>
       </IntVectorProperty>
+      <IntVectorProperty command="SetSwitchGradientOpacity"
+                         default_values="1"
+                         name="SwitchGradientOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Switch between gaussian and linear gradient function
+        </Documentation>
+      </IntVectorProperty>
+       <ProxyProperty command="SetGaussianOpacity"
+                     name="GaussianOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="gaussian_piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
             
       <IntVectorProperty command="SetRequestedRenderMode"
                          default_values="0"

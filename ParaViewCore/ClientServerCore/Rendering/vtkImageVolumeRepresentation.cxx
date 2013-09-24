@@ -35,6 +35,7 @@
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
 #include "vtkImageAccumulate.h"
+#include "vtkGaussianPiecewiseFunction.h"
 
 #include <map>
 #include <string>
@@ -348,6 +349,18 @@ void vtkImageVolumeRepresentation::SetScalarOpacity(vtkPiecewiseFunction* pwf)
 void vtkImageVolumeRepresentation::SetGradientOpacity(vtkPiecewiseFunction* pwf)
 {
   this->Property->SetGradientOpacity(pwf);
+}
+
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf)
+{
+  this->Property->SetGaussianOpacity(pwf);
+}
+
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetSwitchGradientOpacity(bool GaussOrPwf)
+{
+  this->Property->SwitchGaussianOpacity(GaussOrPwf);
 }
 
 //----------------------------------------------------------------------------

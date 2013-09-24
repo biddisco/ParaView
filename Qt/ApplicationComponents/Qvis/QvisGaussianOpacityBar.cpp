@@ -36,6 +36,7 @@
 *****************************************************************************/
 
 #include "QvisGaussianOpacityBar.h"
+#include "vtkGaussianPiecewiseFunction.h"
 
 #include <qpainter.h>
 #include <qpolygon.h>
@@ -47,6 +48,14 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+
+
+
+
+
+
+
+
 
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::QvisGaussianOpacityBar
@@ -73,11 +82,15 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject, const char
     minimumNumberOfGaussians =  0;
 
     // set a default:
-    addGaussian(0.5f, 0.5f, 0.1f, 0.0f, 0);
+    //addGaussian(0.5f, 0.5f, 0.1f, 0.0f, 0);
+    //if we add a default in the constructor, it currently crashes
 
     mousedown = false;
     setMouseTracking(true);
 }
+
+
+
 
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::~QvisGaussianOpacityBar
@@ -105,9 +118,37 @@ QvisGaussianOpacityBar::~QvisGaussianOpacityBar()
 //  Creation:    January 31, 2001
 //
 // ****************************************************************************
+
+
+void QvisGaussianOpacityBar::initialize(vtkGaussianPiecewiseFunction* gpwf){
+	if(gpwf){
+		this->gaussianFunctionGroup = gpwf;
+		gaussianFunctionGroup->Initialize();
+		double range[2] = {0,1};
+		gaussianFunctionGroup->UpdateRange(false,range);
+	}
+}
+
+
+/*
+void QvisGaussianOpacityBar::preparePointsForDrawing(std::vector<Gaussian> &gaussians){
+	//there are 2
+	int ngaussians = gaussianFunctionGroup->GetSize();
+	Gaussian gauss;
+	for (int i = 0; i<ngaussians; i++){convertGaussianToDataSpace(i, gauss);
+	gaussians.push_back(gauss);//the vector should be making copies when it pushes back -> we can reuse gauss
+	}
+
+}
+*/
+
+
 void
 QvisGaussianOpacityBar::drawControlPoints(QPainter &painter)
 {
+	//there are 2 ways for drawing the widget. The first is by getting the context view and rendering and stuff like in the pqtransferfunctionwidget.
+	//Because I don't really care to figure out how that works at the moment (and I want to get done with this) it's not being done like that.
+	//Instead, I'm choosing the less efficient way of moving converting all the gaussians into "image space".
     int pw = pix->width();
     int ph = pix->height();
     QPen bluepen(QColor(100,100,255), 2);
@@ -115,14 +156,20 @@ QvisGaussianOpacityBar::drawControlPoints(QPainter &painter)
     QPen cyanpen(QColor(100,255,255), 2);;
     QPen graypen(QColor(100,100,100), 2);
     QPolygon pts;
+
+   // preparePointsForDrawing(gaussian);
+    if (!gaussianFunctionGroup)
+    	return;
+    ngaussian = gaussianFunctionGroup->GetSize();
+
     for (int p=0; p<ngaussian; p++)
     {
-        int _x  = int(float(gaussian[p].x+gaussian[p].bx)*float(pw));
-        int xr = int(float(gaussian[p].x+gaussian[p].w)*float(pw));
-        int xl = int(float(gaussian[p].x-gaussian[p].w)*float(pw));
-        int _y  = int(float(1-gaussian[p].h)*float(ph));
+        int _x  = int(float(getGaussValue(p,gaussX)+getGaussValue(p,gaussBx))*float(pw));
+        int xr = int(float(getGaussValue(p,gaussX)+getGaussValue(p,gaussW))*float(pw));
+        int xl = int(float(getGaussValue(p,gaussX)-getGaussValue(p,gaussW))*float(pw));
+        int _y  = int(float(1-getGaussValue(p,gaussH))*float(ph));
         int y0 = int(float(1-0)*float(ph));
-        int yb = int(float(1-gaussian[p].h/4. - gaussian[p].by*gaussian[p].h/4.)*float(ph));
+        int yb = int(float(1-getGaussValue(p,gaussH)/4. - getGaussValue(p,gaussBy)*getGaussValue(p,gaussH)/4.)*float(ph));
 
         // lines:
         painter.setPen(graypen);
@@ -152,8 +199,8 @@ QvisGaussianOpacityBar::drawControlPoints(QPainter &painter)
         }
         else
             painter.setPen(bluepen);
-        float bx = gaussian[p].bx;
-        float by = gaussian[p].by;
+        float bx = getGaussValue(p,gaussBx);
+        float by = getGaussValue(p,gaussBy);
         painter.drawLine(_x,yb, _x,yb+5);
         if (bx > 0)
         {
@@ -282,6 +329,7 @@ QvisGaussianOpacityBar::paintToPixmap(int w,int h)
 void
 QvisGaussianOpacityBar::mousePressEvent(QMouseEvent *e)
 {
+
     int _x = e->x();
     int _y = e->y();
 
@@ -300,11 +348,11 @@ QvisGaussianOpacityBar::mousePressEvent(QMouseEvent *e)
         if (! findGaussianControlPoint(_x,_y,
                                        &currentGaussian, &currentMode))
         {
-            currentGaussian = ngaussian;
+            //currentGaussian = ngaussian;
             currentMode     = modeW;
             if (maximumNumberOfGaussians==-1 || getNumberOfGaussians()<maximumNumberOfGaussians)
             {
-                addGaussian(x2val(_x), y2val(_y), 0.001f, 0,0);
+            	currentGaussian = addGaussian(double(x2val(_x)),double(y2val(_y)), 0.001, 0,0);
             }
         }
         lastx = _x;
@@ -355,38 +403,44 @@ QvisGaussianOpacityBar::mouseMoveEvent(QMouseEvent *e)
     switch (currentMode)
     {
       case modeX:
-        gaussian[currentGaussian].x = x2val(_x) - gaussian[currentGaussian].bx;
+        setGaussValue(currentGaussian,x2val(_x) - getGaussValue(currentGaussian,gaussBx),gaussX);
+        emit currentPointChanged(currentGaussian);
         break;
       case modeH:
-        gaussian[currentGaussian].h = y2val(_y);
+        setGaussValue(currentGaussian,y2val(_y),gaussH);
+        emit currentPointChanged(currentGaussian);
         break;
       case modeW:
-        gaussian[currentGaussian].w = qMax((float)fabs(x2val(_x) - gaussian[currentGaussian].x),(float)0.01);
+        setGaussValue(currentGaussian,qMax((float)fabs(x2val(_x) - getGaussValue(currentGaussian,gaussX)),(float)0.01),gaussW);
+        emit currentPointChanged(currentGaussian);
         break;
       case modeWR:
-        gaussian[currentGaussian].w = qMax((float)(x2val(_x) - gaussian[currentGaussian].x),(float)0.01);
-        if (gaussian[currentGaussian].w < fabs(gaussian[currentGaussian].bx))
-            gaussian[currentGaussian].w = fabs(gaussian[currentGaussian].bx);
+        setGaussValue(currentGaussian,qMax((double)(x2val(_x) - getGaussValue(currentGaussian,gaussX)),0.01),gaussW);
+        if (getGaussValue(currentGaussian,gaussW) < fabs(getGaussValue(currentGaussian,gaussBx)))
+            setGaussValue(currentGaussian,fabs(getGaussValue(currentGaussian,gaussBx)),gaussW);
+        emit currentPointChanged(currentGaussian);
         break;
       case modeWL:
-        gaussian[currentGaussian].w = qMax((float)(gaussian[currentGaussian].x - x2val(_x)),(float)0.01);
-        if (gaussian[currentGaussian].w < fabs(gaussian[currentGaussian].bx))
-            gaussian[currentGaussian].w = fabs(gaussian[currentGaussian].bx);
+        setGaussValue(currentGaussian,qMax((float)(getGaussValue(currentGaussian,gaussX) - x2val(_x)),(float)0.01),gaussW);
+        if (getGaussValue(currentGaussian,gaussW) < fabs(getGaussValue(currentGaussian,gaussBx)))
+            setGaussValue(currentGaussian,fabs(getGaussValue(currentGaussian,gaussBx)),gaussW);
+        emit currentPointChanged(currentGaussian);
         break;
       case modeB:
-        gaussian[currentGaussian].bx = x2val(_x) - gaussian[currentGaussian].x;
-        if (gaussian[currentGaussian].bx > gaussian[currentGaussian].w)
-            gaussian[currentGaussian].bx = gaussian[currentGaussian].w;
-        if (gaussian[currentGaussian].bx < -gaussian[currentGaussian].w)
-            gaussian[currentGaussian].bx = -gaussian[currentGaussian].w;
-        if (fabs(gaussian[currentGaussian].bx) < .001)
-            gaussian[currentGaussian].bx = 0;
+        setGaussValue(currentGaussian,x2val(_x) - getGaussValue(currentGaussian,gaussX),gaussBx);
+        if (getGaussValue(currentGaussian,gaussBx) > getGaussValue(currentGaussian,gaussW))
+            setGaussValue(currentGaussian,getGaussValue(currentGaussian,gaussW),gaussBx);
+        if (getGaussValue(currentGaussian,gaussBx) < -getGaussValue(currentGaussian,gaussW))
+            setGaussValue(currentGaussian,-getGaussValue(currentGaussian,gaussW),gaussBx);
+        if (fabs(getGaussValue(currentGaussian,gaussBx)) < .001)
+            setGaussValue(currentGaussian,0,gaussBx);
 
-        gaussian[currentGaussian].by = 4*(y2val(_y) - gaussian[currentGaussian].h/4.)/gaussian[currentGaussian].h;
-        if (gaussian[currentGaussian].by > 2)
-            gaussian[currentGaussian].by = 2;
-        if (gaussian[currentGaussian].by < 0)
-            gaussian[currentGaussian].by = 0;
+        setGaussValue(currentGaussian,4*(y2val(_y) - getGaussValue(currentGaussian,gaussH)/4.)/getGaussValue(currentGaussian,gaussH),gaussBy);
+        if (getGaussValue(currentGaussian,gaussBy) > 2)
+            setGaussValue(currentGaussian,2,gaussBy);
+        if (getGaussValue(currentGaussian,gaussBy) < 0)
+            setGaussValue(currentGaussian,0,gaussBy);
+        emit currentPointChanged(currentGaussian);
         break;
       default:
         break;
@@ -424,6 +478,7 @@ QvisGaussianOpacityBar::mouseReleaseEvent(QMouseEvent *)
 //    p.drawPixmap(contentsRect().left(),contentsRect().top(),*pix);
 
     emit mouseReleased();
+    emit controlPointsModified();
 }
 
 
@@ -444,11 +499,11 @@ QvisGaussianOpacityBar::getRawOpacities(int n, float *opacity)
 
     for (int p=0; p<ngaussian; p++)
     {
-        float _pos    = gaussian[p].x;
-        float _width  = gaussian[p].w;
-        float _height = gaussian[p].h;
-        float xbias  = gaussian[p].bx;
-        float ybias  = gaussian[p].by;
+        float _pos    = getGaussValue(p,gaussX);
+        float _width  = getGaussValue(p,gaussW);
+        float _height = getGaussValue(p,gaussH);
+        float xbias  = getGaussValue(p,gaussBx);
+        float ybias  = getGaussValue(p,gaussBy);
         for (int i=0; i<n/*+1*/; i++)
         {
             float _x = float(i)/float(n-1);
@@ -508,21 +563,8 @@ QvisGaussianOpacityBar::getRawOpacities(int n, float *opacity)
 }
 
 
-// ****************************************************************************
-//  Method:  QvisGaussianOpacityBar::addGaussian
-//
-//  Purpose:
-//
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    January 31, 2001
-//
-// ****************************************************************************
-void
-QvisGaussianOpacityBar::addGaussian(float _x,float h,float w,float bx,float by)
-{
-    gaussian[ngaussian++] = Gaussian(_x,h,w,bx,by);
-}
+
+
 
 
 // ****************************************************************************
@@ -538,9 +580,7 @@ QvisGaussianOpacityBar::addGaussian(float _x,float h,float w,float bx,float by)
 void
 QvisGaussianOpacityBar::removeGaussian(int n)
 {
-    for (int i=n; i<ngaussian-1; i++)
-        gaussian[i] = gaussian[i+1];
-    ngaussian--;
+	gaussianFunctionGroup->RemoveGaussianAtIndex(n);
 }
 
 // ****************************************************************************
@@ -559,6 +599,94 @@ QvisGaussianOpacityBar::setMaximumNumberOfGaussians(int n)
   this->maximumNumberOfGaussians = n;
 }
 
+
+//-------------------------------------------------------------------------------
+
+
+// ****************************************************************************
+//  Method:  QvisGaussianOpacityBar::addGaussian
+//
+//  Purpose:
+//
+//
+//  Programmer:  Jeremy Meredith
+//  Creation:    January 31, 2001
+//
+// ****************************************************************************
+int
+QvisGaussianOpacityBar::addGaussian(float _x,float h,float w,float bx,float by)
+{
+	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+		return gaussianFunctionGroup->AddGaussian(_x*rangemagnitude,h,w*rangemagnitude,bx,by);
+}
+
+
+
+QvisGaussianOpacityBar::Gaussian QvisGaussianOpacityBar::getNode(int index){
+	double values[5];
+	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	Gaussian gauss;
+	gaussianFunctionGroup->GetNodeValue(index,values);
+	gauss.x=values[0]/rangemagnitude;
+	gauss.h=values[1];
+	gauss.w=values[2]/rangemagnitude;
+	gauss.bx=values[3];
+	gauss.by=values[4];
+	return gauss;
+}
+
+
+//TBD convert space
+double QvisGaussianOpacityBar::getGaussValue(int index, gaussvalue v){
+	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	if (gaussX == v)
+		return gaussianFunctionGroup->getX(index)/rangemagnitude;
+	else if (gaussH ==v)
+			return gaussianFunctionGroup->getH(index);
+	else if (gaussW ==v)
+		return gaussianFunctionGroup->getW(index)/rangemagnitude;
+	else if (gaussBx ==v)
+		return gaussianFunctionGroup->getBx(index);
+	else if (gaussBy ==v)
+		return gaussianFunctionGroup->getBy(index);
+}
+
+void  QvisGaussianOpacityBar::setNode(int index, Gaussian &gauss){
+	double values[5];
+	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	values[0] = std::min(std::max(gauss.x*rangemagnitude, gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1));
+	values[1] = gauss.h;
+	values[2] = gauss.w*rangemagnitude;
+	values[3] = gauss.bx;
+	values[4] = gauss.by;
+	gaussianFunctionGroup->SetNodeValue(index,values);
+
+}
+
+
+//TBD convert space
+void QvisGaussianOpacityBar::setGaussValue(int index, double value, gaussvalue v){
+	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	if (gaussX == v)
+		gaussianFunctionGroup->setX(index,std::min(std::max(value*rangemagnitude,gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1)));
+	else if (gaussH ==v)
+			gaussianFunctionGroup->setH(index,value);
+	else if (gaussW ==v)
+			gaussianFunctionGroup->setW(index,value*rangemagnitude);
+	else if (gaussBx ==v)
+			gaussianFunctionGroup->setBx(index,value);
+	else if (gaussBy ==v)
+			gaussianFunctionGroup->setBy(index,value);
+}
+
+
+void QvisGaussianOpacityBar::setFunctionRange(double range[2]){
+	this->gaussianFunctionGroup->UpdateRange(false, range);
+}
+
+
+
+
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::setMaximumNumberOfGaussians
 //
@@ -573,6 +701,11 @@ void
 QvisGaussianOpacityBar::setMinimumNumberOfGaussians(int n)
 {
   this->minimumNumberOfGaussians = n;
+}
+
+void QvisGaussianOpacityBar::setCurrentGaussian(int index){
+	if (index < ngaussian && index >=0)
+		currentGaussian = index;
 }
 
 #define dist2(x1,y1,x2,y2) (((x2)-(x1))*((x2)-(x1)) + ((y2)-(y1))*((y2)-(y1)))
@@ -596,12 +729,12 @@ QvisGaussianOpacityBar::findGaussianControlPoint(int _x,int _y,
     float mindist = 100000;  // it's okay, it's pixels
     for (int p=0; p<ngaussian; p++)
     {
-        int xc = val2x(gaussian[p].x+gaussian[p].bx);
-        int xr = val2x(gaussian[p].x+gaussian[p].w);
-        int xl = val2x(gaussian[p].x-gaussian[p].w);
-        int yc = val2y(gaussian[p].h);
+        int xc = val2x(getGaussValue(p,gaussX)+getGaussValue(p,gaussBx));
+        int xr = val2x(getGaussValue(p,gaussX)+getGaussValue(p,gaussW));
+        int xl = val2x(getGaussValue(p,gaussX)-getGaussValue(p,gaussW));
+        int yc = val2y(getGaussValue(p,gaussH));
         int y0 = val2y(0);
-        int yb = val2y(gaussian[p].h/4. + gaussian[p].by*gaussian[p].h/4.);
+        int yb = val2y(getGaussValue(p,gaussH)/4. + getGaussValue(p,gaussBy)*getGaussValue(p,gaussH)/4.);
 
         float d1 = dist2(_x,_y, xc,y0);
         float d2 = dist2(_x,_y, xc,yc);

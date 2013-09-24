@@ -50,6 +50,20 @@ bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
   return false;
 }
 
+bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(vtkSMProxy* proxy,
+      double rangeMin, double rangeMax, bool extend){
+
+	vtkSMTransferFunctionProxy* tfp =
+	    vtkSMTransferFunctionProxy::SafeDownCast(proxy);
+	  if (tfp)
+	    {
+	    return tfp->RescaleGaussianTransferFunction(rangeMin, rangeMax, extend);
+	    }
+	  return false;
+}
+
+
+
 //----------------------------------------------------------------------------
 namespace
 {
@@ -87,7 +101,54 @@ namespace
 
     return controlPointsProperty;
     }
+
+
+  inline vtkSMProperty* GetGaussianControlPointsProperty(vtkSMProxy* self){
+  	vtkSMProperty* controlPointsProperty = self->GetProperty("Range");
+  	if (!controlPointsProperty)
+  	      {
+  	      vtkGenericWarningMacro("Range' property is required.");
+  	      return NULL;
+  	      }
+  	vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+  	    unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+  	    if (num_elements % 2 != 0)
+  	      {
+  	      vtkGenericWarningMacro("Property must have 2-tuples. Resizing.");
+  	      cntrlPoints.SetNumberOfElements((num_elements/2)*2);
+  	      }
+
+  	    return controlPointsProperty;
+  	    }
 }
+
+
+
+
+
+bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(double rangeMin, double rangeMax, bool extend){
+
+	vtkSMProperty* controlPointsProperty = GetGaussianControlPointsProperty(this);
+
+
+	vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+	unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+	std::vector<double > points;
+	  points.resize(2);
+
+
+	  points[0]=rangeMin;
+	  points[1]=rangeMax;
+
+	  cntrlPoints.Set(&(points[0]), num_elements);
+
+	    this->UpdateVTKObjects();
+	    return true;
+
+
+return false;
+}
+
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
