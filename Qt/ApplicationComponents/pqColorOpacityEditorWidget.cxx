@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMSessionProxyManager.h"
 #include "vtkSMTransferFunctionProxy.h"
 #include "vtkVector.h"
+#include "vtkPVImageAccumulateInformation.h"
 //#include "QvisGaussianOpacityBar.h"
 
 #include <QDoubleValidator>
@@ -801,6 +802,12 @@ void pqColorOpacityEditorWidget::resetRangeToData()
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());
   emit this->changeFinished();
+
+  vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<vtkPVImageAccumulateInformation>::New();
+  repr->getProxy()->GatherInformation(info.GetPointer());
+
+
+
 
   END_UNDO_SET();
 }

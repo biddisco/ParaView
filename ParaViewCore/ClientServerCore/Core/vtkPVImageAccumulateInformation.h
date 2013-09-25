@@ -16,19 +16,24 @@
 // .SECTION Description
 // Subclasses of this class are used to get information from the server.
 
-#ifndef __vtkPVInformation_h
-#define __vtkPVInformation_h
+#ifndef __vtkPVImageAccumulateInformation_h
+#define __vtkPVImageAccumulateInformation_h
 
-#include "vtkPVClientServerCoreCoreModule.h" //needed for exports
-#include "vtkObject.h"
+#include "vtkPVClientServerCoreCoreModule.h"
+#include "vtkPVInformation.h"
+#include "vtkIntArray.h"
+#include "vtkStdString.h"
 
 class vtkClientServerStream;
 class vtkMultiProcessStream;
+class vtkImageData;
 
-class VTKPVCLIENTSERVERCORECORE_EXPORT vtkPVInformationHistogram : public vtkObject
+
+class VTKPVCLIENTSERVERCORECORE_EXPORT vtkPVImageAccumulateInformation : public vtkPVInformation
 {
 public:
-  vtkTypeMacro(vtkPVInformation, vtkObject);
+  static vtkPVImageAccumulateInformation* New();
+  vtkTypeMacro(vtkPVImageAccumulateInformation, vtkPVInformation);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -37,15 +42,13 @@ public:
 
   // Description:
   // Merge another information object.
-  virtual void AddInformation(vtkPVInformation*);
+  virtual void AddInformation(vtkPVImageAccumulateInformation*);
 
   //BTX
   // Description:
   // Manage a serialized version of the information.
-  virtual void CopyToStream(vtkClientServerStream*) = 0;
+  virtual void CopyToStream(vtkClientServerStream*);
   virtual void CopyFromStream(const vtkClientServerStream*);
-
-  virtual int GetRootOnly();
 
   // Description:
   // Serialize/Deserialize the parameters that control how/what information is
@@ -60,17 +63,22 @@ public:
   // Set/get whether to gather information only from the root.
   vtkGetMacro(RootOnly, int);
 
-protected:
-  vtkPVInformation();
-  ~vtkPVInformation();
 
-  void Inilialize();
+
+protected:
+  vtkPVImageAccumulateInformation();
+  ~vtkPVImageAccumulateInformation();
+
+  void Initialize();
 
   int RootOnly;
   vtkSetMacro(RootOnly, int);
+  int* values;
+  vtkStdString arrayName;
+  int sizeOfX;
 
-  vtkPVInformation(const vtkPVInformation&); // Not implemented
-  void operator=(const vtkPVInformation&); // Not implemented
+  vtkPVImageAccumulateInformation(const vtkPVImageAccumulateInformation&); // Not implemented
+  void operator=(const vtkPVImageAccumulateInformation&); // Not implemented
 };
 
 #endif

@@ -182,26 +182,48 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     this->Actor->SetEnableLOD(0);
     this->VolumeMapper->SetInputConnection(
       this->CacheKeeper->GetOutputPort());
-    this->GradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
-    this->GradientFilter->Update();
+    if(!this->Property->GetDisableGaussianOpacity(0) || !this->Property->GetDisableGradientOpacity(0)){
+    		this->GradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
+    		//this->GradientFilter->Update();
 
-    this->GradientFilter->SetDimensionality(3);
-    this->GradientFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
-    this->GradientFilter->Update();
-    //
-    vtkImageData *gradient = this->GradientFilter->GetOutput();
+    		this->GradientFilter->SetDimensionality(3);
+    		this->GradientFilter->SetInputArrayToProcess(0, 0, 0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
+    		this->GradientFilter->Update();
+        //
+    		vtkImageData *gradient = this->GradientFilter->GetOutput();
 
-    vtkDataArray *scalars = input->GetPointData()->GetArray(this->ColorArrayName);
-    if (!scalars) scalars = input->GetPointData()->GetScalars();
+    	    vtkDataArray   *grads = gradient->GetPointData()->GetArray(ColorArrayName); // this->GradientArrayName);
+    	    if (!grads)     grads = gradient->GetPointData()->GetScalars();
 
-    vtkDataArray   *grads = gradient->GetPointData()->GetArray(ColorArrayName); // this->GradientArrayName);
-    if (!grads)     grads = gradient->GetPointData()->GetScalars();
-    //
-    //if (!scalars || !grads) {
-    //  return 0;
-    //}
+    	    grads->GetRange(this->GradientRange);
 
-    grads->GetRange(this->GradientRange);
+
+    	    AccumulateFilter->SetInputData(gradient);
+    	    AccumulateFilter->SetComponentExtent(0,numbinsX-1,0,0,0,0);
+    	    AccumulateFilter->SetComponentOrigin(GradientRange[0],0,0);
+    	    AccumulateFilter->SetComponentSpacing(double((GradientRange[1]-GradientRange[0])/(double(numbinsX-1))),0.0,0.0);
+    	    AccumulateFilter->Update();
+
+    	    std::cout << "grad range 0 " <<GradientRange[0] << std::endl;
+    	    std::cout << "bin step " <<(GradientRange[1]-GradientRange[0])/(double(numbinsX-1)) << std::endl;
+
+    	    int dims[3];
+    	    AccumulateFilter->GetOutput()->GetDimensions(dims);
+    	    std::cout <<"dims 0 "<<dims[0] <<" dims 1 " << dims[1] << " dims 2 " << dims[2] << std::endl;
+    	    if (histogramsize != dims[0]){
+    	    	histogramsize = dims[0];
+    	    	delete histogram;
+    	    	histogram = new int[histogramsize]; //make sure how array is the correct size;
+    	    }
+
+    	    this->GradientHistogram = vtkIntArray::SafeDownCast(AccumulateFilter->GetOutput()->GetPointData()->GetArray("bin_values"));
+
+    	      for(vtkIdType bin = 0; bin < dims[0]; ++bin)
+    	       {
+    	    	  std::cout <<*(static_cast<int*>(AccumulateFilter->GetOutput()->GetScalarPointer(bin, 0, 0))) << std::endl;
+    	    	  histogram[bin] =  *(static_cast<int*>(AccumulateFilter->GetOutput()->GetScalarPointer(bin, 0, 0)));
+    	       }
+        }
 
     this->OutlineSource->SetBounds(vtkImageData::SafeDownCast(
         this->CacheKeeper->GetOutputDataObject(0))->GetBounds());
@@ -415,8 +437,12 @@ void vtkImageVolumeRepresentation::SetRequestedRenderMode(int mode)
 
 void vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
 {
-	if (use)
+	if (use){
 		this->Property->DisableGradientOpacityOff(0);
-	else
+		this->Property->DisableGaussianOpacityOff(0);
+	}
+	else{
 		this->Property->DisableGradientOpacityOn(0);
+		this->Property->DisableGaussianOpacityOn(0);
+	}
 }

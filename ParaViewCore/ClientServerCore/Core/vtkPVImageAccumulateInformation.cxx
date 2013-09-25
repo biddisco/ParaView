@@ -12,37 +12,47 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-#include "vtkPVInformationhistogram.h"
+#include "vtkPVImageAccumulateInformation.h"
+#include "vtkClientServerStream.h"
+#include "vtkMultiProcessStream.h"
 #include "vtkImageAccumulate.h"
+#include "vtkImageData.h"
+#include "vtkPointData.h"
+#include "vtkObjectFactory.h" //needed for newmacro
 
+
+
+vtkStandardNewMacro(vtkPVImageAccumulateInformation);
 
 //----------------------------------------------------------------------------
-vtkPVInformationHistogram::vtkPVInformationHistogram()
+vtkPVImageAccumulateInformation::vtkPVImageAccumulateInformation()
 {
-  this->RootOnly = 0;
+	values = 0;
+	sizeOfX = 0;
+  this->RootOnly = 1;
 }
 
 //----------------------------------------------------------------------------
-vtkPVInformationHistogram::~vtkPVInformationHistogram()
+vtkPVImageAccumulateInformation::~vtkPVImageAccumulateInformation()
 {
 }
 
 //----------------------------------------------------------------------------
 
-void vtkPVInformationHistogram::Inilialize()
+void vtkPVImageAccumulateInformation::Initialize()
 {
 	//TBD
 }
 
 //----------------------------------------------------------------------------
-void vtkPVInformationHistogram::PrintSelf(ostream& os, vtkIndent indent)
+void vtkPVImageAccumulateInformation::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
   os << indent << "RootOnly: " << this->RootOnly << endl;
 }
 
 //----------------------------------------------------------------------------
-void vtkPVInformationHistogram::CopyFromObject(vtkObject* obj)
+void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 {
 	if (!obj)
 		    {
@@ -58,6 +68,26 @@ void vtkPVInformationHistogram::CopyFromObject(vtkObject* obj)
 		    return;
 		    }
 
+
+
+
+	int dims[3];
+	histogram->GetOutput()->GetDimensions(dims);
+
+	values = new int[dims[0]];
+
+	for(vtkIdType bin = 0; bin < dims[0]; ++bin)
+			   {
+				  values[bin] =  *(static_cast<int*>(histogram->GetOutput()->GetScalarPointer(bin, 0, 0)));
+			   }
+
+
+	if(arrayName){
+		delete arrayName;
+	}
+	arrayName = "bin_values";
+
+	sizeOfX = dims[0];
 
 	/*
 	if (!obj)
@@ -139,19 +169,65 @@ void vtkPVInformationHistogram::CopyFromObject(vtkObject* obj)
 }
 
 //----------------------------------------------------------------------------
-void vtkPVInformationHistogram::AddInformation(vtkPVInformationHistogram*)
+void vtkPVImageAccumulateInformation::AddInformation(vtkPVImageAccumulateInformation*)
 {
   vtkErrorMacro("AddInformation not implemented.");
 }
 
 //----------------------------------------------------------------------------
-void vtkPVInformationHistogram::CopyFromStream(const vtkClientServerStream*)
+void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream* stream)
 {
-  vtkErrorMacro("CopyFromStream not implemented.");
+	char* name = 0;
+		  if (!stream->GetArgument(0, 0, &name))
+		     {
+		     vtkErrorMacro("Error parsing array name from message.");
+		     return;
+		     }
+		   this->arrayName = name;
+
+	   int dimx;
+
+	   if (!stream->GetArgument(0, 1, &dimx))
+	   		     {
+	   		     vtkErrorMacro("Error parsing array name from message.");
+	   		     return;
+	   		     }
+	   		   this->sizeOfX = dimx;
+
+
+	   		   if(this->values != NULL){
+	   			   delete values;
+	   		   }
+	   		this->values = new int[dimx];
+
+		for (int i = 2; i< dimx+2; i++){
+		if (!stream->GetArgument(0, 2, &(values[i-1])))
+			 {
+			 vtkErrorMacro("Error parsing array name from message.");
+			 return;
+			 }
+		}
+
+
+
+
+
+}
+
+void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream){
+	*stream << this->arrayName;
+	  *stream << this->sizeOfX;
+	  for (int i = 0; i< sizeOfX; i++)
+	  {
+		  *stream << values[i];
+	  }
+
+
+
+
 }
 
 
-int vtkPVInformationHistogram::GetRootOnly(){
-	return 1;
 
-}
+
+

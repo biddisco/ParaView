@@ -42,6 +42,7 @@ class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
 class vtkImageAccumulate;
 class vtkImageGradientMagnitude;
+class vtkIntArray;
 
 
 
@@ -155,6 +156,11 @@ protected:
   // Description:
   virtual int RequestData(vtkInformation*,
     vtkInformationVector**, vtkInformationVector*);
+
+  int numbinsX;
+  int histogramsize;
+  vtkIntArray * GradientHistogram;
+  int* histogram;
 
 
   //vtkDataArray* grads;

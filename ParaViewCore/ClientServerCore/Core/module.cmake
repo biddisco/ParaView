@@ -21,6 +21,7 @@ vtk_module(vtkPVClientServerCoreCore
   DEPENDS
     vtkFiltersExtraction
     vtkFiltersParallel
+    vtkImagingStatistics
     # Explicitely list (rather than transiently through
     # vtkPVVTKExtensionsCore) because it allows us to turn of wrapping
     # of vtkPVVTKExtensionsCore off but still satisfy API dependcy.
