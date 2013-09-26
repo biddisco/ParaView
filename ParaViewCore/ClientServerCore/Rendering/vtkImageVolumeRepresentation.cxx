@@ -36,6 +36,7 @@
 #include "vtkImageGradientMagnitude.h"
 #include "vtkImageAccumulate.h"
 #include "vtkGaussianPiecewiseFunction.h"
+#include "vtkPVImageAccumulateInformation.h"
 
 #include <map>
 #include <string>
@@ -197,7 +198,8 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
 
     	    grads->GetRange(this->GradientRange);
 
-
+    	    GetInformation();
+    	    this->Information;
     	    AccumulateFilter->SetInputData(gradient);
     	    AccumulateFilter->SetComponentExtent(0,numbinsX-1,0,0,0,0);
     	    AccumulateFilter->SetComponentOrigin(GradientRange[0],0,0);
@@ -301,6 +303,20 @@ void vtkImageVolumeRepresentation::UpdateMapperParameters()
     }
   this->Actor->SetMapper(this->VolumeMapper);
 }
+
+
+void vtkImageVolumeRepresentation::setInformation(){
+	//if(!this->Information)
+		//this->Information = vtkPVImageAccumulateInformation::New();
+
+	//this->Information->CopyFromObject(this->AccumulateFilter);
+
+}
+
+
+
+
+
 
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::PrintSelf(ostream& os, vtkIndent indent)

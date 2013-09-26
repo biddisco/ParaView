@@ -163,6 +163,10 @@ protected:
   int* histogram;
 
 
+  //used to set up the imageaccumulateinformation to send the histogram data to the client.
+  void setInformation();
+
+
   //vtkDataArray* grads;
 
   // Description:
