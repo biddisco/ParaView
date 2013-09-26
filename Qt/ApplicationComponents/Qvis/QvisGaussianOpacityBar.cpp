@@ -497,6 +497,7 @@ QvisGaussianOpacityBar::getRawOpacities(int n, float *opacity)
 {
     for (int i=0; i<n; i++) opacity[i] = 0;
 
+    ngaussian = gaussianFunctionGroup->GetSize();
     for (int p=0; p<ngaussian; p++)
     {
         float _pos    = getGaussValue(p,gaussX);
