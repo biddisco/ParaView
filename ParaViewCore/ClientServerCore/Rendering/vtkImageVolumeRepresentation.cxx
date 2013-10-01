@@ -72,6 +72,11 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   this->GradientArrayName = NULL;
   this->GradientRange[0] = 0.0;
   this->GradientRange[1] = 1.0;
+
+  numbinsX = 100;
+  HistogramBins = 100;
+
+  connected = false;
 }
 
 //----------------------------------------------------------------------------
@@ -184,6 +189,7 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     this->VolumeMapper->SetInputConnection(
       this->CacheKeeper->GetOutputPort());
     if(!this->Property->GetDisableGaussianOpacity(0) || !this->Property->GetDisableGradientOpacity(0)){
+    	connected = true;
     		this->GradientFilter->SetInputConnection(this->CacheKeeper->GetOutputPort());
     		//this->GradientFilter->Update();
 
@@ -201,30 +207,15 @@ int vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     	    GetInformation();
     	    this->Information;
     	    AccumulateFilter->SetInputData(gradient);
-    	    AccumulateFilter->SetComponentExtent(0,numbinsX-1,0,0,0,0);
+    	    AccumulateFilter->SetComponentExtent(0,HistogramBins-1,0,0,0,0);
     	    AccumulateFilter->SetComponentOrigin(GradientRange[0],0,0);
-    	    AccumulateFilter->SetComponentSpacing(double((GradientRange[1]-GradientRange[0])/(double(numbinsX-1))),0.0,0.0);
+    	    AccumulateFilter->SetComponentSpacing(double((GradientRange[1]-GradientRange[0])/(double(HistogramBins-1))),0.0,0.0);
     	    AccumulateFilter->Update();
-
-    	    std::cout << "grad range 0 " <<GradientRange[0] << std::endl;
-    	    std::cout << "bin step " <<(GradientRange[1]-GradientRange[0])/(double(numbinsX-1)) << std::endl;
 
     	    int dims[3];
     	    AccumulateFilter->GetOutput()->GetDimensions(dims);
-    	    std::cout <<"dims 0 "<<dims[0] <<" dims 1 " << dims[1] << " dims 2 " << dims[2] << std::endl;
-    	    if (histogramsize != dims[0]){
-    	    	histogramsize = dims[0];
-    	    	delete histogram;
-    	    	histogram = new int[histogramsize]; //make sure how array is the correct size;
-    	    }
 
     	    this->GradientHistogram = vtkIntArray::SafeDownCast(AccumulateFilter->GetOutput()->GetPointData()->GetArray("bin_values"));
-
-    	      for(vtkIdType bin = 0; bin < dims[0]; ++bin)
-    	       {
-    	    	  std::cout <<*(static_cast<int*>(AccumulateFilter->GetOutput()->GetScalarPointer(bin, 0, 0))) << std::endl;
-    	    	  histogram[bin] =  *(static_cast<int*>(AccumulateFilter->GetOutput()->GetScalarPointer(bin, 0, 0)));
-    	       }
         }
 
     this->OutlineSource->SetBounds(vtkImageData::SafeDownCast(
@@ -435,6 +426,13 @@ void vtkImageVolumeRepresentation::SetSpecularPower(double val)
 void vtkImageVolumeRepresentation::SetShade(bool val)
 {
   this->Property->SetShade(val);
+}
+
+void vtkImageVolumeRepresentation::SetHistogramBins(int nbins)
+{
+  this->HistogramBins =  nbins;
+  if (connected)
+	  AccumulateFilter->UpdateWholeExtent();
 }
 
 //----------------------------------------------------------------------------

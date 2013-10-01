@@ -127,6 +127,10 @@ set (Module_SRCS
   pqFontPropertyWidget.h
   pqHelpReaction.cxx
   pqHelpReaction.h
+  pqHistogramDialog.cxx
+  pqHistogramDialog.h
+  pqHistogramWidget.cxx
+  pqHistogramWidget.h
   pqIgnoreSourceTimeReaction.cxx
   pqIgnoreSourceTimeReaction.h
   pqInputDataTypeDecorator.cxx
@@ -289,6 +293,8 @@ set (Module_MOC_HDRS
   pqFixPathsInStateFilesBehavior.h
   pqFontPropertyWidget.h
   pqHelpReaction.h
+  pqHistogramDialog.h
+  pqHistogramWidget.h
   pqIgnoreSourceTimeReaction.h
   pqInputDataTypeDecorator.h
   pqListPropertyWidget.h
@@ -371,6 +377,7 @@ set (Module_UI_FILES
   Resources/UI/pqEditMenuBuilder.ui
   Resources/UI/pqFileMenuBuilder.ui
   Resources/UI/pqFontPropertyWidget.ui
+  Resources/UI/pqHistogramDialog.ui
   Resources/UI/pqMainControlsToolbar.ui
   Resources/UI/pqPipelineBrowserContextMenu.ui
   Resources/UI/pqTransferFunctionWidgetPropertyWidgetDialog.ui

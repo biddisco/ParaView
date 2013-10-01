@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "vtkSMTransferFunctionProxy.h"
 #include "vtkVector.h"
 #include "vtkPVImageAccumulateInformation.h"
+#include "pqHistogramDialog.h"
 //#include "QvisGaussianOpacityBar.h"
 
 #include <QDoubleValidator>
@@ -305,6 +306,11 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   QObject::connect(ui.SaveAsPreset, SIGNAL(clicked()),
     this, SLOT(saveAsPreset()));
 
+
+  QObject::connect(ui.HistogramDialog, SIGNAL(clicked()),
+     this, SLOT(showHistogramWidget()));
+
+
   // TODO: at some point, I'd like to add a textual editor for users to simply
   // enter the text for the transfer function control points for finer control
   // of the LUT.
@@ -524,6 +530,36 @@ void pqColorOpacityEditorWidget::gaussianCurrentChanged(int index)
     ui.ColorEditor->setCurrentPoint(-1);
     }
   this->updateCurrentData();
+}
+
+
+void pqColorOpacityEditorWidget::showHistogramWidget(){
+	 vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<vtkPVImageAccumulateInformation>::New();
+
+	 pqDataRepresentation* repr =
+	     pqActiveObjects::instance().activeRepresentation();
+	   if (!repr)
+	     {
+	     qDebug("No active representation.");
+	     return;
+	     }
+
+	  repr->getProxy()->GatherInformation(info.GetPointer());
+
+
+int enabledBarsHeight;
+	bool * useBin = new bool[info->sizeOfX];
+	for (int i = 0; i< info->sizeOfX; i++){
+		useBin[i]=true;
+	}
+	bool logscale = false;
+	pqHistogramDialog dialog(this,info->values,info->sizeOfX,useBin,&logscale, &enabledBarsHeight);
+	//dialog.setData();
+	dialog.exec();
+	//dialog.
+	Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+
+	  ui.GaussianOpacityEditor->generateBackgroundHistogram(info->values,info->sizeOfX, logscale,useBin);
 }
 
 //-----------------------------------------------------------------------------
@@ -802,9 +838,16 @@ void pqColorOpacityEditorWidget::resetRangeToData()
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());
   emit this->changeFinished();
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+ // std::cout << "width "<<ui.GaussianOpacityEditor->contentsRect().width() << std::endl;
+ // repr->setProperty("HistogramBins",ui.GaussianOpacityEditor->contentsRect().width());
 
-  vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<vtkPVImageAccumulateInformation>::New();
-  repr->getProxy()->GatherInformation(info.GetPointer());
+ // vtkSMProperty* temp = repr->getProxy()->GetProperty("HistogramBins");
+ // vtkSMPropertyHelper bins(temp);
+ // bins.Set(ui.GaussianOpacityEditor->contentsRect().width(),1);
+//  repr->getProxy()->UpdateVTKObjects();
+
+
 
 
 
@@ -851,6 +894,8 @@ void pqColorOpacityEditorWidget::resetRangeToCustom()
     {
     this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum());
     }
+
+
 
 
 

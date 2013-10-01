@@ -118,7 +118,7 @@ class VTKQVIS_EXPORT QvisGaussianOpacityBar : public QvisAbstractOpacityBar
     // helper functions
     bool findGaussianControlPoint(int,int, int*,Mode*);
     void removeGaussian(int);
-    void addGaussian(float,float,float,float,float);
+    void addGaussian(float _x,float h,float w,float bx,float by);
 };
 
 #endif

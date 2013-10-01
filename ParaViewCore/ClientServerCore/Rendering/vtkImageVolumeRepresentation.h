@@ -67,12 +67,18 @@ public:
   vtkSetMacro(ColorAttributeType, int);
   vtkGetMacro(ColorAttributeType, int);
 
+
+  void SetHistogramBins(int nbins);
   // Description:
   // Pick the array to color with.
   vtkSetStringMacro(ColorArrayName);
   vtkGetStringMacro(ColorArrayName);
 
   vtkGetVector2Macro(GradientRange, double);
+
+  vtkSmartPointer<vtkImageAccumulate>  getHistogram(){
+	  return AccumulateFilter;
+  }
 
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
@@ -209,7 +215,9 @@ protected:
   int   GradientVectorComponent;
   double DataBounds[6];
   double GradientRange[2];
+  int HistogramBins;
   int UseGradientFunction;
+  bool connected;
 
 
 private:

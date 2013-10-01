@@ -332,6 +332,7 @@ QvisGaussianOpacityBar::mousePressEvent(QMouseEvent *e)
 
     int _x = e->x();
     int _y = e->y();
+    std::cout << "ex " << _x << " ey  " << _y << std::endl;
 
     if (e->button() == Qt::RightButton)
     {
@@ -565,7 +566,95 @@ QvisGaussianOpacityBar::getRawOpacities(int n, float *opacity)
 
 
 
+//---------------------------------------------------------------------------
 
+
+int QvisGaussianOpacityBar::getTopBinPixel(int bin, float scale, int* histogram, int currentMax, int currentUnEnabledMax, bool logScale, float enabledBarsHeight, bool* histogramEnabled){
+
+int finalheight = 0;
+
+if (histogram[bin] == 0){
+	return this->contentsRect().height();
+}
+
+
+		if(!histogramEnabled[bin] && histogram[bin]>currentMax){
+				if(logScale)
+					finalheight = float(enabledBarsHeight) - float(enabledBarsHeight)*std::max((log10(float(histogram[bin]-currentMax))/log10(float(currentUnEnabledMax-currentMax))),0.0);
+				else
+					finalheight = float(enabledBarsHeight) - float(enabledBarsHeight)*(float(histogram[bin]-currentMax)/float(currentUnEnabledMax-currentMax));
+		}
+		else{
+			if(logScale)
+				finalheight = int(scale*std::max(log10(float(histogram[bin])),0.0));
+			else
+				finalheight = int(scale*float(histogram[bin]));
+
+			finalheight = this->contentsRect().height()-finalheight;
+
+		}
+
+		return finalheight;
+		}
+
+
+
+
+
+void QvisGaussianOpacityBar::generateBackgroundHistogram(int* values, int size, bool useLogScale, bool* histogramEnabled){
+
+
+int enabledBarsHeight = 8;
+
+	int width = size;
+		int height = this->contentsRect().height();
+
+		//get max value
+		int max = 0;
+		int currentUnEnabledMax = 0;
+		for (int i = 0; i < width; i++) {
+			if (values[i] > max && histogramEnabled[i])
+				max = values[i];
+			if (values[i] > currentUnEnabledMax && !histogramEnabled[i])
+				currentUnEnabledMax = values[i];
+		}
+
+
+		float scale;
+		if (useLogScale)
+			scale = float(height - enabledBarsHeight) / float(log10(max));
+		else
+			scale = float(height - enabledBarsHeight) / float(max);
+
+		QImage* image = new QImage(QSize(width, height), QImage::Format_RGB32);
+
+		image->fill(0);
+
+		for (int i = 0; i < width; i++) {
+			int end = getTopBinPixel(i,scale,values,max,currentUnEnabledMax,useLogScale,enabledBarsHeight,histogramEnabled);
+			QRgb color = histogramEnabled[i] ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
+			for (int j = height - 1; j >= end; j--) {
+				image->setPixel(i, j, color);
+			}
+		}
+
+
+		QPixmap* background =new QPixmap(QPixmap::fromImage(image->scaled(this->contentsRect().width(), height,
+				Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+
+
+
+	this->SetBackgroundPixmap(background);
+
+
+	this->update();
+
+
+
+
+
+
+}
 
 
 // ****************************************************************************

@@ -1538,6 +1538,8 @@
                       panel_visibility="never" />
             <Property name="GradientRange"
                       panel_visibility="never" />
+                      <Property name="HistogramBins"
+                      panel_visibility="never" />      
           	<Property name="DisableGradientOpacity"
                       panel_visibility="never" />
                       <Property name="SwitchGradientOpacity"
@@ -1952,6 +1954,11 @@
       <IntVectorProperty command="SetPickable"
                          default_values="1"
                          name="Pickable"
+                         number_of_elements="1">
+         </IntVectorProperty>
+          <IntVectorProperty command="SetHistogramBins"
+                         default_values="255"
+                         name="HistogramBins"
                          number_of_elements="1">
          </IntVectorProperty>
          <DoubleVectorProperty command="GetGradientRange"

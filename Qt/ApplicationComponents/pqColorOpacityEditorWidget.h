@@ -167,6 +167,7 @@ protected slots:
   void gradientCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
   void gaussianCurrentChanged(int index);
+  void showHistogramWidget();
 
   /// updates the text shown in the "current data" input.
   void updateCurrentData();

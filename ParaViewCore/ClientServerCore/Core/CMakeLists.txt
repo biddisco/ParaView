@@ -51,7 +51,6 @@ set (Module_SRCS
   vtkPVExtractSelection.cxx
   vtkPVExtractArraysOverTime.cxx
   vtkPVGenericAttributeInformation.cxx
-  vtkPVImageAccumulateInformation.cxx
   vtkPVInformation.cxx
   vtkPVMemoryUseInformation.cxx
   vtkPVMultiClientsInformation.cxx
