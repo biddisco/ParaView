@@ -1233,7 +1233,7 @@
       <DoubleVectorProperty animateable="0"
                             clean_command="RemoveAllGaussians"
                             command="AddGaussian"
-                            default_values="0.0 0.0 0.0 0.0 0.0"
+                            default_values="0.5 0.5 0.25 0.0 0.0"
                             name="Points"
                             number_of_elements="5"
                             number_of_elements_per_command="5"
@@ -1245,6 +1245,17 @@
                          panel_visibility="never" >
         <BooleanDomain name="bool" />
       </IntVectorProperty>
+      <DoubleVectorProperty command="SetRange"
+      						default_values="0 1"
+                            name="Range"
+                            number_of_elements="2"
+                            panel_visibility="never"></DoubleVectorProperty>
+    </TransferFunctionProxy>
+  </ProxyGroup>
+  <ProxyGroup name="two_dimenisonal_piecewise_functions">
+    <TransferFunctionProxy class="vtkTwoDTransferFunction"
+           name="TwoDTransferFunction"
+           processes="client|renderserver|dataserver">
       <DoubleVectorProperty command="SetRange"
       						default_values="0 1"
                             name="Range"

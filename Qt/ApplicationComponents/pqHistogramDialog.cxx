@@ -28,11 +28,9 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 	this->dialogUi = new pqHistogramDialogUi;
 	this->dialogUi->setupUi(this);
 	QPushButton* applyButton = this->dialogUi->Confirmation->button(QDialogButtonBox::Ok);
-	std::cout << applyButton<< std::endl;
 	this->connect(applyButton, SIGNAL(clicked()),
 	      this, SLOT(accept()));
 	QPushButton* cancelButton = this->dialogUi->Confirmation->button(QDialogButtonBox::Cancel);
-	std::cout << cancelButton<< std::endl;
 	  this->connect(cancelButton, SIGNAL(clicked()),
 	      this, SLOT(reject()));
 	  this->connect(this->dialogUi->UseLogScale, SIGNAL(clicked()),

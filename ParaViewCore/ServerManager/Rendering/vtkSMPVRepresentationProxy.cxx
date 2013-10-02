@@ -288,7 +288,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
     vtkWarningMacro("No 'LookupTable' and 'ScalarOpacityFunction' found.");
     return false;
     }
-  if (!gofProperty){
+  if (!lutProperty && !gofProperty){
 	  vtkWarningMacro("No 'GradientOpacityFunction'  found.");
   }
 

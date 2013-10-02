@@ -81,6 +81,9 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject, const char
     maximumNumberOfGaussians = -1; // unlimited
     minimumNumberOfGaussians =  0;
 
+    lasty = -1;
+    lastx = -1;
+
     // set a default:
     //addGaussian(0.5f, 0.5f, 0.1f, 0.0f, 0);
     //if we add a default in the constructor, it currently crashes
@@ -123,9 +126,7 @@ QvisGaussianOpacityBar::~QvisGaussianOpacityBar()
 void QvisGaussianOpacityBar::initialize(vtkGaussianPiecewiseFunction* gpwf){
 	if(gpwf){
 		this->gaussianFunctionGroup = gpwf;
-		gaussianFunctionGroup->Initialize();
-		double range[2] = {0,1};
-		gaussianFunctionGroup->UpdateRange(false,range);
+		this->ngaussian = this->gaussianFunctionGroup->GetSize();
 	}
 }
 
@@ -332,7 +333,6 @@ QvisGaussianOpacityBar::mousePressEvent(QMouseEvent *e)
 
     int _x = e->x();
     int _y = e->y();
-    std::cout << "ex " << _x << " ey  " << _y << std::endl;
 
     if (e->button() == Qt::RightButton)
     {

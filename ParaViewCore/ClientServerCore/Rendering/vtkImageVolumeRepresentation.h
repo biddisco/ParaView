@@ -68,7 +68,7 @@ public:
   vtkGetMacro(ColorAttributeType, int);
 
 
-  void SetHistogramBins(int nbins);
+  vtkGetMacro(SupportHistogramWidget,bool);
   // Description:
   // Pick the array to color with.
   vtkSetStringMacro(ColorArrayName);
@@ -169,6 +169,7 @@ protected:
   int* histogram;
 
 
+
   //used to set up the imageaccumulateinformation to send the histogram data to the client.
   void setInformation();
 
@@ -218,6 +219,7 @@ protected:
   int HistogramBins;
   int UseGradientFunction;
   bool connected;
+  bool SupportHistogramWidget;
 
 
 private:

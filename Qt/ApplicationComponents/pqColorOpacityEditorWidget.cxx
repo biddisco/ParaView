@@ -156,6 +156,8 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
 	{
 	ui.GradientOpacityEditor->hide();
 	}
+
+
   if (stc)
     {
     ui.ColorEditor->initialize(stc, true, NULL, false);
@@ -163,8 +165,8 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
 
 
   vtkGaussianPiecewiseFunction* gpwf = stc? stc->GetGaussianOpacityFunction() : NULL;
-  	size = pwf->GetSize();
-  	if (pwf){
+  	size = gpwf->GetSize();
+  	if (gpwf){
   		//TBD initialize stuff for gaussian
   	 ui.GaussianOpacityEditor->initialize(gpwf);
   	}
@@ -231,18 +233,39 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   pqDataRepresentation* repr =
     pqActiveObjects::instance().activeRepresentation();
 
+
+  if (repr->getProxy()->GetProperty("DisableGradientOpacity")){
   QObject::connect(
         ui.DisableOpacityGradient, SIGNAL(clicked()),
         this, SLOT(disableGradientOpacty()));
   this->addPropertyLink(
 		  ui.DisableOpacityGradient, "checked", SIGNAL(clicked()), repr->getProxy(), repr->getProxy()->GetProperty("DisableGradientOpacity"));
+  }
+  else{
+	  ui.DisableOpacityGradient->hide();
+  }
 
-
+  if (repr->getProxy()->GetProperty("SwitchGradientOpacity")){
   QObject::connect(
           ui.gaussorgrad, SIGNAL(clicked()),
           this, SLOT(switchGradientOpacity()));
     this->addPropertyLink(
   		  ui.gaussorgrad, "checked", SIGNAL(clicked()), repr->getProxy(), repr->getProxy()->GetProperty("SwitchGradientOpacity"));
+  }
+  else{
+	  ui.gaussorgrad->hide();
+  }
+
+ // vtkImageVolumeRepresentation* volumerep = vtkImageVolumeRepresentation::SafeDownCast(
+  //			vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
+  pqDataRepresentation* volumerepr =
+ 	     pqActiveObjects::instance().activeRepresentation();
+  //vtkPVCompositeRepresentation* volumerep = vtkPVCompositeRepresentation::SafeDownCast(volumerepr);
+  if(volumerepr->getProxy()->GetProperty("SupportHistogramWidget"))
+	  QObject::connect(ui.HistogramDialog, SIGNAL(clicked()),
+		  this, SLOT(showHistogramWidget()));
+  else
+	  ui.HistogramDialog->hide();
 
 
   QObject::connect(
@@ -307,8 +330,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     this, SLOT(saveAsPreset()));
 
 
-  QObject::connect(ui.HistogramDialog, SIGNAL(clicked()),
-     this, SLOT(showHistogramWidget()));
+
 
 
   // TODO: at some point, I'd like to add a textual editor for users to simply
@@ -545,6 +567,13 @@ void pqColorOpacityEditorWidget::showHistogramWidget(){
 	     }
 
 	  repr->getProxy()->GatherInformation(info.GetPointer());
+
+	  if(repr->getProxy()->GetProperty("SupportHistogramWidget")){
+		  std::cout << "SupportHistogramWidget found in showhistogramtest" << std::endl;
+	  }
+	  else{
+		  std::cout << "not found SupportHistogramWidget in showhistogramtest" << std::endl;
+	  }
 
 
 int enabledBarsHeight;
@@ -833,7 +862,9 @@ void pqColorOpacityEditorWidget::resetRangeToData()
     qDebug("No active representation.");
     return;
     }
-  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
+
+  if(repr->getProxy()->GetProperty("GradientRange"))
+	  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
 
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());

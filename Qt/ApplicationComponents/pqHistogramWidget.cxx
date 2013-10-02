@@ -116,7 +116,7 @@ void pqHistogramWidget::createPixmap() {
 	unscaledImage = *image;
 
 	*image = image->scaled(this->contentsRect().width(), height,
-			Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+			Qt::IgnoreAspectRatio, Qt::FastTransformation);
 
 	this->setPixmap(image);
 
@@ -143,7 +143,7 @@ void pqHistogramWidget::scaleAndDraw() {
 	QImage* image = new QImage(
 			unscaledImage.scaled(this->contentsRect().width(),
 					this->contentsRect().height(), Qt::IgnoreAspectRatio,
-					Qt::SmoothTransformation));
+					Qt::FastTransformation));
 	this->setPixmap(image);
 }
 
@@ -224,8 +224,16 @@ void pqHistogramWidget::mousePressEvent(QMouseEvent *e) {
 	if (histogramSize > selectedBin) {
 		histogramEnabled[selectedBin] = !histogramEnabled[selectedBin];
 	}
-	if (selectedBin > histogramSize || selectedBin < 0) {
+	if (selectedBin >= histogramSize || selectedBin < 0) {
 		std::cout << "selectedbin error" << std::endl;
+		if(selectedBin > histogramSize){
+			selectedBin = histogramSize-1;
+			std::cout << "selected bin too high. Bin set to histogramSize-1" << std::endl;
+		}
+		else{
+			selectedBin = 0;
+			std::cout << "selected bin too low. Bin set to 0" << std::endl;
+		}
 	}
 
 	if ((histogramEnabled[selectedBin] && histogram[selectedBin] > currentMax)

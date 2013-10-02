@@ -59,8 +59,8 @@ void pqGaussianOpacityFunction::setScalarRange(double min, double max)
     // allowing an opacity transfer function with a scalar range of 0.
     // In this case, the piecewise function only contains the endpoints.
     // We are new setting defaults for midPoint (0.5) and sharpness(0.0) 
-    controlPoints << 0.0 << 1.0 << 0.5 << 0.0 << 0.0 ;
-    controlPoints << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
+    controlPoints << 0.5 << 1.0 << 0.5 << 0.0 << 0.0 ;
+  //  controlPoints << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
     }
 
   pqSMAdaptor::setMultipleElementProperty(dvp, controlPoints);

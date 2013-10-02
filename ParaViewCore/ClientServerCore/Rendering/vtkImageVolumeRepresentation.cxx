@@ -428,12 +428,14 @@ void vtkImageVolumeRepresentation::SetShade(bool val)
   this->Property->SetShade(val);
 }
 
+/*
 void vtkImageVolumeRepresentation::SetHistogramBins(int nbins)
 {
   this->HistogramBins =  nbins;
   if (connected)
 	  AccumulateFilter->UpdateWholeExtent();
 }
+*/
 
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetIndependantComponents(bool val)
