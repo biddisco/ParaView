@@ -106,7 +106,9 @@
 	<ProxyProperty name="GaussianOpacityFunction"
                      command="SetGaussianOpacityFunction">
       </ProxyProperty>
-
+      <ProxyProperty name="TwoDTransferFunction"
+                     command="SetTwoDTransferFunction">
+      </ProxyProperty>
       <DoubleVectorProperty clean_command="RemoveAllPoints"
                             command="AddRGBPoint"
                             name="RGBPoints"
@@ -260,6 +262,7 @@
         <Property name="ScalarOpacityFunction" function="ScalarOpacityFunction" />
         <Property name="GradientOpacityFunction" function="GradientOpacityFunction" />
         <Property name="GaussianOpacityFunction" function="GaussianOpacityFunction" />
+        <Property name="TwoDTransferFunction" function="TwoDTransferFunction" />
         <Property name="UseLogScale" function="UseLogScale" />
         <Property name="LockScalarRange" function="LockScalarRange" />
       </PropertyGroup>
@@ -1256,10 +1259,18 @@
     <TransferFunctionProxy class="vtkTwoDTransferFunction"
            name="TwoDTransferFunction"
            processes="client|renderserver|dataserver">
+            <DoubleVectorProperty animateable="0"
+                            clean_command="RemoveAllRegions"
+                            command="AddRegion"
+                            default_values="0.5 0.5 0.25 0.25 0.0 1.0"
+                            name="Points"
+                            number_of_elements="6"
+                            number_of_elements_per_command="6"
+                            repeat_command="1"></DoubleVectorProperty>
       <DoubleVectorProperty command="SetRange"
-      						default_values="0 1"
+      						default_values="0 1 0 1"
                             name="Range"
-                            number_of_elements="2"
+                            number_of_elements="4"
                             panel_visibility="never"></DoubleVectorProperty>
     </TransferFunctionProxy>
   </ProxyGroup>

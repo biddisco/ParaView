@@ -40,6 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqScalarBarRepresentation.h"
 #include "pqScalarOpacityFunction.h"
 #include "pqGaussianOpacityFunction.h"
+#include "pqTwoDTransferFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServerManagerModel.h"
 #include "vtkSMPropertyHelper.h"
@@ -67,15 +68,19 @@ void pqLookupTableManager::onAddProxy(pqProxy* proxy)
 {
   if (pqScalarsToColors* lut = qobject_cast<pqScalarsToColors*>(proxy))
     {
-    this->onAddLookupTable(lut);
+	  this->onAddLookupTable(lut);
     }
   else if (pqGaussianOpacityFunction* opf = qobject_cast<pqGaussianOpacityFunction*>(proxy))
-        {
-        this->onAddGaussianOpacityFunction(opf);
-        }
+	{
+	  this->onAddGaussianOpacityFunction(opf);
+	}
+  else if (pqTwoDTransferFunction* opf = qobject_cast<pqTwoDTransferFunction*>(proxy))
+  	{
+  	  this->onAddTwoDTransferFunction(opf);
+  	}
   else if (pqScalarOpacityFunction* opf = qobject_cast<pqScalarOpacityFunction*>(proxy))
     {
-    this->onAddOpacityFunction(opf);
+	  this->onAddOpacityFunction(opf);
     }
 
 }

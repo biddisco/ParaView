@@ -77,6 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqScalarOpacityFunction.h"
 #include "pqGradientOpacityFunction.h"
 #include "pqGaussianOpacityFunction.h"
+#include "pqTwoDTransferFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServer.h"
 #include "pqServerManagerModel.h"
@@ -629,6 +630,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
   vtkSMProxy* opf = 0;
   vtkSMProxy* gpf = 0;
   vtkSMProxy* gausspf = 0;
+  vtkSMProxy* TDTf = 0;
   if (lut_mgr)
     {
     int number_of_components = this->getNumberOfComponents(
@@ -648,6 +650,11 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
    pqGaussianOpacityFunction* pqGaussPF = lut_mgr->getGaussianOpacityFunction(
 			this->getServer(), "Gaussian_Stuff", 1, 0);
 		  gausspf = (pqGaussPF)? pqGaussPF->getProxy() : 0;
+
+
+	  pqTwoDTransferFunction* pqTwoDTransFunc = lut_mgr->getTwoDTransferFunction(
+				this->getServer(), "TwoD_Stuff", 1, 0);
+	  TDTf = (pqTwoDTransFunc)? pqTwoDTransFunc->getProxy() : 0;
     }
   else
     {
@@ -681,6 +688,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
     opf = this->createOpacityFunctionProxy("ScalarOpacityFunction", repr);
     gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
     gausspf = this->createGaussianOpacityFunctionProxy("GaussianOpacityFunction", repr);
+    TDTf = this->createTwoDTransferFunctionProxy("TwoDTransferFunction", repr);
     }
 
   if (!lut)
@@ -717,6 +725,12 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
         repr->GetProperty("GaussianOpacityFunction"), gausspf);
       repr->UpdateVTKObjects();
     }
+
+  if (TDTf) {
+        pqSMAdaptor::setProxyProperty(
+          repr->GetProperty("TwoDTransferFunction"), TDTf);
+        repr->UpdateVTKObjects();
+      }
 
   bool current_scalar_bar_visibility = false;
   // If old LUT was present update the visibility of the scalar bars
@@ -1380,6 +1394,43 @@ vtkSMProxy* pqPipelineRepresentation::createGaussianOpacityFunctionProxy(const c
 
     pqSMAdaptor::setMultipleElementProperty(
       opacityFunction->GetProperty("Points"), values);
+    opacityFunction->UpdateVTKObjects();
+    }
+  else
+    {
+    opacityFunction = pp->GetProxy(0);
+    }
+
+  return opacityFunction;
+}
+
+//-----------------------------------------------------------------------------
+vtkSMProxy* pqPipelineRepresentation::createTwoDTransferFunctionProxy(const char *name,
+  vtkSMRepresentationProxy* repr)
+//TBD needs to be checked
+{
+  if (!repr || !repr->GetProperty(name))
+    {
+    return NULL;
+    }
+
+  vtkSMProxy* opacityFunction = 0;
+  vtkSMProxyProperty* pp = vtkSMProxyProperty::SafeDownCast(
+    repr->GetProperty(name));
+  if (pp->GetNumberOfProxies() == 0)
+    {
+    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+    opacityFunction = builder->createProxy(
+      "two_dimenisonal_piecewise_functions", "TwoDTransferFunction",
+      this->getServer(), "two_dimenisonal_piecewise_functions");
+    // Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).
+    // We are new setting defaults for midPoint (0.5) and sharpness(0.0)
+    QList<QVariant> values;
+    values << 0.0 << 0.0 << 0.5 << 0.5 << 1.0 << 0.0 ;
+    values << 1.0 << 1.0 << 0.5 << 0.5 << 1.0 << 0.0;
+
+    pqSMAdaptor::setMultipleElementProperty(
+      opacityFunction->GetProperty("Points"), values); //TBD needs to be checked, how points etc. works here
     opacityFunction->UpdateVTKObjects();
     }
   else

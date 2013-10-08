@@ -35,6 +35,7 @@ class vtkImageData;
 class vtkOutlineSource;
 class vtkPiecewiseFunction;
 class vtkGaussianPiecewiseFunction;
+class vtkTwoDTransferFunction;
 class vtkPolyDataMapper;
 class vtkPVCacheKeeper;
 class vtkPVLODVolume;
@@ -115,6 +116,7 @@ public:
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
   void SetGradientOpacity(vtkPiecewiseFunction* pwf);
   void SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
+  void SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf);
   void SetSwitchGradientOpacity(bool GaussOrPwf);
   void SetScalarOpacityUnitDistance(double val);
   void SetAmbient(double);

@@ -62,6 +62,11 @@ public:
       const QString& arrayname, int number_of_components, int component);
   virtual pqGaussianOpacityFunction* getGaussianOpacityFunction(pqServer* server,
         const QString& arrayname, int number_of_components, int component);
+  virtual pqTwoDTransferFunction* getTwoDTransferFunction(
+    pqServer* server, const QString& arrayname,
+    int number_of_components, int component);
+
+
 
   /// Saves the state of the lut/opacity-function so that the next time a new 
   /// LUT/opacity-function is created, it
@@ -106,7 +111,9 @@ protected:
   /// registering a LUT proxy.
   virtual void onAddLookupTable(pqScalarsToColors* lut);
 
-  //TBD: register as callback. Currently it needs to be called directly
+
+  virtual void onAddTwoDTransferFunction(pqTwoDTransferFunction* opFunc);
+
   virtual void onAddGaussianOpacityFunction(
     pqGaussianOpacityFunction* opFunc);
 
@@ -130,6 +137,9 @@ protected:
   /// set default property values for GaussianOpacityFunction.
   void setGaussianOpacityFunctionDefaultState(vtkSMProxy* opFuncProxy);
 
+  void setTwoDTransferFunctionDefaultState(
+   vtkSMProxy* opFuncProxy);
+
   /// creates a new LUT.
   pqScalarsToColors* createLookupTable(pqServer* server,
     const QString& arrayname, int number_of_components, int component);
@@ -140,6 +150,9 @@ protected:
     const QString& arrayname, int number_of_components, int component);
   pqGaussianOpacityFunction* createGaussianOpacityFunction(pqServer* server,
 	const QString& arrayname, int number_of_components, int component);
+  pqTwoDTransferFunction* createTwoDTransferFunction(
+    pqServer* server, const QString& arrayname,
+    int number_of_components, int component);
 
   /// called when a new scalar is created so that subclasses have a chance to
   /// change the default values as needed.

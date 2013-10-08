@@ -223,6 +223,8 @@ set(Module_SRCS
   pqTimeKeeper.h
   pqTreeLayoutStrategyInterface.cxx
   pqTreeLayoutStrategyInterface.h
+  pqTwoDTransferFunction.cxx
+  pqTwoDTransferFunction.h
   pqUndoStack.cxx
   pqUndoStack.h
   pqView.cxx
@@ -324,6 +326,7 @@ set (Module_MOC_HDRS
   pqStandardViewModules.h
   pqTextRepresentation.h
   pqTimeKeeper.h
+  pqTwoDTransferFunction.h
   pqUndoStack.h
   pqViewExporterManager.h
   pqView.h

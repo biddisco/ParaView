@@ -94,6 +94,8 @@ public:
 
   QList<QVariant> xhwbbPoints() const;
 
+  QList<QVariant> twoDTransferPoints() const;
+
   /// Returns the value for use-log-scale.
   bool useLogScale() const;
 
@@ -112,6 +114,8 @@ public slots:
 
   /// Sets the xrgbPoints that control the color transfer function.
   void setXhwbbPoints(const QList<QVariant>& values);
+
+  void settwoDTransferPoints(const QList<QVariant>& values);
 
   /// Set whether to use-log scale.
   void setUseLogScale(bool value);
@@ -154,6 +158,9 @@ signals:
   /// Signal fired when the gradient points change.
   void xhwbbPointsChanged();
 
+  /// Signal fired when the gradient points change.
+  void twoDTransferPointsChanged();
+
   /// Signal fired when useLogScale changes.
   void useLogScaleChanged();
 
@@ -167,6 +174,7 @@ protected slots:
   void gradientCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
   void gaussianCurrentChanged(int index);
+  void TwoDTransferCurrentChanged(int index);
   void showHistogramWidget();
 
   /// updates the text shown in the "current data" input.

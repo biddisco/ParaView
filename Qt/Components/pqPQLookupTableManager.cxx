@@ -58,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqScalarOpacityFunction.h"
 #include "pqGradientOpacityFunction.h"
 #include "pqGaussianOpacityFunction.h"
+#include "pqTwoDTransferFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServer.h"
 #include "pqServerManagerModel.h"
@@ -111,6 +112,8 @@ public:
   MapOfOpactiyFunc OpacityFuncs;
   typedef QMap<Key, QPointer<pqGaussianOpacityFunction> > MapOfGaussianOpactiyFunc;
   MapOfGaussianOpactiyFunc GaussianOpacityFuncs;
+  typedef QMap<Key, QPointer<pqTwoDTransferFunction> > MapOfTwoDTransferFunc;
+  MapOfTwoDTransferFunc TwoDTransferFuncs;
   vtkSmartPointer<vtkPVXMLElement> DefaultOpacityElement;
   
   vtkSmartPointer<vtkPVXMLElement> DefaultScalarBarElement;
@@ -446,7 +449,11 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   pqGaussianOpacityFunction* gaof =
       this->createGaussianOpacityFunction(server, "Gaussian_Stuff", 1, 0);
     vtkSMPropertyHelper(lutProxy, "GaussianOpacityFunction").Set(gaof->getProxy());
-    lutProxy->UpdateVTKObjects();
+
+    pqTwoDTransferFunction* tdtf =
+    this->createTwoDTransferFunction(server, "TwoD_Stuff", 1, 0);
+	vtkSMPropertyHelper(lutProxy, "TwoDTransferFunction").Set(tdtf->getProxy());
+	lutProxy->UpdateVTKObjects();
 
   return this->Internal->LookupTables[key];
 }
@@ -479,6 +486,26 @@ pqGaussianOpacityFunction* pqPQLookupTableManager::getGaussianOpacityFunction(pq
 	    server, arrayname, number_of_components, component);
 	//TBD
 return NULL;
+}
+
+
+
+//-----------------------------------------------------------------------------
+pqTwoDTransferFunction* pqPQLookupTableManager::getTwoDTransferFunction(
+  pqServer* server, const QString& arrayname,
+  int number_of_components, int component)
+{
+	pqInternal::Key key(
+		    server->GetConnectionID(), arrayname, number_of_components);
+
+		  if (this->Internal->TwoDTransferFuncs.contains(key))
+		    {
+		    return this->Internal->TwoDTransferFuncs[key];
+		    }
+
+		  // Create a new opactiy function.
+		  return this->createTwoDTransferFunction(
+		    server, arrayname, number_of_components, component);
 }
 
 //-----------------------------------------------------------------------------
@@ -579,6 +606,53 @@ pqGaussianOpacityFunction* pqPQLookupTableManager::createGaussianOpacityFunction
   return this->Internal->GaussianOpacityFuncs[key];
 }
 
+pqTwoDTransferFunction* pqPQLookupTableManager::createTwoDTransferFunction(
+  pqServer* server, const QString& arrayname,
+  int number_of_components, int component)
+{
+  vtkSMSessionProxyManager* pxm = server->proxyManager();
+  vtkSMProxy* TwoDTransferfunc =
+    pxm->NewProxy("two_dimenisonal_piecewise_functions", "TwoDTransferFunction");
+  //opacityFunction->UpdateVTKObjects();
+
+  QString name = this->Internal->getRegistrationName(
+    QString(TwoDTransferfunc->GetXMLName()),
+    arrayname, number_of_components, component);
+  // This will lead to the creation of pqScalarOpacityFunction object
+  // which this class will be intimated of (onAddOpacityFunction)
+  // and our internal DS will be updated.
+  pxm->RegisterProxy("two_dimenisonal_piecewise_functions", name.toAscii().data(), TwoDTransferfunc);
+  TwoDTransferfunc->Delete();
+  this->setTwoDTransferFunctionDefaultState(TwoDTransferfunc);
+
+  pqInternal::Key key(
+    server->GetConnectionID(), arrayname, number_of_components);
+  if (!this->Internal->TwoDTransferFuncs.contains(key))
+    {
+    qDebug() << "Creation of TwoDTransferFunction failed!" ;
+    return 0;
+    }
+
+  return this->Internal->TwoDTransferFuncs[key];
+}
+
+
+
+
+
+
+void pqPQLookupTableManager::onAddTwoDTransferFunction(pqTwoDTransferFunction* opFunc){
+	 QString registration_name = opFunc->getSMName();
+	  pqInternal::Key key =
+	    this->Internal->getKey(opFunc->getServer()->GetConnectionID(),
+	      registration_name);
+	  if (!this->Internal->TwoDTransferFuncs.contains(key))
+	    {
+	    this->Internal->TwoDTransferFuncs[key] = opFunc;
+	    }
+
+}
+
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::onAddGaussianOpacityFunction(
   pqGaussianOpacityFunction* opFunc)
@@ -630,6 +704,27 @@ void pqPQLookupTableManager::onRemoveOpacityFunction(
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::setGaussianOpacityFunctionDefaultState(
+ vtkSMProxy* opFuncProxy)
+{
+  /*// Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).
+  // We are new setting defaults for midPoint (0.5) and sharpness(0.0)
+  QList<QVariant> values;
+  values << 0.0 << 0.0 << 0.5 << 0.0 << 0.0;
+  values << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
+  pqSMAdaptor::setMultipleElementProperty(
+    opFuncProxy->GetProperty("Points"), values);
+
+  if (this->Internal->DefaultOpacityElement)
+    {
+    opFuncProxy->LoadXMLState(this->Internal->DefaultOpacityElement, NULL);
+    }
+
+  opFuncProxy->UpdateVTKObjects();*/
+}
+
+
+//-----------------------------------------------------------------------------
+void pqPQLookupTableManager::setTwoDTransferFunctionDefaultState(
  vtkSMProxy* opFuncProxy)
 {
   /*// Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).

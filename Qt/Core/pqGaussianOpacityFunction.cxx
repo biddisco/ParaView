@@ -24,11 +24,17 @@ void pqGaussianOpacityFunction::setScalarRange(double min, double max)
   vtkSMDoubleVectorProperty* dvp = vtkSMDoubleVectorProperty::SafeDownCast(
     GaussianopacityFunction->GetProperty("Points"));
 
+  //TBD get property "range" and then set it through that
+
   QList<QVariant> controlPoints = pqSMAdaptor::getMultipleElementProperty(dvp);
   if (controlPoints.size() == 0)
     {
     return;
     }
+
+
+  //TBD controlpoints don't control range
+  //BUG
 
   int max_index = dvp->GetNumberOfElementsPerCommand() * (
     (controlPoints.size()-1)/ dvp->GetNumberOfElementsPerCommand());
@@ -63,6 +69,8 @@ void pqGaussianOpacityFunction::setScalarRange(double min, double max)
   //  controlPoints << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
     }
 
+
+  //TBD set range
   pqSMAdaptor::setMultipleElementProperty(dvp, controlPoints);
   GaussianopacityFunction->UpdateVTKObjects();
 }

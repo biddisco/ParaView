@@ -42,6 +42,7 @@ class pqScalarsToColors;
 class pqScalarOpacityFunction;
 class pqGradientOpacityFunction;
 class pqGaussianOpacityFunction;
+class pqTwoDTransferFunction;
 class pqServer;
 class vtkSMProxy;
 
@@ -70,6 +71,9 @@ public:
       const QString& arrayname, int number_of_components, int component) = 0;
   virtual pqGaussianOpacityFunction* getGaussianOpacityFunction(pqServer* server,
         const QString& arrayname, int number_of_components, int component) = 0;
+  virtual pqTwoDTransferFunction* getTwoDTransferFunction(
+      pqServer* server, const QString& arrayname,
+      int number_of_components, int component) = 0;
 
   /// Saves the state of the lut/opacity-function so that 
   /// the next time a new LUT/opacity-function is created, it
@@ -126,6 +130,8 @@ protected:
 
   /// Called when a OpactiyFunction is added.
     virtual void onAddGaussianOpacityFunction(pqGaussianOpacityFunction*){}
+
+    virtual void onAddTwoDTransferFunction(pqTwoDTransferFunction* opFunc){}
 
   /// Called when a OpactiyFunction is removed.
   virtual void onRemoveOpacityFunction(pqScalarOpacityFunction*){}

@@ -62,6 +62,18 @@ bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(vtkSMProxy* pro
 	  return false;
 }
 
+bool vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+        double scalarRangeMin, double scalarRangeMax, double gradientRangeMin, double gradientRangeMax, bool extend){
+
+	vtkSMTransferFunctionProxy* tfp =
+	    vtkSMTransferFunctionProxy::SafeDownCast(proxy);
+	  if (tfp)
+	    {
+	    return tfp->RescaleTwoDTransferFunction(scalarRangeMin, scalarRangeMax, gradientRangeMin, gradientRangeMax, extend);
+	    }
+	  return false;
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -120,9 +132,29 @@ namespace
 
   	    return controlPointsProperty;
   	    }
+
+
+
+inline vtkSMProperty* GetTwoDTransferFunctionControlPointsProperty(vtkSMProxy* self){
+  	vtkSMProperty* controlPointsProperty = self->GetProperty("Range");
+  	if (!controlPointsProperty)
+  	      {
+  	      vtkGenericWarningMacro("Range' property is required.");
+  	      return NULL;
+  	      }
+  	vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+  	    unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+  	    if (num_elements % 4 != 0)
+  	      {
+  	      vtkGenericWarningMacro("Property must have 4-tuples. Resizing.");
+  	      cntrlPoints.SetNumberOfElements((num_elements/4)*4);
+  	      }
+
+	return controlPointsProperty;
+	}
+
+
 }
-
-
 
 
 
@@ -148,6 +180,33 @@ bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(double rangeMin
 
 return false;
 }
+
+bool vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(double scalarRangeMin, double scalarRangeMax, double gradientRangeMin, double gradientRangeMax, bool extend){
+	vtkSMProperty* controlPointsProperty = GetTwoDTransferFunctionControlPointsProperty(this);
+
+
+	vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+		unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+		std::vector<double > points;
+		  points.resize(4);
+
+
+		  points[0]=scalarRangeMin;
+		  points[1]=scalarRangeMax;
+		  points[2]=gradientRangeMin;
+		  points[3]=gradientRangeMax;
+
+		  cntrlPoints.Set(&(points[0]), num_elements);
+
+		this->UpdateVTKObjects();
+		return true;
+
+}
+
+
+
+
+
 
 
 //----------------------------------------------------------------------------

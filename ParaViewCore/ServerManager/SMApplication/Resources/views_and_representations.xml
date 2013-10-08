@@ -1546,6 +1546,8 @@
                       panel_visibility="never" />
             <Property name="GaussianOpacityFunction"
                       panel_visibility="never" />
+            <Property name="TwoDTransferFunction"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />
@@ -2077,6 +2079,13 @@
                      skip_dependency="1">
         <ProxyGroupDomain name="groups">
           <Group name="gaussian_piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+      <ProxyProperty command="SetTwoDTransferFunction"
+                     name="TwoDTransferFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="two_dimenisonal_piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
             

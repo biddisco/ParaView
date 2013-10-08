@@ -42,8 +42,15 @@ public:
   virtual bool RescaleTransferFunction(double rangeMin, double rangeMax, bool extend=false);
 
   virtual bool RescaleGaussianTransferFunction(const double range[2], bool extend=false)
-      { return this->RescaleTransferFunction(range[0], range[1], extend); }
+      { return this->RescaleGaussianTransferFunction(range[0], range[1], extend); }
     virtual bool RescaleGaussianTransferFunction(double rangeMin, double rangeMax, bool extend=false);
+
+    virtual bool RescaleTwoDTransferFunction(const double srange[2], const double grange[2], bool extend=false)
+          { return this->RescaleTwoDTransferFunction(srange[0], srange[1], grange[0], grange[1], extend); }
+   virtual bool RescaleTwoDTransferFunction(double scalarRangeMin,
+		   double scalarRangeMax, double gradientRangeMin, double gradientRangeMax, bool extend);
+
+
 
   // Description:
   // Safely call RescaleTransferFunction() after casting the proxy to
@@ -64,6 +71,15 @@ public:
       return vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(proxy, range[0], range[1], extend);
 
       }
+
+  static bool RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+        double scalarRangeMin, double scalarRangeMax, double gradientRangeMin, double gradientRangeMax, bool extend=false);
+    static bool RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+        const double srange[2], const double grange[2], bool extend=false)
+        {
+        return vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(proxy, srange[0], srange[1], grange[0], grange[1], extend);
+
+        }
 
   // Description:
   // Invert the transfer function. Returns true if successful.

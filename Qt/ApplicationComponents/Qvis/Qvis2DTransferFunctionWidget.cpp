@@ -2,6 +2,7 @@
 #define _USE_MATH_DEFINES
 #include "Qvis2DTransferFunctionWidget.h"
 
+
 #include <qpainter.h>
 #include <qpolygon.h>
 #include <qpixmap.h>
@@ -31,7 +32,7 @@ Qvis2DTransferFunctionWidget::Qvis2DTransferFunctionWidget(QWidget *parentObject
     this->UnderlayColourPixmap   =  NULL;
 
     // set a default:
-    this->addRegion(0.25f, 0.25f, 0.5f, 0.5f, this->defaultTFMode, 1.0);
+   // this->addRegion(0.25f, 0.25f, 0.5f, 0.5f, this->defaultTFMode, 1.0);
 
     this->mousedown = false;
     this->setMouseTracking(true);
@@ -41,6 +42,127 @@ Qvis2DTransferFunctionWidget::~Qvis2DTransferFunctionWidget()
 {
   if (this->UnderlayColourPixmap) delete this->UnderlayColourPixmap;
 }
+
+//---------------------------------------------------------------------------
+
+void Qvis2DTransferFunctionWidget::initialize(vtkTwoDTransferFunction* function){
+	if(function){
+			this->transferFunction = function;
+			this->nregion = this->transferFunction->GetSize();
+		}
+
+}
+
+//----------------------------------------------------------------------------
+
+//this Section TBD
+
+int
+Qvis2DTransferFunctionWidget::addRegion(double _x,double _y, double _w, double _h, TransferFnMode mode, double max)
+{
+  double xshift = this->transferFunction->GetRangeAtIndex(0);
+  double yshift = this->transferFunction->GetRangeAtIndex(2);
+	double functionX = _x*this->transferFunction->getXRange() + xshift;
+	double functionY = _y*this->transferFunction->getYRange() + yshift;
+	double functionW = _w*this->transferFunction->getXRange();
+	double functionH = _h*this->transferFunction->getYRange();
+	this->transferFunction->AddRegion(functionX,functionY,functionW,functionH,mode,max);
+
+}
+
+
+
+Qvis2DTransferFunctionWidget::Region Qvis2DTransferFunctionWidget::getRegion(int index){
+  double xshift = this->transferFunction->GetRangeAtIndex(0);
+    double yshift = this->transferFunction->GetRangeAtIndex(2);
+    double regionX = this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_X)/this->transferFunction->getXRange() - xshift/this->transferFunction->getXRange();
+    double regionY = this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_Y)/this->transferFunction->getYRange() - yshift/this->transferFunction->getYRange();
+    double regionW = this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_W)/this->transferFunction->getXRange();
+    double regionH = this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_H)/this->transferFunction->getYRange();
+    double max = this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_MAX);
+    TransferFnMode mode = this->transferFunction->getRegionMode(index);
+
+
+	return Region(regionX,regionY,regionW,regionH,mode,max);
+
+}
+
+
+//TBD convert space
+double Qvis2DTransferFunctionWidget::getRegionValue(int index, vtkTwoDTransferFunction::regionvalue value){
+  double xshift = this->transferFunction->GetRangeAtIndex(0);
+      double yshift = this->transferFunction->GetRangeAtIndex(2);
+	if (value == vtkTwoDTransferFunction::REGION_MODE)
+			return this->transferFunction->getRegionMode(index);
+		else if(value == vtkTwoDTransferFunction::REGION_X)
+			return this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_X)/this->transferFunction->getXRange()-xshift/this->transferFunction->getXRange();///this->transferFunction->getXRange()*double(this->contentsRect().width());
+		else if (value == vtkTwoDTransferFunction::REGION_Y)
+			return this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_Y)/this->transferFunction->getYRange()- yshift/this->transferFunction->getYRange();///this->transferFunction->getYRange()*double(this->contentsRect().height());
+		else if (value == vtkTwoDTransferFunction::REGION_W)
+			return this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_W)/this->transferFunction->getXRange();///this->transferFunction->getXRange()*double(this->contentsRect().width());
+		else if (value == vtkTwoDTransferFunction::REGION_H)
+			return this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_H)/this->transferFunction->getYRange();///this->transferFunction->getYRange()*double(this->contentsRect().height());
+		else if (value == vtkTwoDTransferFunction::REGION_MAX)
+			return this->transferFunction->getValue(index,vtkTwoDTransferFunction::REGION_MAX);
+		else
+			return -1;
+
+}
+
+void  Qvis2DTransferFunctionWidget::setRegion(int index, Qvis2DTransferFunctionWidget::Region &reg){
+	double xshift = this->transferFunction->GetRangeAtIndex(0);
+        double yshift = this->transferFunction->GetRangeAtIndex(2);
+        double values[5];
+	values[0] = reg.x*this->transferFunction->getXRange()+xshift;
+	values[1] = reg.y*this->transferFunction->getYRange()+yshift;
+	values[2] = reg.w*this->transferFunction->getXRange();
+	values[3] = reg.h*this->transferFunction->getYRange();
+	//
+	values[4] = reg.maximum;
+	this->transferFunction->SetRegionValues(index,values,reg.TFMode);
+
+}
+
+
+//TBD convert space
+void Qvis2DTransferFunctionWidget::setRegionValue(int index, double value, vtkTwoDTransferFunction::regionvalue v){
+  double xshift = this->transferFunction->GetRangeAtIndex(0);
+  double yshift = this->transferFunction->GetRangeAtIndex(2);
+
+	if(v == vtkTwoDTransferFunction::REGION_X)
+		this->transferFunction->SetRegionValue(index, value*this->transferFunction->getXRange() + xshift, v);
+	else if (v == vtkTwoDTransferFunction::REGION_Y)
+		this->transferFunction->SetRegionValue(index, value*this->transferFunction->getYRange() + yshift, v);
+	else if (v == vtkTwoDTransferFunction::REGION_W)
+		this->transferFunction->SetRegionValue(index, value*this->transferFunction->getXRange(), v);
+	else if (v == vtkTwoDTransferFunction::REGION_H)
+		this->transferFunction->SetRegionValue(index, value*this->transferFunction->getYRange(), v);
+	else if (v == vtkTwoDTransferFunction::REGION_MAX)
+		this->transferFunction->SetRegionValue(index, value, v);
+
+
+
+}
+
+void Qvis2DTransferFunctionWidget::setRegionMode(int index, TransferFnMode mo){
+	this->transferFunction->SetRegionMode(index,mo);
+
+
+
+}
+
+
+void Qvis2DTransferFunctionWidget::setFunctionRange(double range[2]){
+	//this->transf->UpdateRange(false, range);
+}
+
+
+
+
+
+
+
+
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::setBackgroundGradientData(int x, int y, int *data)
 {
@@ -100,20 +222,30 @@ int Val2y(QPixmap *p, float val)
   return _y;
 }
 //---------------------------------------------------------------------------
+
+void Qvis2DTransferFunctionWidget::setCurrentRegion(int index){
+  this->activeRegion = index;
+}
+
+//---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::drawColourBars(QPainter &painter)
 {
   if (!this->UnderlayColourPixmap) {
     std::cout << "UnderlayColourPixmap is NULL, why? " << std::endl;
     return;
   }
+
+  if (this->transferFunction->GetSize() <= 0)
+	  return;
+
   QImage Image = this->UnderlayColourPixmap->toImage();
   double xx, yy, intensity;
   for (int p=0; p<nregion; p++)
   {
-    double x1 = Val2x(pix,region[p].x);
-    double y1 = Val2y(pix,region[p].y);
-    double x2 = Val2x(pix,region[p].x+region[p].w);
-    double y2 = Val2y(pix,region[p].y+region[p].h);
+    double x1 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X));
+    double y1 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y));
+    double x2 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X)+getRegionValue(p,vtkTwoDTransferFunction::REGION_W));
+    double y2 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(p,vtkTwoDTransferFunction::REGION_H));
     double wx = x2-x1;
     double wy = y1-y2;
     double mx = (double)this->UnderlayColourPixmap->width()/this->contentsRect().width();
@@ -129,7 +261,7 @@ void Qvis2DTransferFunctionWidget::drawColourBars(QPainter &painter)
     for (double i=0; i<wx; i++) {
       QColor pixel = Image.pixel(xl + i*mx, 0);
       for (double j=0; j<wy; j++) {
-        switch (region[p].TFMode) {
+        switch ((TransferFnMode) int(getRegionValue(p,vtkTwoDTransferFunction::REGION_MODE)+0.1)) {
           case Uniform:
             intensity = 1.0;
             break;
@@ -164,7 +296,7 @@ void Qvis2DTransferFunctionWidget::drawColourBars(QPainter &painter)
             intensity = (wx-i)/wx;
             break;
         }
-        intensity = region[p].maximum * intensity;
+        intensity = getRegionValue(p,vtkTwoDTransferFunction::REGION_MAX) * intensity;
         pixel.setAlpha(static_cast<int>(255.0*intensity + 0.49999));
         boxmap.setPixel(i, j, pixel.rgba());
       }
@@ -182,10 +314,10 @@ void Qvis2DTransferFunctionWidget::drawControlPoints(QPainter &painter)
   QPolygon pts;
   for (int p=0; p<nregion; p++)
   {
-    int x1 = Val2x(pix,region[p].x);
-    int y1 = Val2y(pix,region[p].y);
-    int x2 = Val2x(pix,region[p].x+region[p].w);
-    int y2 = Val2y(pix,region[p].y+region[p].h);
+    int x1 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X));
+    int y1 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y));
+    int x2 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X)+getRegionValue(p,vtkTwoDTransferFunction::REGION_W));
+    int y2 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(p,vtkTwoDTransferFunction::REGION_H));
 
     // x1, y1
     if (highlitRegion == p && (movingMode == modeC0 || movingMode == modeAll)) {
@@ -246,10 +378,10 @@ void Qvis2DTransferFunctionWidget::drawRegions(QPainter &painter)
     else {
       painter.setPen(whitepen);
     }
-    int x1 = Val2x(pix,region[p].x);
-    int y1 = Val2y(pix,region[p].y);
-    int x2 = Val2x(pix,region[p].x+region[p].w);
-    int y2 = Val2y(pix,region[p].y+region[p].h);
+    int x1 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X));
+    int y1 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y));
+    int x2 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X)+getRegionValue(p,vtkTwoDTransferFunction::REGION_W));
+    int y2 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(p,vtkTwoDTransferFunction::REGION_H));
     pts.setPoints(4, x1,y1, x1,y2, x2,y2, x2,y1);
     painter.drawPolygon(pts);
   }
@@ -295,6 +427,8 @@ void Qvis2DTransferFunctionWidget::createRGBAData(unsigned char *data)
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
+
+
   int _x = e->x();
   int _y = e->y();
   bool activeChanged = false;
@@ -329,6 +463,7 @@ void Qvis2DTransferFunctionWidget::mousePressEvent(QMouseEvent *e)
   if (activeChanged) {
     emit this->activeRegionChanged(this->activeRegion);
   }
+  nregion = this->transferFunction->GetSize();
   this->repaint();
 }
 //---------------------------------------------------------------------------
@@ -353,60 +488,62 @@ void Qvis2DTransferFunctionWidget::mouseMoveEvent(QMouseEvent *e)
   float ymax = 1.0; // y2val(this->contentsRect().height());
   switch (movingMode) {
     case modeC0:
-      dx = nx - region[r].x;
-      dy = ny - region[r].y;
-      region[r].x = nx;
-      region[r].y = ny;
-      region[r].w = region[r].w-dx;
-      region[r].h = region[r].h-dy;
+      dx = nx - getRegionValue(r,vtkTwoDTransferFunction::REGION_X);
+      dy = ny - getRegionValue(r,vtkTwoDTransferFunction::REGION_Y);
+      setRegionValue(r,nx, vtkTwoDTransferFunction::REGION_X);
+      setRegionValue(r,ny, vtkTwoDTransferFunction::REGION_Y);
+      setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_W)-dx, vtkTwoDTransferFunction::REGION_W);
+      setRegionValue(r, getRegionValue(r,vtkTwoDTransferFunction::REGION_H)-dy, vtkTwoDTransferFunction::REGION_H);
       break;
     case modeC1:
-      dx = nx - region[r].x;
-      dy = ny - (region[r].y+region[r].h);
-      region[r].x = nx;
-      region[r].w = region[r].w-dx;
-      region[r].h = region[r].h+dy;
+      dx = nx - getRegionValue(r,vtkTwoDTransferFunction::REGION_X);
+      dy = ny - (getRegionValue(r,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(r,vtkTwoDTransferFunction::REGION_H));
+      setRegionValue(r,nx, vtkTwoDTransferFunction::REGION_X);
+      setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_W)-dx, vtkTwoDTransferFunction::REGION_W);
+      setRegionValue(r, getRegionValue(r,vtkTwoDTransferFunction::REGION_H)+dy, vtkTwoDTransferFunction::REGION_H);
       break;
     case modeC2:
-      dx = nx - (region[r].x + region[r].w);
-      dy = ny - (region[r].y + region[r].h);
-      region[r].w = region[r].w+dx;
-      region[r].h = region[r].h+dy;
+      dx = nx - (getRegionValue(r,vtkTwoDTransferFunction::REGION_X) + getRegionValue(r,vtkTwoDTransferFunction::REGION_W));
+      dy = ny - (getRegionValue(r,vtkTwoDTransferFunction::REGION_Y) + getRegionValue(r,vtkTwoDTransferFunction::REGION_H));
+      setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_W)+dx, vtkTwoDTransferFunction::REGION_W);
+      setRegionValue(r, getRegionValue(r,vtkTwoDTransferFunction::REGION_H)+dy, vtkTwoDTransferFunction::REGION_H);
       break;
     case modeC3:
-      dx = nx - (region[r].x+region[r].w);
-      dy = ny - region[r].y;
-      region[r].y = ny;
-      region[r].w = region[r].w+dx;
-      region[r].h = region[r].h-dy;
+      dx = nx - (getRegionValue(r,vtkTwoDTransferFunction::REGION_X) + getRegionValue(r,vtkTwoDTransferFunction::REGION_W));
+      dy = ny - getRegionValue(r,vtkTwoDTransferFunction::REGION_Y);
+      setRegionValue(r,ny, vtkTwoDTransferFunction::REGION_Y);
+      setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_W)+dx, vtkTwoDTransferFunction::REGION_W);
+      setRegionValue(r, getRegionValue(r,vtkTwoDTransferFunction::REGION_H)-dy, vtkTwoDTransferFunction::REGION_H);
       break;
     case modeAll:
       dx = nx - lx;
       dy = ny - ly;
-      if ((region[r].x+region[r].w+dx)<xmax &&
-          (region[r].y+region[r].h+dy)<ymax &&
-          (region[r].x+dx)>=0 &&
-          (region[r].y+dy)>=0)
+      if ((getRegionValue(r,vtkTwoDTransferFunction::REGION_X)+getRegionValue(r,vtkTwoDTransferFunction::REGION_W)+dx)<xmax &&
+          (getRegionValue(r,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(r,vtkTwoDTransferFunction::REGION_H)+dy)<ymax &&
+          (getRegionValue(r,vtkTwoDTransferFunction::REGION_X)+dx)>=0 &&
+          (getRegionValue(r,vtkTwoDTransferFunction::REGION_Y)+dy)>=0)
       {
-        region[r].x = region[r].x + dx;
-        region[r].y = region[r].y + dy;
+    	  setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_X)+ dx, vtkTwoDTransferFunction::REGION_X);
+    	  setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_Y)+ dy, vtkTwoDTransferFunction::REGION_Y);
       }
       break;
     default:
       break;
   }
   // make sure it works when the rectangle is inside out
-  if (region[r].w<0) {
-    region[r].x += region[r].w;
-    region[r].w  =-region[r].w;
+  if (getRegionValue(r,vtkTwoDTransferFunction::REGION_W)<0) {
+	  setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_X)+ getRegionValue(r,vtkTwoDTransferFunction::REGION_W),
+			  vtkTwoDTransferFunction::REGION_X);
+	  setRegionValue(r,-getRegionValue(r,vtkTwoDTransferFunction::REGION_W),vtkTwoDTransferFunction::REGION_W);
     if      (movingMode == modeC0) movingMode = modeC3;  
     else if (movingMode == modeC1) movingMode = modeC2;  
     else if (movingMode == modeC2) movingMode = modeC1;  
     else if (movingMode == modeC3) movingMode = modeC0;  
   }
-  if (region[r].h<0) {
-    region[r].y += region[r].h;
-    region[r].h  =-region[r].h;
+  if (getRegionValue(r,vtkTwoDTransferFunction::REGION_H)<0) {
+	  setRegionValue(r,getRegionValue(r,vtkTwoDTransferFunction::REGION_Y)+ getRegionValue(r,vtkTwoDTransferFunction::REGION_H),
+	  			  vtkTwoDTransferFunction::REGION_Y);
+	  setRegionValue(r,-getRegionValue(r,vtkTwoDTransferFunction::REGION_H),vtkTwoDTransferFunction::REGION_H);
     if      (movingMode == modeC0) movingMode = modeC1;  
     else if (movingMode == modeC1) movingMode = modeC0;  
     else if (movingMode == modeC2) movingMode = modeC3;  
@@ -462,18 +599,22 @@ float Qvis2DTransferFunctionWidget::getActiveRegionMaximum()
 void Qvis2DTransferFunctionWidget::addRegion(
   float x,float y,float w,float h,float mo,float mx)
 {
-    region[nregion++] = Region(x,y,w,h,mo,mx);
+	addRegion(double(x),double(y),double(w),double(h),(TransferFnMode) int(mo), double(mx));
+    //region[nregion++] = Region(x,y,w,h,mo,mx);
 }
 //---------------------------------------------------------------------------
 void
 Qvis2DTransferFunctionWidget::removeRegion(int n)
 {
+	this->transferFunction->RemoveRegionAtIndex(n);
+
+/*
   for (int i=n; i<nregion-1; i++) region[i] = region[i+1];
   nregion--;
   if (this->activeRegion >= nregion) {
     this->activeRegion = nregion-1;
     emit this->activeRegionChanged(this->activeRegion);
-  }
+  }*/
 }
 //---------------------------------------------------------------------------
 void
@@ -488,12 +629,12 @@ Qvis2DTransferFunctionWidget::setMinimumNumberOfRegions(int n)
   this->minimumNumberOfRegions = n;
 }
 //---------------------------------------------------------------------------
-bool Qvis2DTransferFunctionWidget::InRegion(Region &r, float *pt)
+bool Qvis2DTransferFunctionWidget::InRegion(int index, float *pt)
 {
-  if (pt[0]<r.x) return false;
-  if (pt[0]>(r.x+r.w)) return false;
-  if (pt[1]<r.y) return false;
-  if (pt[1]>(r.y+r.h)) return false;
+  if (pt[0]<getRegionValue(index,vtkTwoDTransferFunction::REGION_X)) return false;
+  if (pt[0]>getRegionValue(index,vtkTwoDTransferFunction::REGION_X) + getRegionValue(index,vtkTwoDTransferFunction::REGION_W)) return false;
+  if (pt[1]<getRegionValue(index,vtkTwoDTransferFunction::REGION_Y)) return false;
+  if (pt[1]>getRegionValue(index,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(index,vtkTwoDTransferFunction::REGION_H)) return false;
   return true;
 }
 //---------------------------------------------------------------------------
@@ -511,10 +652,10 @@ bool Qvis2DTransferFunctionWidget::findRegionControlPoint(
   float mindist = 100000;  // it's okay, it's pixels
   for (int p=0; p<nregion; p++)
   {
-    int x1 = val2x(region[p].x);
-    int y1 = val2y(region[p].y);
-    int x2 = val2x(region[p].x+region[p].w);
-    int y2 = val2y(region[p].y+region[p].h);
+    int x1 = val2x(getRegionValue(p,vtkTwoDTransferFunction::REGION_X));
+    int y1 = val2y(getRegionValue(p,vtkTwoDTransferFunction::REGION_Y));
+    int x2 = val2x(getRegionValue(p,vtkTwoDTransferFunction::REGION_X)+getRegionValue(p,vtkTwoDTransferFunction::REGION_W));
+    int y2 = val2y(getRegionValue(p,vtkTwoDTransferFunction::REGION_Y)+getRegionValue(p,vtkTwoDTransferFunction::REGION_H));
     int y0 = val2y(0);
     float pt[2] = { x2val(_x), y2val(_y) };
 
@@ -552,7 +693,7 @@ bool Qvis2DTransferFunctionWidget::findRegionControlPoint(
       mindist    = d4;
       found      = true;
     }
-    else if (InRegion(region[p], pt)) 
+    else if (InRegion(p, pt))
     {
       *newregion = p;
       *newmode   = modeAll;
@@ -570,23 +711,19 @@ int Qvis2DTransferFunctionWidget::getNumberOfRegions()
 void Qvis2DTransferFunctionWidget::getRegion(int i,
   float *x, float *y, float *w, float *h, float *mo, float *mx)
 {
-  *x  = region[i].x;
-  *y  = region[i].y;
-  *w  = region[i].w;
-  *h  = region[i].h;
-  *mo = region[i].TFMode;
-  *mx = region[i].maximum;
+  *x  = getRegionValue(i,vtkTwoDTransferFunction::REGION_X);
+  *y  = getRegionValue(i,vtkTwoDTransferFunction::REGION_Y);
+  *w  = getRegionValue(i,vtkTwoDTransferFunction::REGION_W);
+  *h  = getRegionValue(i,vtkTwoDTransferFunction::REGION_H);
+  *mo = this->transferFunction->getRegionMode(i);
+  *mx = getRegionValue(i,vtkTwoDTransferFunction::REGION_MAX);
 }
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::setRegion(int i,
   float *x, float *y, float *w, float *h, float *mo, float *mx)
 {
-  region[i].x = *x;
-  region[i].y = *y;
-  region[i].w = *w;
-  region[i].h = *h;
-  region[i].TFMode  = TransferFnMode(static_cast<int>(*mo));
-  region[i].maximum = *mx;
+	Region r(*x,*y,*w,*h,TransferFnMode(static_cast<int>(*mo)),*mx);
+	setRegion(i,r);
 }
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::setAllRegions(int n, float *regiondata)

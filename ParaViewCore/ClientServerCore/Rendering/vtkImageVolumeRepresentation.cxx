@@ -386,6 +386,10 @@ void vtkImageVolumeRepresentation::SetGaussianOpacity(vtkGaussianPiecewiseFuncti
   this->Property->SetGaussianOpacity(pwf);
 }
 
+void vtkImageVolumeRepresentation::SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf){
+	//this->Property->SetGaussianOpacity(0); //remoeveme
+}
+
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetSwitchGradientOpacity(bool GaussOrPwf)
 {

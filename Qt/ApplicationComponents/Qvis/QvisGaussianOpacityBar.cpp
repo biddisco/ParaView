@@ -716,9 +716,10 @@ QvisGaussianOpacityBar::addGaussian(float _x,float h,float w,float bx,float by)
 QvisGaussianOpacityBar::Gaussian QvisGaussianOpacityBar::getNode(int index){
 	double values[5];
 	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	double shift = gaussianFunctionGroup->GetRangeAtIndex(0);
 	Gaussian gauss;
 	gaussianFunctionGroup->GetNodeValue(index,values);
-	gauss.x=values[0]/rangemagnitude;
+	gauss.x=values[0]/rangemagnitude-shift/rangemagnitude;
 	gauss.h=values[1];
 	gauss.w=values[2]/rangemagnitude;
 	gauss.bx=values[3];
@@ -730,8 +731,9 @@ QvisGaussianOpacityBar::Gaussian QvisGaussianOpacityBar::getNode(int index){
 //TBD convert space
 double QvisGaussianOpacityBar::getGaussValue(int index, gaussvalue v){
 	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	double shift = gaussianFunctionGroup->GetRangeAtIndex(0);
 	if (gaussX == v)
-		return gaussianFunctionGroup->getX(index)/rangemagnitude;
+		return gaussianFunctionGroup->getX(index)/rangemagnitude - shift/rangemagnitude;
 	else if (gaussH ==v)
 			return gaussianFunctionGroup->getH(index);
 	else if (gaussW ==v)
@@ -745,7 +747,8 @@ double QvisGaussianOpacityBar::getGaussValue(int index, gaussvalue v){
 void  QvisGaussianOpacityBar::setNode(int index, Gaussian &gauss){
 	double values[5];
 	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
-	values[0] = std::min(std::max(gauss.x*rangemagnitude, gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1));
+	double shift = gaussianFunctionGroup->GetRangeAtIndex(0);
+	values[0] = std::min(std::max(gauss.x*rangemagnitude+shift, gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1));
 	values[1] = gauss.h;
 	values[2] = gauss.w*rangemagnitude;
 	values[3] = gauss.bx;
@@ -758,8 +761,9 @@ void  QvisGaussianOpacityBar::setNode(int index, Gaussian &gauss){
 //TBD convert space
 void QvisGaussianOpacityBar::setGaussValue(int index, double value, gaussvalue v){
 	double rangemagnitude = gaussianFunctionGroup->GetRangeAtIndex(1)-gaussianFunctionGroup->GetRangeAtIndex(0);
+	double shift = gaussianFunctionGroup->GetRangeAtIndex(0);
 	if (gaussX == v)
-		gaussianFunctionGroup->setX(index,std::min(std::max(value*rangemagnitude,gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1)));
+		gaussianFunctionGroup->setX(index,std::min(std::max(value*rangemagnitude+shift,gaussianFunctionGroup->GetRangeAtIndex(0)),gaussianFunctionGroup->GetRangeAtIndex(1)));
 	else if (gaussH ==v)
 			gaussianFunctionGroup->setH(index,value);
 	else if (gaussW ==v)
