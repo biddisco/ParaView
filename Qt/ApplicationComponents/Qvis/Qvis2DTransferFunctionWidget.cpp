@@ -271,7 +271,7 @@ void Qvis2DTransferFunctionWidget::drawColourBars(QPainter &painter)
             intensity = exp( (-8.0) * (xx + yy) );
             break;
           case Sine:
-						intensity = 0.5 * (1.0 + cos(7.0*M_PI*(i-cx)/cx));
+            intensity = 0.5 * (1.0 + cos(7.0*M_PI*(i-cx)/cx));
             break;
           case RightHalf:
             xx = (i-2*cx)*(i-2*cx)/sx;
@@ -450,11 +450,13 @@ void Qvis2DTransferFunctionWidget::mousePressEvent(QMouseEvent *e)
       movingMode    = modeC2;
       if (maximumNumberOfRegions==-1 || getNumberOfRegions()<maximumNumberOfRegions) {
         addRegion(x2val(_x), y2val(_y), 0.01f, 0.01f, this->defaultTFMode, 1.0);
+        emit controlPointsModified();
       }
     }
     else if (testregion != this->activeRegion) {
       this->activeRegion = testregion;
       activeChanged = true;
+      emit activeRegionChanged(this->activeRegion);
     }
     lastx = _x;
     lasty = _y;
@@ -549,6 +551,8 @@ void Qvis2DTransferFunctionWidget::mouseMoveEvent(QMouseEvent *e)
     else if (movingMode == modeC2) movingMode = modeC3;  
     else if (movingMode == modeC3) movingMode = modeC2;  
   }
+
+  emit controlPointsModified();
 
   lastx = _x;
   lasty = _y;

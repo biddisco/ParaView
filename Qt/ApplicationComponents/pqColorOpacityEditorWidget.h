@@ -73,6 +73,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqColorOpacityEditorWidget :
   Q_PROPERTY(QList<QVariant> xvmsPoints READ xvmsPoints WRITE setXvmsPoints)
   Q_PROPERTY(QList<QVariant> gvmsPoints READ gvmsPoints WRITE setGvmsPoints)
   Q_PROPERTY(QList<QVariant> xhwbbPoints READ xhwbbPoints WRITE setXhwbbPoints)
+  Q_PROPERTY(QList<QVariant> twoDTransferPoints READ twoDTransferPoints WRITE settwoDTransferPoints)
   Q_PROPERTY(bool useLogScale READ useLogScale WRITE setUseLogScale)
   Q_PROPERTY(bool lockScalarRange READ lockScalarRange WRITE setLockScalarRange)
   typedef pqPropertyWidget Superclass;

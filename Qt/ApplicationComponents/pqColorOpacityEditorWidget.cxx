@@ -425,6 +425,36 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       ui.GaussianOpacityEditor->hide();
     }
 
+  smproperty = smgroup->GetProperty("TwoDTransferFunction");
+    if (smproperty)
+      {
+        // TODO: T
+
+        vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+
+        if (pwfProxy && pwfProxy->GetProperty("Points"))
+          {
+            this->addPropertyLink(this, "twoDTransferPoints",
+            SIGNAL(twoDTransferPointsChanged()), pwfProxy,
+                pwfProxy->GetProperty("Points"));
+          }
+        else
+          {
+            ui.TwoDTransferFunction->hide();
+          }
+      }
+    else
+      {
+        ui.TwoDTransferFunction->hide();
+      }
+
+
+
+
+
+
+
+
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
   if (smproperty)
     {
