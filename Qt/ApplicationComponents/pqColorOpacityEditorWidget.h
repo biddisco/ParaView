@@ -103,6 +103,8 @@ public:
   /// Returns true if the scalar range is locked.
   bool lockScalarRange() const;
 
+
+
 public slots:
   /// Sets the xvmsPoints that control the opacity transfer function.
   void setXvmsPoints(const QList<QVariant>&);
@@ -129,7 +131,7 @@ public slots:
 
   /// Reset the transfer function ranges to custom values.
   void resetRangeToCustom();
-  void resetRangeToCustom(double min, double max);
+  void resetRangeToCustom(double min, double max, double gmin, double gmax);
 
   /// Reset the transfer function ranges to temporal range for active data
   /// source.

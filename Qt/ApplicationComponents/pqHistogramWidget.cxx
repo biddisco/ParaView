@@ -216,7 +216,6 @@ void pqHistogramWidget::updateAllBinColumns() {
 
 void pqHistogramWidget::mousePressEvent(QMouseEvent *e) {
 	//switch enabled disabled
-
 	int width = this->contentsRect().width();
 	int selectedBin = int(
 			float(e->x()) * (float(this->histogramSize) / float(width)));
@@ -246,6 +245,44 @@ void pqHistogramWidget::mousePressEvent(QMouseEvent *e) {
 	this->repaint();
 
 }
+
+void pqHistogramWidget::mouseDoubleClickEvent(QMouseEvent *e) {
+
+
+this->mousePressEvent(e);
+
+int y = e->y();
+
+
+float scale = float(this->contentsRect().height() - enabledBarsHeight) / float(currentMax);
+  for (int i = 0; i<histogramSize; i++){
+      int top = getTopBinPixel(i, scale);
+      if (top<y){
+          this->histogramEnabled[i] = false;
+      }
+      else{
+          this->histogramEnabled[i] = true;
+      }
+  }
+
+
+/*
+else{
+    float scale = float(currentMax)/float(this->enabledBarsHeight);
+    for (int i = 0; i<histogramSize; i++){
+      if (!histogramEnabled[i]) {
+          int top = getTopBinPixel(i, scale);
+          if (top > y)
+            histogramEnabled[i] = true;
+      }
+    }
+}
+*/
+createPixmap();
+this->update();
+
+}
+
 
 void pqHistogramWidget::paintEvent(QPaintEvent *e) {
 

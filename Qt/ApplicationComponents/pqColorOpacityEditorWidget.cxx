@@ -619,18 +619,17 @@ pqColorOpacityEditorWidget::showHistogramWidget()
       return;
     }
 
-  repr->getProxy()->GatherInformation(info.GetPointer());
+  repr->getProxy()->InvokeCommand("UpdateHistogram");
 
-  if (repr->getProxy()->GetProperty("SupportHistogramWidget"))
+
+  repr->getProxy()->GatherInformation(info.GetPointer());
+ // repr->
+  if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
     {
-      std::cout << "SupportHistogramWidget found in showhistogramtest"
-          << std::endl;
+      std::cout<< "Did not find SupportHistogramWidget in showhistogramtest" << std::endl;
     }
-  else
-    {
-      std::cout << "not found SupportHistogramWidget in showhistogramtest"
-          << std::endl;
-    }
+
+
 
   int enabledBarsHeight;
   bool * useBin = new bool[info->sizeOfX];
@@ -976,9 +975,8 @@ pqColorOpacityEditorWidget::resetRangeToData()
       return;
     }
 
-  if (repr->getProxy()->GetProperty("GradientRange"))
-    repr->getProxy()->UpdatePropertyInformation(
-        repr->getProxy()->GetProperty("GradientRange"));
+  if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+    repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
@@ -1008,6 +1006,8 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
       return;
     }
 
+
+
   if (QMessageBox::warning(this, "Potentially slow operation",
       "This can potentially take a long time to complete. \n"
           "Are you sure you want to continue?",
@@ -1015,6 +1015,8 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
     {
       BEGIN_UNDO_SET(
           "Reset transfer function ranges using temporal data range");
+      if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+            repr->getProxy()->InvokeCommand("UpdateGradientRange");
       vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRangeOverTime(
           repr->getProxy());
       emit this->changeFinished();
@@ -1031,25 +1033,37 @@ pqColorOpacityEditorWidget::resetRangeToCustom()
           this->proxy()->GetClientSideObject());
   double range[2];
   stc->GetRange(range);
+  double grange[2];
+  stc->GetGradientOpacityFunction()->GetRange(grange);
 
   pqRescaleRange dialog(this);
   dialog.setRange(range[0], range[1]);
+  dialog.setGradientRange(grange[0], grange[1]);
   if (dialog.exec() == QDialog::Accepted)
     {
-      this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum());
+      this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum(), dialog.getMinimumGradient(), dialog.getMaximumGradient());
     }
 
 }
 
 //-----------------------------------------------------------------------------
 void
-pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max)
+pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max, double gmin, double gmax)
 {
   BEGIN_UNDO_SET("Reset transfer function ranges");
   vtkSMTransferFunctionProxy::RescaleTransferFunction(this->proxy(), min, max);
   vtkSMTransferFunctionProxy::RescaleTransferFunction(
       vtkSMPropertyHelper(this->proxy(), "ScalarOpacityFunction").GetAsProxy(),
       min, max);
+
+  pqDataRepresentation* repr =
+        pqActiveObjects::instance().activeRepresentation();
+
+  vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionsToCustomRange(repr->getProxy(), min, max, gmin, gmax);
+
+
+
+
   emit this->changeFinished();
   END_UNDO_SET();
 }

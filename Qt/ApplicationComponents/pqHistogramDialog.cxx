@@ -50,7 +50,7 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 
 
 		this->histogramSize=size;
-
+		this->dialogUi->stackedWidget->setCurrentIndex(0);
 
 
 

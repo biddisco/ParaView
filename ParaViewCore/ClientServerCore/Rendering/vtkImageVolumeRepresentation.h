@@ -29,6 +29,7 @@
 #include "vtkVector.h"
 #include "vtkSmartPointer.h"
 
+
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
 class vtkImageData;
@@ -44,6 +45,7 @@ class vtkVolumeProperty;
 class vtkImageAccumulate;
 class vtkImageGradientMagnitude;
 class vtkIntArray;
+class vtkDoubleArray;
 
 
 
@@ -75,10 +77,30 @@ public:
   vtkSetStringMacro(ColorArrayName);
   vtkGetStringMacro(ColorArrayName);
 
+  double* dosomething(){
+    return GradientRange;
+  }
   vtkGetVector2Macro(GradientRange, double);
 
+/*
+  virtual double *GetGradientRange ()
+{
+  return this->GradientRange;
+}
+virtual void GetGradientRange (double &_arg1, double &_arg2)
+  {
+    _arg1 = this->GradientRange[0];
+    _arg2 = this->GradientRange[1];
+  };
+virtual void GetGradientRange (double _arg[2])
+  {
+  this->GetGradientRange (_arg[0], _arg[1]);
+  }
+*/
+
   vtkSmartPointer<vtkImageAccumulate>  getHistogram(){
-	  return AccumulateFilter;
+      UpdateHistogram();
+      return AccumulateFilter;
   }
 
   // Description:
@@ -132,9 +154,13 @@ public:
   // Forwarded to vtkSmartVolumeMapper.
   void SetRequestedRenderMode(int);
 
+  void UpdateGradientRange();
+  void UpdateHistogram();
+
   // Description:
   // Provides access to the actor used by this representation.
   vtkPVLODVolume* GetActor() { return this->Actor; }
+  //vtkDoubleArray* GetGradientRange() { return this->GradientRange;}
 
   // Description:
   // Helper method to pass input image extent information to the view to use in
@@ -153,9 +179,15 @@ public:
     vtkGetMacro(GradientVectorComponent, int);
 
 //BTX
+    void updateGradRange();
+    void updateGradientHistogram();
 protected:
   vtkImageVolumeRepresentation();
   ~vtkImageVolumeRepresentation();
+
+  bool histogramOutOfDate;
+  bool GradientRangeOutOfDate;
+
 
   // Description:
   // Fill input port information.
@@ -169,6 +201,8 @@ protected:
   int histogramsize;
   vtkIntArray * GradientHistogram;
   int* histogram;
+
+
 
 
 
@@ -222,6 +256,10 @@ protected:
   int UseGradientFunction;
   bool connected;
   bool SupportHistogramWidget;
+  bool GradientRangeFirstTimeStartup;
+  bool GradientHistogramFirstTimeStartup;
+
+
 
 
 private:

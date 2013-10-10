@@ -1538,6 +1538,10 @@
                       panel_visibility="never" />
             <Property name="GradientRange"
                       panel_visibility="never" />
+            <Property name="UpdateGradientRange"
+                      panel_visibility="never" />
+            <Property name="UpdateHistogram"
+                      panel_visibility="never" />
             <Property name="SupportHistogramWidget"
                       panel_visibility="never" />      
           	<Property name="DisableGradientOpacity"
@@ -1966,6 +1970,12 @@
              <BooleanDomain name="bool" />
              <SimpleIntInformationHelper />
          </IntVectorProperty>
+         <Property command = "UpdateGradientRange"
+                  name = "UpdateGradientRange" >
+                  </Property>
+         <Property command = "UpdateHistogram"
+                  name = "UpdateHistogram" >
+                  </Property>
          <DoubleVectorProperty command="GetGradientRange"
                             default_values="0 1"
                             information_only="1"

@@ -23,7 +23,7 @@ pqTwoDTransferFunction::~pqTwoDTransferFunction()
 void pqTwoDTransferFunction::setRange(double xmin, double xmax, double ymin, double ymax)
 {
 
-	//TBD
+	//FIXME
 
   vtkSMProxy* TwoDTransferFunction = this->getProxy();
 
@@ -47,11 +47,11 @@ void pqTwoDTransferFunction::setRange(double xmin, double xmax, double ymin, dou
     (controlPoints.size()-1)/ dvp->GetNumberOfElementsPerCommand());
 
   //controlpoints don't control range...
-  QPair<double, double> current_x_range(controlPoints[0].toDouble(),
-    controlPoints[max_index].toDouble());
+  QPair<double, double> current_x_range(range[0].toDouble(),
+      range[1].toDouble());
 
-  QPair<double, double> current_y_range(controlPoints[0].toDouble(),
-      controlPoints[max_index].toDouble());
+  QPair<double, double> current_y_range(range[2].toDouble(),
+      range[3].toDouble());
 
   // Adjust vtkPiecewiseFunction points to the new range.
   double doldx = (current_x_range.second - current_x_range.first);

@@ -95,6 +95,7 @@ protected slots:
 protected:
   /// callback called when vtkControlPointsItem fires
   /// vtkControlPointsItem::CurrentPointEditEvent.
+
   void onCurrentPointEditEvent();
 
 private:

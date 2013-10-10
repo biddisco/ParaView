@@ -38,7 +38,8 @@ class PQCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
 
   protected :
   void   mousePressEvent(QMouseEvent*);
-      void   paintEvent(QPaintEvent *e);
+  void   mouseDoubleClickEvent(QMouseEvent*);
+  void   paintEvent(QPaintEvent *e);
   int histogramSize;
     int* histogram;
     bool* histogramEnabled;

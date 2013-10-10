@@ -63,6 +63,11 @@ public:
   // only be extended as needed to fit the data range.
   virtual bool RescaleTransferFunctionToDataRange(bool extend=false);
 
+
+  virtual bool RescaleTransferFunctionToCustomRange(double minScale, double maxScale, double minGradient, double maxGradient,
+      bool extend = false);
+
+
   // Description:
   // Rescales the color transfer function and opacity transfer function using the
   // current data range for the chosen data-array. Returns true if rescale was
@@ -84,6 +89,14 @@ public:
       vtkSMPVRepresentationProxy::SafeDownCast(proxy);
     return self? self->RescaleTransferFunctionToDataRange(extend) : false;
     }
+
+  static bool RescaleGradientTransferFunctionsToCustomRange(vtkSMProxy* proxy, double minScale, double maxScale,
+      double minGradient, double maxGradient, bool extend=false)
+      {
+      vtkSMPVRepresentationProxy* self =
+        vtkSMPVRepresentationProxy::SafeDownCast(proxy);
+      return self? self->RescaleTransferFunctionToCustomRange(minScale, maxScale, minGradient, maxGradient, extend) : false;
+      }
 
   // Description:
   // Safely call RescaleTransferFunctionToDataRange() after casting the proxy to

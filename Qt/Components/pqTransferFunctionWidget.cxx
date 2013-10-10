@@ -354,6 +354,10 @@ void pqTransferFunctionWidget::initialize(
     }
 }
 
+
+//-----------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 void pqTransferFunctionWidget::onCurrentPointEditEvent()
 {

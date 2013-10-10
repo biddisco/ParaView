@@ -83,6 +83,106 @@ void vtkSMPVRepresentationProxy::OnPropertyUpdated(vtkObject*,
 }
 
 //----------------------------------------------------------------------------
+
+
+bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToCustomRange(double minScale, double maxScale, double minGradient, double maxGradient,
+      bool extend){
+
+  vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
+   vtkSMProperty* sofProperty = this->GetProperty("ScalarOpacityFunction");
+   vtkSMProperty* gofProperty = this->GetProperty("GradientOpacityFunction");
+   vtkSMProperty* gaussfProperty = this->GetProperty("GaussianOpacityFunction");
+   vtkSMProperty* TDTransfProperty = this->GetProperty("TwoDTransferFunction");
+   if (!lutProperty && !sofProperty)
+     {
+     vtkWarningMacro("No 'LookupTable' and 'ScalarOpacityFunction' found.");
+     return false;
+     }
+   if (!lutProperty && !gofProperty){
+           vtkWarningMacro("No 'GradientOpacityFunction' and 'LookupTable' found.");
+   }
+   if (!lutProperty && !gaussfProperty){
+           vtkWarningMacro("No 'GaussianOpacityFunction' and 'LookupTable' found.");
+     }
+   if (!lutProperty && !TDTransfProperty){
+           vtkWarningMacro("No 'TwoDTransferFunction' and 'LookupTable' found.");
+     }
+
+   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
+   vtkSMProxy* sof = vtkSMPropertyHelper(sofProperty).GetAsProxy();
+   vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
+   vtkSMProxy* gaussf = vtkSMPropertyHelper(gaussfProperty).GetAsProxy();
+   vtkSMProxy* TwoDTf = vtkSMPropertyHelper(TDTransfProperty).GetAsProxy();
+
+
+double range[2] = {minScale, maxScale};
+double gofrange[2] = {minGradient, maxGradient};
+   // We need to determine the component number to use from the lut.
+
+
+       // If data range is too small then we tweak it a bit so scalar mapping
+       // produces valid/reproducible results.
+       if (lut)
+         {
+         vtkSMTransferFunctionProxy::RescaleTransferFunction(lut, range, extend);
+         vtkSMProxy* sof_lut = vtkSMPropertyHelper(
+           lut, "ScalarOpacityFunction", true).GetAsProxy();
+         vtkSMProxy* gof_lut = vtkSMPropertyHelper(
+                   lut, "GradientOpacityFunction", true).GetAsProxy();
+         vtkSMProxy* gaussf_lut = vtkSMPropertyHelper(
+                           lut, "GaussianOpacityFunction", true).GetAsProxy();
+         vtkSMProxy* TwoDTf_lut = vtkSMPropertyHelper(
+                                                   lut, "TwoDTransferFunction", true).GetAsProxy();
+         if (sof_lut && sof != sof_lut)
+           {
+           vtkSMTransferFunctionProxy::RescaleTransferFunction(
+             sof_lut, range, extend);
+           }
+         if (gof_lut && gof != gof_lut)
+                   {
+
+                   vtkSMTransferFunctionProxy::RescaleTransferFunction(
+                         gof_lut, gofrange, true);
+                   }
+         if (gaussf_lut && gaussf != gaussf_lut)
+                   {
+
+                   vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+                         gaussf_lut, gofrange, true);
+                   }
+         if (TwoDTf_lut && TwoDTf != TwoDTf_lut)
+                   {
+
+                   vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(
+                           TwoDTf_lut, range, gofrange, true);
+                   }
+
+         }
+       if (sof)
+         {
+         vtkSMTransferFunctionProxy::RescaleTransferFunction(sof, range, extend);
+         }
+       if (gof)
+                   {
+                   vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange, true);
+                   }
+       if (gaussf)
+                   {
+                   vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(gaussf, gofrange, true);
+                   }
+       if (TwoDTf)
+             {
+                 vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(
+                       TwoDTf, range, gofrange, true);
+             }
+
+       return (lut || sof || gof || gaussf || TwoDTf);
+
+
+}
+
+
+//----------------------------------------------------------------------------
 void vtkSMPVRepresentationProxy::SetPropertyModifiedFlag(const char* name, int flag)
 {
   if (!this->InReadXMLAttributes && name && strcmp(name, "Input") == 0)
