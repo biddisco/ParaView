@@ -74,9 +74,15 @@ public:
 	void setMinimumNumberOfGaussians(int);
 	void setCurrentGaussian(int);
 
-	void generateBackgroundHistogram(int* values, int size, bool useLogScale, bool* histogramEnabled);
+	void generateBackgroundHistogram(bool useLogScale);
 
 	void setFunctionRange(double range[2]);
+
+	int currentHistogramSize;
+	bool* histogramEnabled;
+	int* histogramValues;
+	double histogramRange[2];
+	void updateHistogram(double rangeMin, double rangeMax, int histogramSize, int* histogram);
 
 protected:
 	void mouseMoveEvent(QMouseEvent*);

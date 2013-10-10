@@ -104,6 +104,7 @@ void pqHistogramWidget::createPixmap() {
   for (int i = 0; i < width; i++) {
     int end = getTopBinPixel(i, scale);
     QRgb color = histogramEnabled[i] ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
+    int value = histogram[i];
     for (int j = height - 1; j >= end; j--) {
       image->setPixel(i, j, color);
     }

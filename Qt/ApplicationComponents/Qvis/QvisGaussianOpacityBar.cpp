@@ -80,10 +80,12 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject, const char
     currentMode     = modeNone;
     maximumNumberOfGaussians = -1; // unlimited
     minimumNumberOfGaussians =  0;
-
+    currentHistogramSize = -1;
     lasty = -1;
     lastx = -1;
 
+    histogramEnabled = 0;
+    histogramValues = 0;
     // set a default:
     //addGaussian(0.5f, 0.5f, 0.1f, 0.0f, 0);
     //if we add a default in the constructor, it currently crashes
@@ -458,6 +460,61 @@ QvisGaussianOpacityBar::mouseMoveEvent(QMouseEvent *e)
 }
 
 
+//-------------------------------------------------------------------------------
+void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax, int histogramSize, int* histogram){
+  double currentFunctionRange[2];
+  this->gaussianFunctionGroup->GetRange(currentFunctionRange);
+
+
+  if (rangeMin == currentFunctionRange[0] && rangeMax == currentFunctionRange[1] && histogramSize == currentHistogramSize){
+      //no changes to size or range. histogram takes up entire image.
+    for (int i = 0; i< histogramSize; i++){
+        this->histogramValues[i] = histogram[i];
+    }
+    return;
+  }
+
+
+
+  int histMinIndex = int((currentFunctionRange[0]-rangeMin)/(rangeMax-rangeMin)*double(histogramSize)+0.01);
+  int histMaxIndex = int((currentFunctionRange[1]-rangeMin)/(rangeMax-rangeMin)*double(histogramSize)+0.01);
+
+  int newHistogramSize = histMaxIndex-histMinIndex;
+  //newHistogramSize = abs(newHistogramSize);
+  //newHistogramSize = newHistogramSize-histMinIndex;
+
+
+  if(newHistogramSize != currentHistogramSize){ //needa different size
+      if (this->histogramEnabled){
+        delete this->histogramEnabled;
+      }
+      this->histogramEnabled = new bool[newHistogramSize];
+      if (this->histogramValues){
+        delete this->histogramValues;
+      }
+      this->histogramValues = new int[newHistogramSize];
+  }
+  for (int i = 0; i< newHistogramSize; i++){
+      histogramValues[i] = 0;
+      this->histogramEnabled[i] = true;
+  }
+//  if ((histMinIndex<0 && histMaxIndex < 0) ||(histMinIndex>histogramSize && histMaxIndex > histogramSize))
+ //   return; //outside of histogram
+
+
+  int index = std::max(histMinIndex,0); //index = histmindindex if the guassian min range is higher
+  for (int i = std::max(-histMinIndex,0); i<histMaxIndex && index < histogramSize; i++, index++){
+      histogramValues[i] = histogram[index];
+  }
+
+  currentHistogramSize = newHistogramSize;
+
+
+
+
+}
+
+
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::mouseReleaseEvent
 //
@@ -601,22 +658,22 @@ if (histogram[bin] == 0){
 
 
 
-void QvisGaussianOpacityBar::generateBackgroundHistogram(int* values, int size, bool useLogScale, bool* histogramEnabled){
-
+void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale){
+this->showBackgroundPixmap = true;
 
 int enabledBarsHeight = 8;
 
-	int width = size;
+	int width = currentHistogramSize;
 		int height = this->contentsRect().height();
 
 		//get max value
 		int max = 0;
 		int currentUnEnabledMax = 0;
 		for (int i = 0; i < width; i++) {
-			if (values[i] > max && histogramEnabled[i])
-				max = values[i];
-			if (values[i] > currentUnEnabledMax && !histogramEnabled[i])
-				currentUnEnabledMax = values[i];
+			if (histogramValues[i] > max && histogramEnabled[i])
+				max = histogramValues[i];
+			if (histogramValues[i] > currentUnEnabledMax && !histogramEnabled[i])
+				currentUnEnabledMax = histogramValues[i];
 		}
 
 
@@ -631,7 +688,7 @@ int enabledBarsHeight = 8;
 		image->fill(0);
 
 		for (int i = 0; i < width; i++) {
-			int end = getTopBinPixel(i,scale,values,max,currentUnEnabledMax,useLogScale,enabledBarsHeight,histogramEnabled);
+			int end = getTopBinPixel(i,scale,histogramValues,max,currentUnEnabledMax,useLogScale,enabledBarsHeight,histogramEnabled);
 			QRgb color = histogramEnabled[i] ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
 			for (int j = height - 1; j >= end; j--) {
 				image->setPixel(i, j, color);

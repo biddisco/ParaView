@@ -628,25 +628,33 @@ pqColorOpacityEditorWidget::showHistogramWidget()
     {
       std::cout<< "Did not find SupportHistogramWidget in showhistogramtest" << std::endl;
     }
+/*
+  if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+      repr->getProxy()->InvokeCommand("UpdateGradientRange");
+    double gofrange[2] = {0, 1};
+      this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+      vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
+      */
 
-
-
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+double gradientrange[2];
+  if (repr->getProxy()->GetProperty("GradientRange")){
+      repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
+      vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,2);
+  }
+  ui.GaussianOpacityEditor->updateHistogram(gradientrange[0],gradientrange[1],info->sizeOfX,info->values);
   int enabledBarsHeight;
-  bool * useBin = new bool[info->sizeOfX];
-  for (int i = 0; i < info->sizeOfX; i++)
-    {
-      useBin[i] = true;
-    }
+
   bool logscale = false;
-  pqHistogramDialog dialog(this, info->values, info->sizeOfX, useBin, &logscale,
+  pqHistogramDialog dialog(this, ui.GaussianOpacityEditor->histogramValues, ui.GaussianOpacityEditor->currentHistogramSize,ui.GaussianOpacityEditor->histogramEnabled, &logscale,
       &enabledBarsHeight);
   //dialog.setData();
   dialog.exec();
   //dialog.
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
 
-  ui.GaussianOpacityEditor->generateBackgroundHistogram(info->values,
-      info->sizeOfX, logscale, useBin);
+
+  ui.GaussianOpacityEditor->generateBackgroundHistogram(logscale);
+  this->update();
 }
 
 //-----------------------------------------------------------------------------
@@ -985,6 +993,13 @@ pqColorOpacityEditorWidget::resetRangeToData()
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   // std::cout << "width "<<ui.GaussianOpacityEditor->contentsRect().width() << std::endl;
   // repr->setProperty("HistogramBins",ui.GaussianOpacityEditor->contentsRect().width());
+  /*
+   * if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+    repr->getProxy()->InvokeCommand("UpdateGradientRange");
+  double gofrange[2] = {0, 1};
+    this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+    vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
+    */
 
   // vtkSMProperty* temp = repr->getProxy()->GetProperty("HistogramBins");
   // vtkSMPropertyHelper bins(temp);
