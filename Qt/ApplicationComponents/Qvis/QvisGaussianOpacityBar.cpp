@@ -580,13 +580,13 @@ if (histogram[bin] == 0){
 
 		if(!histogramEnabled[bin] && histogram[bin]>currentMax){
 				if(logScale)
-					finalheight = float(enabledBarsHeight) - float(enabledBarsHeight)*std::max((log10(float(histogram[bin]-currentMax))/log10(float(currentUnEnabledMax-currentMax))),0.0);
+					finalheight = float(enabledBarsHeight) - float(enabledBarsHeight)*std::max((double)(log10(float(histogram[bin]-currentMax))/log10(float(currentUnEnabledMax-currentMax))),0.0);
 				else
 					finalheight = float(enabledBarsHeight) - float(enabledBarsHeight)*(float(histogram[bin]-currentMax)/float(currentUnEnabledMax-currentMax));
 		}
 		else{
 			if(logScale)
-				finalheight = int(scale*std::max(log10(float(histogram[bin])),0.0));
+				finalheight = int(scale*std::max((double)log10(float(histogram[bin])),0.0));
 			else
 				finalheight = int(scale*float(histogram[bin]));
 
@@ -622,7 +622,7 @@ int enabledBarsHeight = 8;
 
 		float scale;
 		if (useLogScale)
-			scale = float(height - enabledBarsHeight) / float(log10(max));
+			scale = float(height - enabledBarsHeight) / float(log10((float)max));
 		else
 			scale = float(height - enabledBarsHeight) / float(max);
 

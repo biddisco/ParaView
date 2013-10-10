@@ -66,7 +66,7 @@ Qvis2DTransferFunctionWidget::addRegion(double _x,double _y, double _w, double _
 	double functionY = _y*this->transferFunction->getYRange() + yshift;
 	double functionW = _w*this->transferFunction->getXRange();
 	double functionH = _h*this->transferFunction->getYRange();
-	this->transferFunction->AddRegion(functionX,functionY,functionW,functionH,mode,max);
+	return this->transferFunction->AddRegion(functionX,functionY,functionW,functionH,mode,max);
 
 }
 

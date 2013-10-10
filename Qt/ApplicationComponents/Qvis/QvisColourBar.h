@@ -8,11 +8,12 @@
 #ifndef QVIS_COLOUR_BAR_H
 #define QVIS_COLOUR_BAR_H
 //---------------------------------------------------------------------------
+#include "pqApplicationComponentsModule.h"
 #include "QvisAbstractOpacityBar.h"
 //---------------------------------------------------------------------------
 class QPixmap;
 //---------------------------------------------------------------------------
-class QvisColourBar : public QvisAbstractOpacityBar
+class PQAPPLICATIONCOMPONENTS_EXPORT QvisColourBar : public QvisAbstractOpacityBar
 {
     Q_OBJECT
   public:

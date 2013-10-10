@@ -2,7 +2,7 @@
 #define __pqHistogramDialog_h
 
 
-#include "pqComponentsModule.h"
+#include "pqApplicationComponentsModule.h"
 #include <QDialog>
 #include "vtkType.h"
 #include <qframe.h>
@@ -12,7 +12,7 @@ class pqHistogramWidget;
 class pqHistogramDialogUi;
 
 
-class PQCOMPONENTS_EXPORT pqHistogramDialog : public QDialog
+class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramDialog : public QDialog
 {
   Q_OBJECT
 

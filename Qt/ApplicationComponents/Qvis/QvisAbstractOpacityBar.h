@@ -39,6 +39,7 @@
 #define QvisAbstractOpacityBar_H
 
 #include <qframe.h>
+#include "pqApplicationComponentsModule.h"
 
 class QPixmap;
 
@@ -52,7 +53,7 @@ class QPixmap;
 //  Creation:    January 30, 2001
 //
 // ****************************************************************************
-class QvisAbstractOpacityBar : public QFrame
+class PQAPPLICATIONCOMPONENTS_EXPORT QvisAbstractOpacityBar : public QFrame
 {
     Q_OBJECT
   public:

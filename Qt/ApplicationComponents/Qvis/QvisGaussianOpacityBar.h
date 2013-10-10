@@ -38,6 +38,7 @@
 #ifndef QVIS_GAUSSIAN_OPACITY_BAR_H
 #define QVIS_GAUSSIAN_OPACITY_BAR_H
 
+#include "pqApplicationComponentsModule.h"
 #include "QvisAbstractOpacityBar.h"
 #include "vtkType.h"
 #include "vtkSmartPointer.h"
@@ -58,7 +59,7 @@ class vtkGaussianPiecewiseFunction;
 //
 // ****************************************************************************
 
-class QvisGaussianOpacityBar: public QvisAbstractOpacityBar {
+class PQAPPLICATIONCOMPONENTS_EXPORT QvisGaussianOpacityBar: public QvisAbstractOpacityBar {
 Q_OBJECT
 public:
 	QvisGaussianOpacityBar(QWidget *parent = NULL, const char *name = NULL);

@@ -12,12 +12,13 @@
 #define QVIS_2D_TRANSFER_FUNCTION_WIDGET_H
 //---------------------------------------------------------------------------
 #include "QvisAbstractOpacityBar.h"
+#include "pqApplicationComponentsModule.h"
 #include "vtkTwoDTransferFunction.h"
 #include "vtkSmartPointer.h"
 //---------------------------------------------------------------------------
 class QPixmap;
 //---------------------------------------------------------------------------
-class Qvis2DTransferFunctionWidget : public QvisAbstractOpacityBar
+class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisAbstractOpacityBar
 {
     Q_OBJECT
   public:

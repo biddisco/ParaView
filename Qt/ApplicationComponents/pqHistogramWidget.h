@@ -4,12 +4,12 @@
 
 
 #include <QWidget>
-#include "pqComponentsModule.h"
+#include "pqApplicationComponentsModule.h"
 #include "vtkType.h"
 
 class QPixmap;
 
-class PQCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
+class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
 {
   Q_OBJECT
   typedef QWidget Superclass;
