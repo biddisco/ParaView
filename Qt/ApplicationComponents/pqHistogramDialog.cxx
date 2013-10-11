@@ -58,7 +58,6 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 
 
 void pqHistogramDialog::resizeEvent(QResizeEvent* event){
-  std::cout << "dialog window resized" << std::endl;
 
   QWidget::resizeEvent(event);
 
