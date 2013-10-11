@@ -1546,7 +1546,9 @@
                       panel_visibility="never" />      
           	<Property name="DisableGradientOpacity"
                       panel_visibility="never" />
-                      <Property name="SwitchGradientOpacity"
+            <Property name="SwitchGradientOpacity"
+                      panel_visibility="never" />
+            <Property name="SwitchScalarOpacity"
                       panel_visibility="never" />
             <Property name="GaussianOpacityFunction"
                       panel_visibility="never" />
@@ -2079,6 +2081,14 @@
       <IntVectorProperty command="SetSwitchGradientOpacity"
                          default_values="1"
                          name="SwitchGradientOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Switch between gaussian and linear gradient function
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty command="SetSwitchScalarOpacity"
+                         default_values="1"
+                         name="SwitchScalarOpacity"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
         <Documentation>Switch between gaussian and linear gradient function

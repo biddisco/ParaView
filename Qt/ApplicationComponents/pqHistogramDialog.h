@@ -18,7 +18,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramDialog : public QDialog
 
 public :
 
-  pqHistogramDialog(QWidget *widgetParent, int* hist, int size, bool* histogramEn, bool* logScal, int* enabledBarsHeigh);
+  pqHistogramDialog(QWidget *widgetParent, int* hist, int size, bool* histogramEn, bool* logScal, float* enabledBarsHeighfrac);
   ~pqHistogramDialog();
 
   //void setData(int* hist, int size, bool* histogramEn, bool* logScale);
@@ -52,7 +52,8 @@ void resizeImage(int width, int height);
 
     int* histogram;
     bool* histogramEnabled;
-    int *enabledBarsHeight;
+    float *enabledBarsHeightFraction;
+    void resizeEvent(QResizeEvent* event);
 
 
 

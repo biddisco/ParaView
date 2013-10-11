@@ -19,7 +19,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
 
 
   public :
-  void SetData(bool* histogramEnable, int* histogra, int histogramSiz, bool logSc, int enabledBarsHeigh);
+  void SetData(bool* histogramEnable, int* histogra, int histogramSiz, bool logSc, float enabledBarsFrac);
   pqHistogramWidget();
   pqHistogramWidget(QWidget* parentObject);
 
@@ -40,6 +40,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
   void   mousePressEvent(QMouseEvent*);
   void   mouseDoubleClickEvent(QMouseEvent*);
   void   paintEvent(QPaintEvent *e);
+  void calculateEnabledBarsHeight();
   int histogramSize;
     int* histogram;
     bool* histogramEnabled;
@@ -53,6 +54,12 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramWidget : public QWidget
     void scaleAndDraw();
     int enabledBarsHeight;
     int getTopBinPixel(int bin, float scale);
+
+    float enabledBarsHeightFraction; //this is the portion of the image that the enabled bars will take up.
+    //don't get confused by the fact that the origin is in the top left -> the larger the fraction the smaller the higher.
+
+
+    void resizeEvent(QResizeEvent* event);
 
     bool logScale;
 

@@ -140,6 +140,7 @@ virtual void GetGradientRange (double _arg[2])
   void SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
   void SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf);
   void SetSwitchGradientOpacity(bool GaussOrPwf);
+  void SetSwitchScalarOpacity(bool GaussOrPwf);
   void SetScalarOpacityUnitDistance(double val);
   void SetAmbient(double);
   void SetDiffuse(double);

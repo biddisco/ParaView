@@ -376,7 +376,13 @@ void vtkImageVolumeRepresentation::SetTwoDTransferFunction(vtkTwoDTransferFuncti
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetSwitchGradientOpacity(bool GaussOrPwf)
 {
-  this->Property->SwitchGaussianOpacity(GaussOrPwf);
+  this->Property->SwitchGradientOpacity(GaussOrPwf);
+}
+
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetSwitchScalarOpacity(bool GaussOrPwf)
+{
+  this->Property->SwitchScalarOpacity(GaussOrPwf);
 }
 
 //----------------------------------------------------------------------------

@@ -449,6 +449,9 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   pqGaussianOpacityFunction* gaof =
       this->createGaussianOpacityFunction(server, "Gaussian_Stuff", 1, 0);
     vtkSMPropertyHelper(lutProxy, "GaussianOpacityFunction").Set(gaof->getProxy());
+    pqGaussianOpacityFunction* sgaof =
+          this->createGaussianOpacityFunction(server, "Scalar_Gaussian_Stuff", 1, 0);
+        vtkSMPropertyHelper(lutProxy, "ScalarGaussianOpacityFunction").Set(sgaof->getProxy());
 
     pqTwoDTransferFunction* tdtf =
     this->createTwoDTransferFunction(server, "TwoD_Stuff", 1, 0);

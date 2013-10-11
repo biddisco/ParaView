@@ -630,6 +630,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
   vtkSMProxy* opf = 0;
   vtkSMProxy* gpf = 0;
   vtkSMProxy* gausspf = 0;
+  vtkSMProxy* scalarGausspf = 0;
   vtkSMProxy* TDTf = 0;
   if (lut_mgr)
     {
@@ -650,6 +651,10 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
    pqGaussianOpacityFunction* pqGaussPF = lut_mgr->getGaussianOpacityFunction(
 			this->getServer(), "Gaussian_Stuff", 1, 0);
 		  gausspf = (pqGaussPF)? pqGaussPF->getProxy() : 0;
+
+    pqGaussianOpacityFunction* pqScalarGaussPF = lut_mgr->getGaussianOpacityFunction(
+                           this->getServer(), "Scalar_Gaussian_Stuff", 1, 0);
+                     scalarGausspf = (pqScalarGaussPF)? pqScalarGaussPF->getProxy() : 0;
 
 
 	  pqTwoDTransferFunction* pqTwoDTransFunc = lut_mgr->getTwoDTransferFunction(
@@ -687,6 +692,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       
     opf = this->createOpacityFunctionProxy("ScalarOpacityFunction", repr);
     gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
+    scalarGausspf = this->createGaussianOpacityFunctionProxy("ScalarGaussianOpacityFunction", repr);
     gausspf = this->createGaussianOpacityFunctionProxy("GaussianOpacityFunction", repr);
     TDTf = this->createTwoDTransferFunctionProxy("TwoDTransferFunction", repr);
     }

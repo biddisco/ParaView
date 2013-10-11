@@ -72,6 +72,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqColorOpacityEditorWidget :
   Q_PROPERTY(QList<QVariant> xrgbPoints READ xrgbPoints WRITE setXrgbPoints)
   Q_PROPERTY(QList<QVariant> xvmsPoints READ xvmsPoints WRITE setXvmsPoints)
   Q_PROPERTY(QList<QVariant> gvmsPoints READ gvmsPoints WRITE setGvmsPoints)
+  Q_PROPERTY(QList<QVariant> ScalarxhwbbPoints READ ScalarxhwbbPoints WRITE setScalarXhwbbPoints)
   Q_PROPERTY(QList<QVariant> xhwbbPoints READ xhwbbPoints WRITE setXhwbbPoints)
   Q_PROPERTY(QList<QVariant> twoDTransferPoints READ twoDTransferPoints WRITE settwoDTransferPoints)
   Q_PROPERTY(bool useLogScale READ useLogScale WRITE setUseLogScale)
@@ -93,6 +94,7 @@ public:
   /// function. This a list of 4-tuples.
   QList<QVariant> gvmsPoints() const;
 
+  QList<QVariant> ScalarxhwbbPoints() const;
   QList<QVariant> xhwbbPoints() const;
 
   QList<QVariant> twoDTransferPoints() const;
@@ -115,7 +117,8 @@ public slots:
   /// Sets the xrgbPoints that control the color transfer function.
   void setXrgbPoints(const QList<QVariant>&);
 
-  /// Sets the xrgbPoints that control the color transfer function.
+  void setScalarXhwbbPoints(const QList<QVariant>& values);
+
   void setXhwbbPoints(const QList<QVariant>& values);
 
   void settwoDTransferPoints(const QList<QVariant>& values);
@@ -146,7 +149,21 @@ public slots:
   /// save current transfer function as preset.
   void saveAsPreset();
 
+  void switchScalarOpacity();
+
   void switchGradientOpacity();
+
+  void showGradientFunctions();
+  void hideGradientFunctions();
+
+
+
+
+
+
+
+
+
 
 signals:
   /// Signal fired when the xrgbPoints change.
@@ -157,6 +174,10 @@ signals:
 
   /// Signal fired when the gradient points change.
   void gvmsPointsChanged();
+
+
+  /// Signal fired when the gradient points change.
+    void ScalarxhwbbPointsChanged();
 
   /// Signal fired when the gradient points change.
   void xhwbbPointsChanged();

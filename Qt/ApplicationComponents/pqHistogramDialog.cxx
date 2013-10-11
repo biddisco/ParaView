@@ -10,7 +10,7 @@
 
 class pqHistogramDialogUi : public Ui::pqHistogramDialog {};
 
-pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size, bool* histogramEn, bool* logScal, int* enabledBarsHeigh)
+pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size, bool* histogramEn, bool* logScal, float* enabledBarsHeighfrac)
   : QDialog(widgetParent)
 {
 
@@ -20,8 +20,8 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 	  finalHistogramEnabled = 0;
 	  this->histogram = hist;
 
-	  this->enabledBarsHeight = enabledBarsHeigh;
-	  *(this->enabledBarsHeight) = 50; //the lower the number is, the higher the bars
+	  this->enabledBarsHeightFraction = enabledBarsHeighfrac;
+	  *(this->enabledBarsHeightFraction) = 0.8; //the lower the number is, the higher the bars
 
 
 
@@ -46,7 +46,7 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 	  	this->finallogScale = logScal;
 	  	this->logScale = *logScal;
 
-	  	this->dialogUi->HistogramWidget->SetData(histogramEnabled,histogram,this->histogramSize, *logScal, *enabledBarsHeight);
+	  	this->dialogUi->HistogramWidget->SetData(histogramEnabled,histogram,this->histogramSize, *logScal, *enabledBarsHeightFraction);
 
 
 		this->histogramSize=size;
@@ -56,6 +56,13 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 
 }
 
+
+void pqHistogramDialog::resizeEvent(QResizeEvent* event){
+  std::cout << "dialog window resized" << std::endl;
+
+  QWidget::resizeEvent(event);
+
+}
 
 
 
