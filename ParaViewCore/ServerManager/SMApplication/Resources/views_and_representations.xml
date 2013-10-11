@@ -1550,6 +1550,8 @@
                       panel_visibility="never" />
             <Property name="SwitchScalarOpacity"
                       panel_visibility="never" />
+            <Property name="ScalarGaussianOpacityFunction"
+                      panel_visibility="never" />
             <Property name="GaussianOpacityFunction"
                       panel_visibility="never" />
             <Property name="TwoDTransferFunction"
@@ -2094,6 +2096,13 @@
         <Documentation>Switch between gaussian and linear gradient function
         </Documentation>
       </IntVectorProperty>
+      <ProxyProperty command="SetScalarGaussianOpacity"
+                     name="ScalarGaussianOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="gaussian_piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
        <ProxyProperty command="SetGaussianOpacity"
                      name="GaussianOpacityFunction"
                      skip_dependency="1">

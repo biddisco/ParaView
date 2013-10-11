@@ -197,6 +197,7 @@ protected slots:
   void opacityCurrentChanged(vtkIdType);
   void gradientCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
+  void scalargaussianCurrentChanged(int index);
   void gaussianCurrentChanged(int index);
   void TwoDTransferCurrentChanged(int index);
   void showHistogramWidget();

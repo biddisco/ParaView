@@ -137,6 +137,7 @@ virtual void GetGradientRange (double _arg[2])
   void SetColor(vtkColorTransferFunction* lut);
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
   void SetGradientOpacity(vtkPiecewiseFunction* pwf);
+  void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
   void SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
   void SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf);
   void SetSwitchGradientOpacity(bool GaussOrPwf);
@@ -149,6 +150,7 @@ virtual void GetGradientRange (double _arg[2])
   void SetShade(bool);
   void SetIndependantComponents(bool);
   
+
   void SetDisableGradientOpacity(bool use);
 
   //***************************************************************************

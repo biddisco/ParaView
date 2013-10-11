@@ -88,6 +88,11 @@ Qvis2DTransferFunctionWidget::Region Qvis2DTransferFunctionWidget::getRegion(int
 }
 
 
+/*
+ *   ((p-r1Min)/(r1Max-r1Min))*(r2Max-r2Min)+r2Min
+      ((p-0)/(1))*(r2Max-r2Min)+r2Min
+ */
+
 //TBD convert space
 double Qvis2DTransferFunctionWidget::getRegionValue(int index, vtkTwoDTransferFunction::regionvalue value){
   double xshift = this->transferFunction->GetRangeAtIndex(0);
@@ -126,6 +131,7 @@ void  Qvis2DTransferFunctionWidget::setRegion(int index, Qvis2DTransferFunctionW
 
 //TBD convert space
 void Qvis2DTransferFunctionWidget::setRegionValue(int index, double value, vtkTwoDTransferFunction::regionvalue v){
+
   double xshift = this->transferFunction->GetRangeAtIndex(0);
   double yshift = this->transferFunction->GetRangeAtIndex(2);
 

@@ -364,6 +364,13 @@ void vtkImageVolumeRepresentation::SetGradientOpacity(vtkPiecewiseFunction* pwf)
 }
 
 //----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction* pwf)
+{
+  this->Property->SetScalarGaussianOpacity(pwf);
+}
+
+
+//----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf)
 {
   this->Property->SetGaussianOpacity(pwf);

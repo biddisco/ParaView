@@ -382,6 +382,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
   vtkSMProperty* sofProperty = this->GetProperty("ScalarOpacityFunction");
   vtkSMProperty* gofProperty = this->GetProperty("GradientOpacityFunction");
+  vtkSMProperty* sgaussfProperty = this->GetProperty("ScalarGaussianOpacityFunction");
   vtkSMProperty* gaussfProperty = this->GetProperty("GaussianOpacityFunction");
   vtkSMProperty* TDTransfProperty = this->GetProperty("TwoDTransferFunction");
   if (!lutProperty && !sofProperty)
@@ -395,6 +396,9 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   if (!lutProperty && !gaussfProperty){
   	  vtkWarningMacro("No 'GaussianOpacityFunction' and 'LookupTable' found.");
     }
+  if (!lutProperty && !sgaussfProperty){
+            vtkWarningMacro("No 'ScalarGaussianOpacityFunction' and 'LookupTable' found.");
+      }
   if (!lutProperty && !TDTransfProperty){
   	  vtkWarningMacro("No 'TwoDTransferFunction' and 'LookupTable' found.");
     }
@@ -402,6 +406,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
   vtkSMProxy* sof = vtkSMPropertyHelper(sofProperty).GetAsProxy();
   vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
+  vtkSMProxy* sgaussf = vtkSMPropertyHelper(gaussfProperty).GetAsProxy();
   vtkSMProxy* gaussf = vtkSMPropertyHelper(gaussfProperty).GetAsProxy();
   vtkSMProxy* TwoDTf = vtkSMPropertyHelper(TDTransfProperty).GetAsProxy();
 
@@ -447,6 +452,8 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
           lut, "ScalarOpacityFunction", true).GetAsProxy();
         vtkSMProxy* gof_lut = vtkSMPropertyHelper(
                   lut, "GradientOpacityFunction", true).GetAsProxy();
+        vtkSMProxy* sgaussf_lut = vtkSMPropertyHelper(
+                                  lut, "ScalarGaussianOpacityFunction", true).GetAsProxy();
         vtkSMProxy* gaussf_lut = vtkSMPropertyHelper(
                           lut, "GaussianOpacityFunction", true).GetAsProxy();
         vtkSMProxy* TwoDTf_lut = vtkSMPropertyHelper(
@@ -462,6 +469,12 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(
 			gof_lut, gofrange, true);
 		  }
+        if (sgaussf_lut && sgaussf != sgaussf_lut)
+                          {
+
+                          vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+                                sgaussf_lut, range, true);
+                          }
         if (gaussf_lut && gaussf != gaussf_lut)
 		  {
 
@@ -484,6 +497,10 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		  {
 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange, true);
 		  }
+      if (sgaussf)
+                {
+                vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(sgaussf, range, true);
+                }
       if (gaussf)
       		  {
       		  vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(gaussf, gofrange, true);
@@ -494,7 +511,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
                       TwoDTf, range, gofrange, true);
             }
 
-      return (lut || sof || gof || gaussf || TwoDTf);
+      return (lut || sof || gof ||  sgaussf || gaussf || TwoDTf);
       }
 
     }

@@ -732,6 +732,12 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       repr->UpdateVTKObjects();
     }
 
+  if (scalarGausspf) {
+        pqSMAdaptor::setProxyProperty(
+          repr->GetProperty("ScalarGaussianOpacityFunction"), scalarGausspf);
+        repr->UpdateVTKObjects();
+      }
+
   if (TDTf) {
         pqSMAdaptor::setProxyProperty(
           repr->GetProperty("TwoDTransferFunction"), TDTf);

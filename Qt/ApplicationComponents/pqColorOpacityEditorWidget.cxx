@@ -646,6 +646,13 @@ pqColorOpacityEditorWidget::colorCurrentChanged(vtkIdType index)
 
 //-----------------------------------------------------------------------------
 void
+pqColorOpacityEditorWidget::scalargaussianCurrentChanged(int index)
+{
+
+}
+
+//-----------------------------------------------------------------------------
+void
 pqColorOpacityEditorWidget::gaussianCurrentChanged(int index)
 {
   if (index != -1)
