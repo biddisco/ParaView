@@ -201,6 +201,8 @@
         <file>Icons/pqStructuredGrid16.png</file>
         <file>Icons/pqSurfaceSelectionCell24.png</file>
         <file>Icons/pqSurfaceSelectionPoint24.png</file>
+        <file>Icons/pqTangentOn.png</file>
+        <file>Icons/pqTangentOff.png</file>
         <file>Icons/pqThreshold24.png</file>
         <file>Icons/pqTopCenter32.png</file>
         <file>Icons/pqTopLeftCorner32.png</file>
