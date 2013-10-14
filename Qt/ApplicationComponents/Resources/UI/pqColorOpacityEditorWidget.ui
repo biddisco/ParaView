@@ -79,7 +79,7 @@
         </widget>
        </item>
        <item>
-        <widget class="pqTransferFunctionWidget" name="GradientOpacityEditor" native="true">
+        <widget class="pqTransferFunctionWidget" name="GradientLinearOpacityEditor" native="true">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -89,7 +89,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QvisGaussianOpacityBar" name="GaussianOpacityEditor" native="true">
+        <widget class="QvisGaussianOpacityBar" name="GradientGaussianOpacityEditor" native="true">
          <property name="minimumSize">
           <size>
            <width>0</width>

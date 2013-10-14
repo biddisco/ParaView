@@ -442,11 +442,11 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   // An opacity function is created as a "slave" to this lookup table
   pqScalarOpacityFunction* gof = this->createOpacityFunction(server,
 	  "Gradient_Stuff", 1, 0);
-  vtkSMPropertyHelper(lutProxy, "GradientOpacityFunction").Set(gof->getProxy());
+  vtkSMPropertyHelper(lutProxy, "GradientLinearOpacityFunction").Set(gof->getProxy());
 
   pqGaussianOpacityFunction* gaof = this->createGaussianOpacityFunction(server,
 	  "Gaussian_Stuff", 1, 0);
-  vtkSMPropertyHelper(lutProxy, "GaussianOpacityFunction").Set(
+  vtkSMPropertyHelper(lutProxy, "GradientGaussianOpacityFunction").Set(
 	  gaof->getProxy());
   pqGaussianOpacityFunction* sgaof = this->createGaussianOpacityFunction(server,
 	  "Scalar_Gaussian_Stuff", 1, 0);

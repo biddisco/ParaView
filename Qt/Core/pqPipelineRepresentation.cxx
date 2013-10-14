@@ -629,7 +629,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
   vtkSMProxy* lut = 0;
   vtkSMProxy* opf = 0;
   vtkSMProxy* gpf = 0;
-  vtkSMProxy* gausspf = 0;
+  vtkSMProxy* gradientGausspf = 0;
   vtkSMProxy* scalarGausspf = 0;
   vtkSMProxy* TDTf = 0;
   if (lut_mgr)
@@ -648,9 +648,9 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
          this->getServer(), "Gradient_Stuff", 1, 0);
        gpf = (pqGPF)? pqGPF->getProxy() : 0;
 
-   pqGaussianOpacityFunction* pqGaussPF = lut_mgr->getGaussianOpacityFunction(
+   pqGaussianOpacityFunction* pqGradientGaussPF = lut_mgr->getGaussianOpacityFunction(
 			this->getServer(), "Gaussian_Stuff", 1, 0);
-		  gausspf = (pqGaussPF)? pqGaussPF->getProxy() : 0;
+		  gradientGausspf = (pqGradientGaussPF)? pqGradientGaussPF->getProxy() : 0;
 
     pqGaussianOpacityFunction* pqScalarGaussPF = lut_mgr->getGaussianOpacityFunction(
                            this->getServer(), "Scalar_Gaussian_Stuff", 1, 0);
@@ -691,9 +691,9 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       }
       
     opf = this->createOpacityFunctionProxy("ScalarOpacityFunction", repr);
-    gpf = this->createOpacityFunctionProxy("GradientOpacityFunction", repr);
+    gpf = this->createOpacityFunctionProxy("GradientLinearOpacityFunction", repr);
     scalarGausspf = this->createGaussianOpacityFunctionProxy("ScalarGaussianOpacityFunction", repr);
-    gausspf = this->createGaussianOpacityFunctionProxy("GaussianOpacityFunction", repr);
+    gradientGausspf = this->createGaussianOpacityFunctionProxy("GradientGaussianOpacityFunction", repr);
     TDTf = this->createTwoDTransferFunctionProxy("TwoDTransferFunction", repr);
     }
 
@@ -722,13 +722,13 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
 
   if (gpf) {
     pqSMAdaptor::setProxyProperty(
-      repr->GetProperty("GradientOpacityFunction"), gpf);
+      repr->GetProperty("GradientLinearOpacityFunction"), gpf);
     repr->UpdateVTKObjects();
   }
 
-  if (gausspf) {
+  if (gradientGausspf) {
       pqSMAdaptor::setProxyProperty(
-        repr->GetProperty("GaussianOpacityFunction"), gausspf);
+        repr->GetProperty("GradientGaussianOpacityFunction"), gradientGausspf);
       repr->UpdateVTKObjects();
     }
 

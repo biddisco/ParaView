@@ -66,6 +66,12 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   vtkMath::UninitializeBounds(this->DataBounds);
   this->GradientVectorComponent = 0;
   this->GradientArrayName = NULL;
+
+  this->histogram = 0;
+  this->GradientHistogram = 0;
+  this->histogramsize = 0;
+  this->UseGradientFunction = 0;
+  this->SupportHistogramWidget = true;
   // this->GradientRange = vtkDoubleArray::New();
   //this->GradientRange->SetNumberOfComponents(2);
   // GradientRange[0] = 0.0;
@@ -371,9 +377,9 @@ vtkImageVolumeRepresentation::SetScalarOpacity(vtkPiecewiseFunction* pwf)
 
 //----------------------------------------------------------------------------
 void
-vtkImageVolumeRepresentation::SetGradientOpacity(vtkPiecewiseFunction* pwf)
+vtkImageVolumeRepresentation::SetGradientLinearOpacity(vtkPiecewiseFunction* pwf)
 {
-  this->Property->SetGradientOpacity(pwf);
+  this->Property->SetGradientLinearOpacity(pwf);
 }
 
 //----------------------------------------------------------------------------
@@ -386,10 +392,10 @@ vtkImageVolumeRepresentation::SetScalarGaussianOpacity(
 
 //----------------------------------------------------------------------------
 void
-vtkImageVolumeRepresentation::SetGaussianOpacity(
+vtkImageVolumeRepresentation::SetGradientGaussianOpacity(
     vtkGaussianPiecewiseFunction* pwf)
 {
-  this->Property->SetGaussianOpacity(pwf);
+  this->Property->SetGradientGaussianOpacity(pwf);
 }
 
 void
@@ -485,13 +491,13 @@ vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
 {
   if (use)
     {
-      this->Property->DisableGradientOpacityOff(0);
-      this->Property->DisableGaussianOpacityOff(0);
+      this->Property->DisableGradientLinearOpacityOff(0);
+      this->Property->DisableGradientGaussianOpacityOff(0);
     }
   else
     {
-      this->Property->DisableGradientOpacityOn(0);
-      this->Property->DisableGaussianOpacityOn(0);
+      this->Property->DisableGradientLinearOpacityOn(0);
+      this->Property->DisableGradientGaussianOpacityOn(0);
     }
 }
 

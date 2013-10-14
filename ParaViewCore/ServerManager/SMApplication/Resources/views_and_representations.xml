@@ -1534,7 +1534,7 @@
                       panel_visibility="never" />
             <Property name="ScalarOpacityFunction"
                       panel_visibility="never" />
-            <Property name="GradientOpacityFunction"
+            <Property name="GradientLinearOpacityFunction"
                       panel_visibility="never" />
             <Property name="GradientRange"
                       panel_visibility="never" />
@@ -1552,7 +1552,7 @@
                       panel_visibility="never" />
             <Property name="ScalarGaussianOpacityFunction"
                       panel_visibility="never" />
-            <Property name="GaussianOpacityFunction"
+            <Property name="GradientGaussianOpacityFunction"
                       panel_visibility="never" />
             <Property name="TwoDTransferFunction"
                       panel_visibility="never" />
@@ -2065,8 +2065,8 @@
           <Group name="piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
-      <ProxyProperty command="SetGradientOpacity"
-                     name="GradientOpacityFunction"
+      <ProxyProperty command="SetGradientLinearOpacity"
+                     name="GradientLinearOpacityFunction"
                      skip_dependency="1">
         <ProxyGroupDomain name="groups">
           <Group name="piecewise_functions" />
@@ -2103,8 +2103,8 @@
           <Group name="gaussian_piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
-       <ProxyProperty command="SetGaussianOpacity"
-                     name="GaussianOpacityFunction"
+       <ProxyProperty command="SetGradientGaussianOpacity"
+                     name="GradientGaussianOpacityFunction"
                      skip_dependency="1">
         <ProxyGroupDomain name="groups">
           <Group name="gaussian_piecewise_functions" />

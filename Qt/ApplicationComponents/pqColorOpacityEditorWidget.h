@@ -195,10 +195,10 @@ protected slots:
   /// slots called when the current point changes on the two internal
   /// pqTransferFunctionWidget widgets.
   void opacityCurrentChanged(vtkIdType);
-  void gradientCurrentChanged(vtkIdType);
+  void gradientLinearCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
-  void scalargaussianCurrentChanged(int index);
-  void gaussianCurrentChanged(int index);
+  void scalarGaussianCurrentChanged(int index);
+  void gradientGaussianCurrentChanged(int index);
   void TwoDTransferCurrentChanged(int index);
   void showHistogramWidget();
 

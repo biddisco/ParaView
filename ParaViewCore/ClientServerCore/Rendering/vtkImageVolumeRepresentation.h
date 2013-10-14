@@ -137,9 +137,9 @@ public:
   void SetInterpolationType(int val);
   void SetColor(vtkColorTransferFunction* lut);
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
-  void SetGradientOpacity(vtkPiecewiseFunction* pwf);
+  void SetGradientLinearOpacity(vtkPiecewiseFunction* pwf);
   void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
-  void SetGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
+  void SetGradientGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
   void SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf);
   void SetSwitchGradientOpacity(bool GaussOrPwf);
   void SetSwitchScalarOpacity(bool GaussOrPwf);

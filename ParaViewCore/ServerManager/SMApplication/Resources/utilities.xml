@@ -100,11 +100,11 @@
                      command="SetScalarOpacityFunction">
       </ProxyProperty>
 
-       <ProxyProperty name="GradientOpacityFunction"
-                     command="SetGradientOpacityFunction">
+       <ProxyProperty name="GradientLinearOpacityFunction"
+                     command="SetGradientLinearOpacityFunction">
       </ProxyProperty>
-	<ProxyProperty name="GaussianOpacityFunction"
-                     command="SetGaussianOpacityFunction">
+	<ProxyProperty name="GradientGaussianOpacityFunction"
+                     command="SetGradientGaussianOpacityFunction">
       </ProxyProperty>
       <ProxyProperty name="ScalarGaussianOpacityFunction"
                      command="SetScalarGaussianOpacityFunction">
@@ -263,8 +263,8 @@
         <Property name="EnableOpacityMapping" function="EnableOpacityMapping" />
         <Property name="RGBPoints" function="XRGBPoints" />
         <Property name="ScalarOpacityFunction" function="ScalarOpacityFunction" />
-        <Property name="GradientOpacityFunction" function="GradientOpacityFunction" />
-        <Property name="GaussianOpacityFunction" function="GaussianOpacityFunction" />
+        <Property name="GradientLinearOpacityFunction" function="GradientLinearOpacityFunction" />
+        <Property name="GradientGaussianOpacityFunction" function="GradientGaussianOpacityFunction" />
         <Property name="ScalarGaussianOpacityFunction" function="ScalarGaussianOpacityFunction" />
         <Property name="TwoDTransferFunction" function="TwoDTransferFunction" />
         <Property name="UseLogScale" function="UseLogScale" />
