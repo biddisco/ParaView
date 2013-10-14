@@ -182,18 +182,16 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     }
 
   gpwf = stc ? stc->GetScalarGaussianOpacityFunction() : NULL;
-    size = gpwf->GetSize();
-    if (gpwf)
-      {
-        //TBD initialize stuff for gaussian
-        ui.ScalarGaussianOpacityEditor->initialize(gpwf);
-      }
-    else
-      {
-        ui.ScalarGaussianOpacityEditor->hide();
-      }
-
-
+  size = gpwf->GetSize();
+  if (gpwf)
+    {
+      //TBD initialize stuff for gaussian
+      ui.ScalarGaussianOpacityEditor->initialize(gpwf);
+    }
+  else
+    {
+      ui.ScalarGaussianOpacityEditor->hide();
+    }
 
   vtkTwoDTransferFunction* tdtf = stc ? stc->GetTwoDTransferFunction() : NULL;
   if (tdtf)
@@ -285,19 +283,17 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     }
 
   if (repr->getProxy()->GetProperty("SwitchScalarOpacity"))
-      {
-        QObject::connect(ui.SwitchScalarLinGauss, SIGNAL(clicked()), this,
-        SLOT(switchScalarOpacity()));
-        this->addPropertyLink(ui.SwitchScalarLinGauss, "checked", SIGNAL(clicked()),
-            repr->getProxy(),
-            repr->getProxy()->GetProperty("SwitchScalarOpacity"));
-      }
-    else
-      {
-        ui.SwitchScalarLinGauss->hide();
-      }
-
-
+    {
+      QObject::connect(ui.SwitchScalarLinGauss, SIGNAL(clicked()), this,
+      SLOT(switchScalarOpacity()));
+      this->addPropertyLink(ui.SwitchScalarLinGauss, "checked",
+          SIGNAL(clicked()), repr->getProxy(),
+          repr->getProxy()->GetProperty("SwitchScalarOpacity"));
+    }
+  else
+    {
+      ui.SwitchScalarLinGauss->hide();
+    }
 
   // vtkImageVolumeRepresentation* volumerep = vtkImageVolumeRepresentation::SafeDownCast(
   //			vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
@@ -313,14 +309,14 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   QObject::connect(ui.OpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
       this, SLOT(opacityCurrentChanged(vtkIdType)));
   QObject::connect(ui.ColorEditor, SIGNAL(currentPointChanged(vtkIdType)), this,
-      SLOT(colorCurrentChanged(vtkIdType)));
+  SLOT(colorCurrentChanged(vtkIdType)));
   QObject::connect(ui.GradientOpacityEditor,
   SIGNAL(currentPointChanged(vtkIdType)), this,
   SLOT(gradientCurrentChanged(vtkIdType)));
   QObject::connect(ui.GaussianOpacityEditor, SIGNAL(currentPointChanged(int)),
       this, SLOT(gaussianCurrentChanged(int)));
   QObject::connect(ui.TwoDTransferFunction, SIGNAL(activeRegionChanged(int)),
-       this, SLOT(TwoDTransferCurrentChanged(int)));
+      this, SLOT(TwoDTransferCurrentChanged(int)));
 
   QObject::connect(ui.ColorEditor, SIGNAL(controlPointsModified()), this,
   SIGNAL(xrgbPointsChanged()));
@@ -328,12 +324,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   SIGNAL(xvmsPointsChanged()));
   QObject::connect(ui.GradientOpacityEditor, SIGNAL(controlPointsModified()),
       this, SIGNAL(gvmsPointsChanged()));
-  QObject::connect(ui.ScalarGaussianOpacityEditor, SIGNAL(controlPointsModified()),
-        this, SIGNAL(ScalarxhwbbPointsChanged()));
+  QObject::connect(ui.ScalarGaussianOpacityEditor,
+      SIGNAL(controlPointsModified()), this,
+      SIGNAL(ScalarxhwbbPointsChanged()));
   QObject::connect(ui.GaussianOpacityEditor, SIGNAL(controlPointsModified()),
       this, SIGNAL(xhwbbPointsChanged()));
   QObject::connect(ui.TwoDTransferFunction, SIGNAL(controlPointsModified()),
-        this, SIGNAL(twoDTransferPointsChanged()));
+      this, SIGNAL(twoDTransferPointsChanged()));
 
   QObject::connect(ui.ColorEditor, SIGNAL(controlPointsModified()), this,
   SLOT(updateCurrentData()));
@@ -344,7 +341,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   QObject::connect(ui.GaussianOpacityEditor, SIGNAL(controlPointsModified()),
       this, SLOT(updateCurrentData()));
   QObject::connect(ui.TwoDTransferFunction, SIGNAL(controlPointsModified()),
-        this, SLOT(updateCurrentData()));
+      this, SLOT(updateCurrentData()));
 
   QObject::connect(ui.ResetRangeToData, SIGNAL(clicked()), this,
   SLOT(resetRangeToData()));
@@ -363,11 +360,10 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   QObject::connect(ui.SaveAsPreset, SIGNAL(clicked()), this,
   SLOT(saveAsPreset()));
 
-
   QObject::connect(ui.ShowGradientFunctions, SIGNAL(clicked()), this,
-    SLOT(showGradientFunctions()));
+  SLOT(showGradientFunctions()));
   QObject::connect(ui.HideGradientFunctions, SIGNAL(clicked()), this,
-      SLOT(hideGradientFunctions()));
+  SLOT(hideGradientFunctions()));
 
   // TODO: at some point, I'd like to add a textual editor for users to simply
   // enter the text for the transfer function control points for finer control
@@ -439,29 +435,28 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       ui.OpacityEditor->hide();
     }
 
-
   smproperty = smgroup->GetProperty("ScalarGaussianOpacityFunction");
-    if (smproperty)
-      {
-        // TODO: T
+  if (smproperty)
+    {
+      // TODO: T
 
-        vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+      vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
 
-        if (pwfProxy && pwfProxy->GetProperty("Points"))
-          {
-            this->addPropertyLink(this, "ScalarxhwbbPoints",
-            SIGNAL(ScalarxhwbbPointsChanged()), pwfProxy,
-                pwfProxy->GetProperty("Points"));
-          }
-        else
-          {
-            ui.ScalarGaussianOpacityEditor->hide();
-          }
-      }
-    else
-      {
-        ui.ScalarGaussianOpacityEditor->hide();
-      }
+      if (pwfProxy && pwfProxy->GetProperty("Points"))
+        {
+          this->addPropertyLink(this, "ScalarxhwbbPoints",
+          SIGNAL(ScalarxhwbbPointsChanged()), pwfProxy,
+              pwfProxy->GetProperty("Points"));
+        }
+      else
+        {
+          ui.ScalarGaussianOpacityEditor->hide();
+        }
+    }
+  else
+    {
+      ui.ScalarGaussianOpacityEditor->hide();
+    }
 
   smproperty = smgroup->GetProperty("GaussianOpacityFunction");
   if (smproperty)
@@ -487,34 +482,27 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     }
 
   smproperty = smgroup->GetProperty("TwoDTransferFunction");
-    if (smproperty)
-      {
-        // TODO: T
+  if (smproperty)
+    {
+      // TODO: T
 
-        vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
+      vtkSMProxy* pwfProxy = vtkSMPropertyHelper(smproperty).GetAsProxy();
 
-        if (pwfProxy && pwfProxy->GetProperty("Points"))
-          {
-            this->addPropertyLink(this, "twoDTransferPoints",
-            SIGNAL(twoDTransferPointsChanged()), pwfProxy,
-                pwfProxy->GetProperty("Points"));
-          }
-        else
-          {
-            ui.TwoDTransferFunction->hide();
-          }
-      }
-    else
-      {
-        ui.TwoDTransferFunction->hide();
-      }
-
-
-
-
-
-
-
+      if (pwfProxy && pwfProxy->GetProperty("Points"))
+        {
+          this->addPropertyLink(this, "twoDTransferPoints",
+          SIGNAL(twoDTransferPointsChanged()), pwfProxy,
+              pwfProxy->GetProperty("Points"));
+        }
+      else
+        {
+          ui.TwoDTransferFunction->hide();
+        }
+    }
+  else
+    {
+      ui.TwoDTransferFunction->hide();
+    }
 
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
   if (smproperty)
@@ -572,11 +560,10 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       this->addDecorator(this->Internals->Decorator);
     }
 
+  switchGradientOpacity();
+  switchScalarOpacity();
 
-switchGradientOpacity();
-switchScalarOpacity();
-
-hideGradientFunctions();
+  hideGradientFunctions();
 
   this->updateCurrentData();
 }
@@ -695,37 +682,42 @@ pqColorOpacityEditorWidget::showHistogramWidget()
 
   repr->getProxy()->InvokeCommand("UpdateHistogram");
 
-
   repr->getProxy()->GatherInformation(info.GetPointer());
- // repr->
+  // repr->
   if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
     {
-      std::cout<< "Did not find SupportHistogramWidget in showhistogramtest" << std::endl;
+      std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
+          << std::endl;
     }
-/*
-  if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-      repr->getProxy()->InvokeCommand("UpdateGradientRange");
-    double gofrange[2] = {0, 1};
-      this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
-      vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
-      */
+  /*
+   if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+   repr->getProxy()->InvokeCommand("UpdateGradientRange");
+   double gofrange[2] = {0, 1};
+   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
+   */
 
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-double gradientrange[2];
-  if (repr->getProxy()->GetProperty("GradientRange")){
-      repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
-      vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,2);
-  }
-  ui.GaussianOpacityEditor->updateHistogram(gradientrange[0],gradientrange[1],info->sizeOfX,info->values);
+  double gradientrange[2];
+  if (repr->getProxy()->GetProperty("GradientRange"))
+    {
+      repr->getProxy()->UpdatePropertyInformation(
+          repr->getProxy()->GetProperty("GradientRange"));
+      vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,
+          2);
+    }
+  ui.GaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
+      info->sizeOfX, info->values);
   float enabledBarsHeight;
 
   bool logscale = false;
-  pqHistogramDialog dialog(this, ui.GaussianOpacityEditor->histogramValues, ui.GaussianOpacityEditor->currentHistogramSize,ui.GaussianOpacityEditor->histogramEnabled, &logscale,
+  pqHistogramDialog dialog(this, ui.GaussianOpacityEditor->histogramValues,
+      ui.GaussianOpacityEditor->currentHistogramSize,
+      ui.GaussianOpacityEditor->histogramEnabled, &logscale,
       &enabledBarsHeight);
   //dialog.setData();
   dialog.exec();
   //dialog.
-
 
   ui.GaussianOpacityEditor->generateBackgroundHistogram(logscale);
   this->update();
@@ -828,7 +820,6 @@ pqColorOpacityEditorWidget::ScalarxhwbbPoints() const
   return values;
 }
 
-
 //----------------------------------------------------------------------------------------
 
 QList<QVariant>
@@ -921,9 +912,6 @@ pqColorOpacityEditorWidget::twoDTransferPoints() const
   return values;
 }
 
-
-
-
 //-----------------------------------------------------------------------------
 bool
 pqColorOpacityEditorWidget::useLogScale() const
@@ -947,34 +935,42 @@ pqColorOpacityEditorWidget::disableGradientOpacty()
 void
 pqColorOpacityEditorWidget::switchScalarOpacity()
 {
-  if(this->Internals->Ui.ScalarGaussianOpacityEditor->isHidden() && this->Internals->Ui.OpacityEditor->isHidden()){
+  if (this->Internals->Ui.ScalarGaussianOpacityEditor->isHidden()
+      && this->Internals->Ui.OpacityEditor->isHidden())
+    {
       return;
-  }
-  else if(this->Internals->Ui.SwitchScalarLinGauss->isChecked()){
+    }
+  else if (this->Internals->Ui.SwitchScalarLinGauss->isChecked())
+    {
       this->Internals->Ui.ScalarGaussianOpacityEditor->show();
       this->Internals->Ui.OpacityEditor->hide();
-  }
-  else{
+    }
+  else
+    {
       this->Internals->Ui.ScalarGaussianOpacityEditor->hide();
       this->Internals->Ui.OpacityEditor->show();
-  }
+    }
 
 }
 
 void
 pqColorOpacityEditorWidget::switchGradientOpacity()
 {
-  if(this->Internals->Ui.GaussianOpacityEditor->isHidden() && this->Internals->Ui.GradientOpacityEditor->isHidden()){
+  if (this->Internals->Ui.GaussianOpacityEditor->isHidden()
+      && this->Internals->Ui.GradientOpacityEditor->isHidden())
+    {
       return;
-  }
-  else if(this->Internals->Ui.gaussorgrad->isChecked()){
+    }
+  else if (this->Internals->Ui.gaussorgrad->isChecked())
+    {
       this->Internals->Ui.GaussianOpacityEditor->show();
       this->Internals->Ui.GradientOpacityEditor->hide();
-  }
-  else{
+    }
+  else
+    {
       this->Internals->Ui.GaussianOpacityEditor->hide();
       this->Internals->Ui.GradientOpacityEditor->show();
-  }
+    }
 
 }
 
@@ -1049,7 +1045,6 @@ pqColorOpacityEditorWidget::setXrgbPoints(const QList<QVariant>& values)
   // from the proxy, we don't need to do anything here. The widget will be
   // updated when the proxy updates.
 }
-
 
 //-----------------------------------------------------------------------------
 void
@@ -1135,17 +1130,16 @@ pqColorOpacityEditorWidget::resetRangeToData()
   // repr->setProperty("HistogramBins",ui.GaussianOpacityEditor->contentsRect().width());
   /*
    * if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-    repr->getProxy()->InvokeCommand("UpdateGradientRange");
-  double gofrange[2] = {0, 1};
-    this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
-    vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
-    */
+   repr->getProxy()->InvokeCommand("UpdateGradientRange");
+   double gofrange[2] = {0, 1};
+   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
+   */
 
   // vtkSMProperty* temp = repr->getProxy()->GetProperty("HistogramBins");
   // vtkSMPropertyHelper bins(temp);
   // bins.Set(ui.GaussianOpacityEditor->contentsRect().width(),1);
 //  repr->getProxy()->UpdateVTKObjects();
-
   END_UNDO_SET();
 }
 
@@ -1161,8 +1155,6 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
       return;
     }
 
-
-
   if (QMessageBox::warning(this, "Potentially slow operation",
       "This can potentially take a long time to complete. \n"
           "Are you sure you want to continue?",
@@ -1171,7 +1163,7 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
       BEGIN_UNDO_SET(
           "Reset transfer function ranges using temporal data range");
       if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-            repr->getProxy()->InvokeCommand("UpdateGradientRange");
+        repr->getProxy()->InvokeCommand("UpdateGradientRange");
       vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRangeOverTime(
           repr->getProxy());
       emit this->changeFinished();
@@ -1196,14 +1188,16 @@ pqColorOpacityEditorWidget::resetRangeToCustom()
   dialog.setGradientRange(grange[0], grange[1]);
   if (dialog.exec() == QDialog::Accepted)
     {
-      this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum(), dialog.getMinimumGradient(), dialog.getMaximumGradient());
+      this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum(),
+          dialog.getMinimumGradient(), dialog.getMaximumGradient());
     }
 
 }
 
 //-----------------------------------------------------------------------------
 void
-pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max, double gmin, double gmax)
+pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max,
+    double gmin, double gmax)
 {
   BEGIN_UNDO_SET("Reset transfer function ranges");
   vtkSMTransferFunctionProxy::RescaleTransferFunction(this->proxy(), min, max);
@@ -1212,12 +1206,10 @@ pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max, double gm
       min, max);
 
   pqDataRepresentation* repr =
-        pqActiveObjects::instance().activeRepresentation();
+      pqActiveObjects::instance().activeRepresentation();
 
-  vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionsToCustomRange(repr->getProxy(), min, max, gmin, gmax);
-
-
-
+  vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionsToCustomRange(
+      repr->getProxy(), min, max, gmin, gmax);
 
   emit this->changeFinished();
   END_UNDO_SET();
@@ -1285,28 +1277,28 @@ pqColorOpacityEditorWidget::saveAsPreset()
     }
 }
 
-
-
 void
-pqColorOpacityEditorWidget::showGradientFunctions(){
+pqColorOpacityEditorWidget::showGradientFunctions()
+{
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GaussianOpacityEditor->show();
-      ui.GradientOpacityEditor->show();
-      ui.TwoDTransferFunction->show();
-      ui.gaussorgrad->show();
+  ui.GradientOpacityEditor->show();
+  ui.TwoDTransferFunction->show();
+  ui.gaussorgrad->show();
 
-      this->switchGradientOpacity();
+  this->switchGradientOpacity();
 
-      ui.StackedShowGradientFunctions->setCurrentIndex(1);
+  ui.StackedShowGradientFunctions->setCurrentIndex(1);
 
 }
 
 void
-pqColorOpacityEditorWidget::hideGradientFunctions(){
+pqColorOpacityEditorWidget::hideGradientFunctions()
+{
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GaussianOpacityEditor->hide();
-    ui.GradientOpacityEditor->hide();
-    ui.TwoDTransferFunction->hide();
-    ui.gaussorgrad->hide();
-    ui.StackedShowGradientFunctions->setCurrentIndex(0);
+  ui.GradientOpacityEditor->hide();
+  ui.TwoDTransferFunction->hide();
+  ui.gaussorgrad->hide();
+  ui.StackedShowGradientFunctions->setCurrentIndex(0);
 }

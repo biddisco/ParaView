@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   ParaView
-  Module:    vtkImageVolumeRepresentation.h
+ Program:   ParaView
+ Module:    vtkImageVolumeRepresentation.h
 
-  Copyright (c) Kitware, Inc.
-  All rights reserved.
-  See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
+ Copyright (c) Kitware, Inc.
+ All rights reserved.
+ See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 // .NAME vtkImageVolumeRepresentation - representation for showing image
 // datasets as a volume.
 // .SECTION Description
@@ -20,7 +20,6 @@
 // representation does not support delivery to client (or render server) nodes.
 // In those configurations, it merely delivers a outline for the image to the
 // client and render-server and those nodes simply render the outline.
-
 #ifndef __vtkImageVolumeRepresentation_h
 #define __vtkImageVolumeRepresentation_h
 
@@ -28,7 +27,6 @@
 #include "vtkPVDataRepresentation.h"
 #include "vtkVector.h"
 #include "vtkSmartPointer.h"
-
 
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
@@ -47,61 +45,64 @@ class vtkImageGradientMagnitude;
 class vtkIntArray;
 class vtkDoubleArray;
 
-
-
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation : public vtkPVDataRepresentation
-{
+class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
+  {
 public:
-  static vtkImageVolumeRepresentation* New();
-  vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation);
+  static vtkImageVolumeRepresentation* New();vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // This is same a vtkDataObject::FieldAssociation types so you can use those
   // as well.
   enum AttributeTypes
-    {
-    POINT_DATA=0,
-    CELL_DATA=1
-    };
+	{
+	POINT_DATA = 0,
+	CELL_DATA = 1
+	};
 
   // Description:
   // Methods to control scalar coloring. ColorAttributeType defines the
   // attribute type.
-  vtkSetMacro(ColorAttributeType, int);
-  vtkGetMacro(ColorAttributeType, int);
+  vtkSetMacro(ColorAttributeType, int)
+  ;vtkGetMacro(ColorAttributeType, int)
+  ;
 
-
-  vtkGetMacro(SupportHistogramWidget,bool);
+  vtkGetMacro(SupportHistogramWidget,bool)
+  ;
   // Description:
   // Pick the array to color with.
-  vtkSetStringMacro(ColorArrayName);
-  vtkGetStringMacro(ColorArrayName);
+  vtkSetStringMacro(ColorArrayName)
+  ;vtkGetStringMacro(ColorArrayName)
+  ;
 
-  double* dosomething(){
-    return GradientRange;
-  }
-  vtkGetVector2Macro(GradientRange, double);
+  double* dosomething()
+	{
+	return GradientRange;
+	}
+  vtkGetVector2Macro(GradientRange, double)
+  ;
 
-/*
-  virtual double *GetGradientRange ()
-{
-  return this->GradientRange;
-}
-virtual void GetGradientRange (double &_arg1, double &_arg2)
-  {
-    _arg1 = this->GradientRange[0];
-    _arg2 = this->GradientRange[1];
-  };
-virtual void GetGradientRange (double _arg[2])
-  {
-  this->GetGradientRange (_arg[0], _arg[1]);
-  }
-*/
+  /*
+   virtual double *GetGradientRange ()
+   {
+   return this->GradientRange;
+   }
+   virtual void GetGradientRange (double &_arg1, double &_arg2)
+   {
+   _arg1 = this->GradientRange[0];
+   _arg2 = this->GradientRange[1];
+   };
+   virtual void GetGradientRange (double _arg[2])
+   {
+   this->GetGradientRange (_arg[0], _arg[1]);
+   }
+   */
 
-  vtkSmartPointer<vtkImageAccumulate>  getHistogram(){
-      UpdateHistogram();
-      return AccumulateFilter;
-  }
+  vtkSmartPointer<vtkImageAccumulate> getHistogram()
+	{
+	UpdateHistogram();
+	return AccumulateFilter;
+	}
 
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
@@ -109,7 +110,7 @@ virtual void GetGradientRange (double _arg[2])
   // representations or ask them to perform certain tasks e.g.
   // PrepareForRendering.
   virtual int ProcessViewRequest(vtkInformationRequestKey* request_type,
-    vtkInformation* inInfo, vtkInformation* outInfo);
+	  vtkInformation* inInfo, vtkInformation* outInfo);
 
   // Description:
   // This needs to be called on all instances of vtkGeometryRepresentation when
@@ -149,7 +150,6 @@ virtual void GetGradientRange (double _arg[2])
   void SetSpecularPower(double);
   void SetShade(bool);
   void SetIndependantComponents(bool);
-  
 
   void SetDisableGradientOpacity(bool use);
 
@@ -162,28 +162,33 @@ virtual void GetGradientRange (double _arg[2])
 
   // Description:
   // Provides access to the actor used by this representation.
-  vtkPVLODVolume* GetActor() { return this->Actor; }
+  vtkPVLODVolume* GetActor()
+	{
+	return this->Actor;
+	}
   //vtkDoubleArray* GetGradientRange() { return this->GradientRange;}
 
   // Description:
   // Helper method to pass input image extent information to the view to use in
   // determining the cuts for ordered compositing.
-  static void PassOrderedCompositingInformation(
-    vtkPVDataRepresentation* self, vtkInformation* inInfo);
+  static void PassOrderedCompositingInformation(vtkPVDataRepresentation* self,
+	  vtkInformation* inInfo);
 
-   // Description:
-    // Set/Get the name of the array which will be used for gradient opacity mapping
-    vtkSetStringMacro(GradientArrayName);
-    vtkGetStringMacro(GradientArrayName);
+  // Description:
+  // Set/Get the name of the array which will be used for gradient opacity mapping
+  vtkSetStringMacro(GradientArrayName)
+  ;vtkGetStringMacro(GradientArrayName)
+  ;
 
-    // Description:
-    // If gradient is a vector filed, then specify the component (0=magnitude)
-    vtkSetMacro(GradientVectorComponent, int);
-    vtkGetMacro(GradientVectorComponent, int);
+  // Description:
+  // If gradient is a vector filed, then specify the component (0=magnitude)
+  vtkSetMacro(GradientVectorComponent, int)
+  ;vtkGetMacro(GradientVectorComponent, int)
+  ;
 
 //BTX
-    void updateGradRange();
-    void updateGradientHistogram();
+  void updateGradRange();
+  void updateGradientHistogram();
 protected:
   vtkImageVolumeRepresentation();
   ~vtkImageVolumeRepresentation();
@@ -191,27 +196,21 @@ protected:
   bool histogramOutOfDate;
   bool GradientRangeOutOfDate;
 
-
   // Description:
   // Fill input port information.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
 
   // Description:
-  virtual int RequestData(vtkInformation*,
-    vtkInformationVector**, vtkInformationVector*);
+  virtual int RequestData(vtkInformation*, vtkInformationVector**,
+	  vtkInformationVector*);
 
   int numbinsX;
   int histogramsize;
   vtkIntArray * GradientHistogram;
   int* histogram;
 
-
-
-
-
   //used to set up the imageaccumulateinformation to send the histogram data to the client.
   void setInformation();
-
 
   //vtkDataArray* grads;
 
@@ -244,15 +243,14 @@ protected:
   vtkOutlineSource* OutlineSource;
   vtkPolyDataMapper* OutlineMapper;
 //BTX
-    vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
-    vtkSmartPointer<vtkImageAccumulate>        AccumulateFilter;
+  vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
+  vtkSmartPointer<vtkImageAccumulate> AccumulateFilter;
 //ETX
-
 
   int ColorAttributeType;
   char* ColorArrayName;
   char *GradientArrayName;
-  int   GradientVectorComponent;
+  int GradientVectorComponent;
   double DataBounds[6];
   double GradientRange[2];
   int HistogramBins;
@@ -262,14 +260,11 @@ protected:
   bool GradientRangeFirstTimeStartup;
   bool GradientHistogramFirstTimeStartup;
 
-
-
-
 private:
   vtkImageVolumeRepresentation(const vtkImageVolumeRepresentation&); // Not implemented
   void operator=(const vtkImageVolumeRepresentation&); // Not implemented
 
 //ETX
-};
+  };
 
 #endif
