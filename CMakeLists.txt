@@ -31,6 +31,8 @@
 cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 project(ParaView)
 
+  cmake_policy(SET CMP0023 OLD)
+
 # Disallow in-source build
 if ("${ParaView_SOURCE_DIR}"  STREQUAL "${ParaView_BINARY_DIR}")
   message(FATAL_ERROR
