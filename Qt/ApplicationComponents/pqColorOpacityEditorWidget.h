@@ -195,6 +195,7 @@ signals:
 protected:
   bool initializinggrad;
    bool initializingscalar;
+   void paintEvent(QPaintEvent *e);
 
 protected slots:
   /// slots called when the current point changes on the two internal

@@ -1423,3 +1423,34 @@ pqColorOpacityEditorWidget::hideGradientFunctions()
   ui.gaussorgrad->hide();
   ui.StackedShowGradientFunctions->setCurrentIndex(0);
 }
+
+void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
+//make sure all the buttons are correct
+
+  //std::cout << "pqcoloropacityeditorwidget paint event"<< std::endl;
+
+  pqDataRepresentation* repr =
+        pqActiveObjects::instance().activeRepresentation();
+
+  if (!repr->getProxy()->GetProperty("InfoDisableGradientOpacity"))
+        return;
+
+      repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
+    // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
+
+        int disabled;
+        vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
+
+        if (disabled){
+          hideGradientFunctions();
+          this->Internals->Ui.DisableOpacityGradient->setChecked(false);
+        }
+          else
+        	{
+        	showGradientFunctions();
+        	this->Internals->Ui.DisableOpacityGradient->setChecked(true);
+        	}
+
+        Superclass::paintEvent(e);
+
+}
