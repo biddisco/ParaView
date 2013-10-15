@@ -487,9 +487,9 @@ vtkImageVolumeRepresentation::SetRequestedRenderMode(int mode)
 //----------------------------------------------------------------------------
 
 void
-vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
+vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool disable)
 {
-  if (use)
+  if (!disable)
     {
       this->Property->DisableGradientLinearOpacityOff(0);
       this->Property->DisableGradientGaussianOpacityOff(0);
@@ -499,6 +499,10 @@ vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool use)
       this->Property->DisableGradientLinearOpacityOn(0);
       this->Property->DisableGradientGaussianOpacityOn(0);
     }
+}
+
+bool vtkImageVolumeRepresentation::GetDisableGradientOpacity(){
+  return this->Property->gradientOpacityDisabled(0);
 }
 
 void
@@ -594,5 +598,13 @@ vtkImageVolumeRepresentation::UpdateHistogram()
 
   histogramOutOfDate = false;
 
+}
+
+
+bool vtkImageVolumeRepresentation::GetIsScalarGaussianFunction(){
+  return this->Property->GetuseScalarGaussian();
+}
+bool vtkImageVolumeRepresentation::GetIsGradientGaussianFunction(){
+  return this->Property->GetuseGradientGaussian();
 }
 

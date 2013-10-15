@@ -479,6 +479,7 @@ vtkSMPropertyHelper::vtkSMPropertyHelper(vtkSMProxy* proxy, const char* pname,
 
   vtkSMProperty *property = proxy->GetProperty(pname);
 
+
   if(!property)
     {
     vtkSMPropertyHelperWarningMacro("Failed to locate property: " << pname);

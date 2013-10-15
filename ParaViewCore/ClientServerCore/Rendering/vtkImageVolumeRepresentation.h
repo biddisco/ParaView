@@ -63,24 +63,19 @@ public:
   // Description:
   // Methods to control scalar coloring. ColorAttributeType defines the
   // attribute type.
-  vtkSetMacro(ColorAttributeType, int)
-  ;vtkGetMacro(ColorAttributeType, int)
-  ;
+  vtkSetMacro(ColorAttributeType, int);
+  vtkGetMacro(ColorAttributeType, int);
 
-  vtkGetMacro(SupportHistogramWidget,bool)
-  ;
+  vtkGetMacro(SupportHistogramWidget,bool);
   // Description:
   // Pick the array to color with.
-  vtkSetStringMacro(ColorArrayName)
-  ;vtkGetStringMacro(ColorArrayName)
-  ;
+  vtkSetStringMacro(ColorArrayName);
+  vtkGetStringMacro(ColorArrayName);
 
-  double* dosomething()
-	{
-	return GradientRange;
-	}
-  vtkGetVector2Macro(GradientRange, double)
-  ;
+  vtkGetVector2Macro(GradientRange, double);
+
+  bool GetIsScalarGaussianFunction();
+  bool GetIsGradientGaussianFunction();
 
   /*
    virtual double *GetGradientRange ()
@@ -160,6 +155,8 @@ public:
   void UpdateGradientRange();
   void UpdateHistogram();
 
+  bool GetDisableGradientOpacity();
+
   // Description:
   // Provides access to the actor used by this representation.
   vtkPVLODVolume* GetActor()
@@ -176,15 +173,13 @@ public:
 
   // Description:
   // Set/Get the name of the array which will be used for gradient opacity mapping
-  vtkSetStringMacro(GradientArrayName)
-  ;vtkGetStringMacro(GradientArrayName)
-  ;
+  vtkSetStringMacro(GradientArrayName);
+  vtkGetStringMacro(GradientArrayName);
 
   // Description:
   // If gradient is a vector filed, then specify the component (0=magnitude)
-  vtkSetMacro(GradientVectorComponent, int)
-  ;vtkGetMacro(GradientVectorComponent, int)
-  ;
+  vtkSetMacro(GradientVectorComponent, int);
+  vtkGetMacro(GradientVectorComponent, int);
 
 //BTX
   void updateGradRange();

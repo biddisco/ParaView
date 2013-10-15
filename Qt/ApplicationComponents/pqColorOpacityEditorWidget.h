@@ -191,6 +191,11 @@ signals:
   /// Signal fired when lockScalarRange changes.
   void lockScalarRangeChanged();
 
+
+protected:
+  bool initializinggrad;
+   bool initializingscalar;
+
 protected slots:
   /// slots called when the current point changes on the two internal
   /// pqTransferFunctionWidget widgets.
@@ -220,13 +225,13 @@ protected slots:
   void useLogScaleClicked(bool);
 
 
-  void disableGradientOpacty();
+  void disableGradientOpacity();
 
 
 private:
   Q_DISABLE_COPY(pqColorOpacityEditorWidget);
 
-  bool disableGradientOpacity;
+  bool disableGradientOpac;
 
   class pqInternals;
   pqInternals* Internals;
