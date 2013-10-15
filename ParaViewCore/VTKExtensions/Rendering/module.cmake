@@ -38,6 +38,7 @@ vtk_module(vtkPVVTKExtensionsRendering
     vtkRenderingOpenGL
     vtkRenderingParallel
     vtkRenderingLIC
+    vtkzlib
 
     ${__dependencies}
 PRIVATE_DEPENDS
