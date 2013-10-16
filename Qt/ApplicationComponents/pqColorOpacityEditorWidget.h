@@ -111,16 +111,19 @@ public slots:
   /// Sets the xvmsPoints that control the opacity transfer function.
   void setXvmsPoints(const QList<QVariant>&);
 
-  /// Sets the xvmsPoints that control the opacity transfer function.
+  /// Sets the gvmsPoints that control the gradient linear opacity transfer function.
   void setGvmsPoints(const QList<QVariant>&);
 
   /// Sets the xrgbPoints that control the color transfer function.
   void setXrgbPoints(const QList<QVariant>&);
 
+  /// Sets the XhwbbPoints that control the scalar gaussian opacity transfer function.
   void setScalarXhwbbPoints(const QList<QVariant>& values);
 
+  /// Sets the XhwbbPoints that control the scalar gaussian opacity transfer function.
   void setXhwbbPoints(const QList<QVariant>& values);
 
+  /// Sets the XhwbbPoints that control the 2D transfer function.
   void settwoDTransferPoints(const QList<QVariant>& values);
 
   /// Set whether to use-log scale.
@@ -149,11 +152,15 @@ public slots:
   /// save current transfer function as preset.
   void saveAsPreset();
 
+  /// switch between the linear and gaussian scalar functions.
   void switchScalarOpacity();
 
+  /// switch between the linear and gaussian gradient functions.
   void switchGradientOpacity();
 
+  /// show the gradient functions and respective buttons in the gui
   void showGradientFunctions();
+  /// hide the gradient functions and respective buttons in the gui
   void hideGradientFunctions();
 
 
@@ -193,8 +200,12 @@ signals:
 
 
 protected:
+
+  ///variable used during initialization
   bool initializinggrad;
+  ///variable used during initialization
    bool initializingscalar;
+
    void paintEvent(QPaintEvent *e);
 
 protected slots:

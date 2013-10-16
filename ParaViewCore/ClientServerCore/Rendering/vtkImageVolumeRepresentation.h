@@ -188,7 +188,11 @@ protected:
   vtkImageVolumeRepresentation();
   ~vtkImageVolumeRepresentation();
 
+  // Description:
+    // Used to determine if the histogram has not been created or belongs to a different data set.
   bool histogramOutOfDate;
+  // Description:
+  // Used to determine if the gradient range has not been determined or belongs to a different data set.
   bool GradientRangeOutOfDate;
 
   // Description:
