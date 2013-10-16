@@ -66,8 +66,15 @@ public:
 	~QvisGaussianOpacityBar();
 	void initialize(vtkGaussianPiecewiseFunction* gpwf);
 	void getRawOpacities(int, float*);
+	///returns the number of gaussians in the connected gaussianfunction
 	int getNumberOfGaussians();
+	// Description:
+	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
+	//The gaussian is scaled and shifted into the space used by the widget
 	void getGaussian(int, float*, float*, float*, float*, float*);
+	// Description:
+	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
+	//The gaussian is scaled and shifted into the space used by the widget
 	void setGaussian(int, float*, float*, float*, float*, float*);
 	void setAllGaussians(int, float*);
 	void setMaximumNumberOfGaussians(int);

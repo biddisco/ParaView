@@ -986,7 +986,7 @@ bool QvisGaussianOpacityBar::findGaussianControlPoint(int _x, int _y,
 // ****************************************************************************
 int QvisGaussianOpacityBar::getNumberOfGaussians()
   {
-  return ngaussian;
+  return this->gaussianFunctionGroup->GetSize();
   }
 
 // ****************************************************************************
