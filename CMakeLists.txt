@@ -76,13 +76,9 @@ set (ParaView_CMAKE_DIR "${ParaView_SOURCE_DIR}/CMake")
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ParaView_CMAKE_DIR})
 
 # Use the new version of the variable names for output of build process.
-# These are consistent with what VTK sets.
+# Make sure these are consistent with what VTK sets.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-if(UNIX)
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
-else()
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-endif()
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
 include(Utilities/Git/Git.cmake)
@@ -225,8 +221,14 @@ cmake_dependent_option(PARAVIEW_USE_MPI_SSEND
 cmake_dependent_option(PARAVIEW_USE_ICE_T
   "Enable IceT (needed for parallel rendering)" ON
   "PARAVIEW_USE_MPI" OFF)
+cmake_dependent_option(PARAVIEW_INITIALIZE_MPI_ON_CLIENT
+  "Initialize MPI on client-processes by default. Can be overridden using command line arguments"
+  OFF
+  "PARAVIEW_USE_MPI" OFF)
+
 mark_as_advanced(PARAVIEW_USE_ICE_T
-  PARAVIEW_USE_MPI_SSEND)
+  PARAVIEW_USE_MPI_SSEND
+  PARAVIEW_INITIALIZE_MPI_ON_CLIENT)
 
 cmake_dependent_option(PARAVIEW_ENABLE_QT_SUPPORT
   "Build ParaView with Qt support (without GUI)" OFF
@@ -502,6 +504,14 @@ if (PARAVIEW_ENABLE_WEB)
   if (PARAVIEW_BUILD_WEB_DOCUMENTATION)
     list (APPEND ParaViewModulesDirs Web/Documentation)
   endif()
+
+  # Setup install rules for Web Applications
+  install(
+     DIRECTORY "${PARAVIEW_WWW_DIR}"
+     DESTINATION "${VTK_INSTALL_DATA_DIR}"
+     USE_SOURCE_PERMISSIONS
+     COMPONENT Runtime
+  )
 endif()
 
 include(ParaViewModuleTop)

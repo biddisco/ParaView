@@ -129,7 +129,6 @@ SET (TESTS_WITH_BASELINES
 #  ${CMAKE_CURRENT_SOURCE_DIR}/SaveAnimationGeometry.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/SaveColorMap.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/SaveCSV.xml
-  ${CMAKE_CURRENT_SOURCE_DIR}/SelectionLabels.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/SelectReader.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/SimpleInteraction.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/Slice.xml
@@ -161,6 +160,13 @@ SET (TESTS_WITH_BASELINES
   #  ${CMAKE_CURRENT_SOURCE_DIR}/XYBarChart.xml
 )
 
+if(PARAVIEW_ENABLE_PYTHON)
+  set(TESTS_WITH_BASELINES
+    ${TESTS_WITH_BASELINES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/SelectionLabels.xml
+  )
+endif()
+
 #------------------------------------------------------------------------------
 # Add streaming tests.
 # We need to locate smooth.flash since it's not included in the default testing
@@ -184,6 +190,7 @@ if (EXISTS "${smooth_flash}" AND PARAVIEW_DATA_ROOT)
   foreach (tname ${streaming_tests})
     add_pv_test("pv" "_DISABLE_C"
       COMMAND --client ${CLIENT_EXECUTABLE}
+              --enable-bt
               -dr
               --enable-streaming
               --disable-light-kit
@@ -194,8 +201,10 @@ if (EXISTS "${smooth_flash}" AND PARAVIEW_DATA_ROOT)
     add_pv_test(pvcs "_DISABLE_CS"
       COMMAND
          --server $<TARGET_FILE:pvserver>
+         --enable-bt
          --enable-streaming
          --client ${CLIENT_EXECUTABLE}
+         --enable-bt
          -dr
          --enable-streaming
          --disable-light-kit
@@ -209,6 +218,7 @@ endif()
 
 # Probe picking does not work in render server mode
 set(ProbePicking_DISABLE_CRS TRUE)
+set(ProbePicking_THRESHOLD 40)
 
 # only enable find data tests if numpy is available
 include("TestNumPy")
@@ -276,6 +286,7 @@ set (StructuredGridVolumeRendering_DISABLE_CRS TRUE)
   # <-- since volume rendering is not supported in CRS mode.
 
 # Since this test needs selection, disable in CRS mode.
+set (SelectionLabels_BREAK TRUE)
 set (SelectionLabels_DISABLE_CRS TRUE)
 
 # Mark tests that change change state considerably requires a restart of the
@@ -316,6 +327,7 @@ SET (XYChart_BREAK TRUE)
 SET (XYHistogram_BREAK TRUE)
 set (ChartAxisRangeAndLabels_BREAK TRUE)
 
+
 SET(ExtractLevel_BREAK TRUE)
 
 SET(Fractal2D_BREAK TRUE)
@@ -339,7 +351,7 @@ SET (ColorEditorVolumeControls_THRESHOLD 300)
 SET (SLACTools_DISABLE_CS TRUE)
 SET (SLACTools_DISABLE_CRS TRUE)
 SET (SLACTools_BREAK TRUE)
-SET(SLACTools_THRESHOLD 20)
+set (SLACTools_THRESHOLD 40)
 
 # DisconnectAndSaveAnimation is only support in Client-Server mode.
 set (DisconnectAndSaveAnimation_DISABLE_C TRUE)
@@ -583,22 +595,27 @@ IF (PARAVIEW_DATA_ROOT)
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${TESTS_WITH_MULTI_SERVERS_3})
 
+  set (TileDisplayScatterPlot-2x1_THRESHOLD 40)
   add_tile_display_tests("pvcs-tile-display" 2 1
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/TileDisplayScatterPlot-2x1.xml)
 
+  set (TileDisplayScatterPlot-2x2_THRESHOLD 40)
   add_tile_display_tests("pvcs-tile-display" 2 2
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/TileDisplayScatterPlot-2x2.xml)
 
+  set (TileDisplay3DTesting-1x2_THRESHOLD 40)
   add_tile_display_tests("pvcs-tile-display" 1 2
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/TileDisplay3DTesting-1x2.xml)
 
+  set (TileDisplay3DTesting-2x1_THRESHOLD 40)
   add_tile_display_tests("pvcs-tile-display" 2 1
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/TileDisplay3DTesting-2x1.xml)
 
+  set (TileDisplay3DTesting-2x2_THRESHOLD 40)
   add_tile_display_tests("pvcs-tile-display" 2 2
      BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline
      TEST_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/TileDisplay3DTesting-2x2.xml)
@@ -616,6 +633,7 @@ IF (PARAVIEW_DATA_ROOT)
       "${CMAKE_CURRENT_BINARY_DIR}/exodusStateFile.3.14.1.pvsm" @ONLY)
     add_pv_test("pv" "_DISABLE_C"
       COMMAND --client $<TARGET_FILE:paraview>
+              --enable-bt
               -dr
               --test-directory=${PARAVIEW_TEST_DIR}
               --state=${CMAKE_CURRENT_BINARY_DIR}/exodusStateFile.3.14.1.pvsm

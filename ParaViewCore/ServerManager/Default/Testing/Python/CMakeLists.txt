@@ -11,16 +11,18 @@ set (SMSTATE_FILES
   TestPHT
   SPCTH2)
 set (SMSTATE_FILE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../SMStates")
-  
+
 IF (PARAVIEW_DATA_ROOT)
   FOREACH (tfile ${SMSTATE_FILES})
     ADD_TEST(NAME "${tfile}-ServerManagerPython"
       COMMAND $<TARGET_FILE:pvpython>
-        ${CMAKE_CURRENT_SOURCE_DIR}/SMPythonTesting.py
+        --enable-bt
+        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/site-packages/paraview/smtesting.py"
         -D ${PARAVIEW_DATA_ROOT}
         -T ${ParaView_BINARY_DIR}/Testing/Temporary
         -V ${PARAVIEW_DATA_ROOT}/Baseline/${tfile}.png
-        --state ${CMAKE_CURRENT_SOURCE_DIR}/../SMStates/${tfile}.pvsm)
+        --state ${CMAKE_CURRENT_SOURCE_DIR}/../SMStates/${tfile}.pvsm
+        )
     set_tests_properties(${tfile}-ServerManagerPython PROPERTIES LABELS "PARAVIEW")
   ENDFOREACH (tfile)
 
@@ -28,12 +30,14 @@ IF (PARAVIEW_DATA_ROOT)
   # state for regression testing.
   ADD_TEST(NAME "LoadSave-ServerManagerPython"
       COMMAND $<TARGET_FILE:pvpython>
-        ${CMAKE_CURRENT_SOURCE_DIR}/SMPythonTesting.py
+        --enable-bt
+        "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/site-packages/paraview/smtesting.py"
         -D ${PARAVIEW_DATA_ROOT}
         -T ${ParaView_BINARY_DIR}/Testing/Temporary
         -V ${PARAVIEW_DATA_ROOT}/Baseline/Arrow.png
         --state ${CMAKE_CURRENT_SOURCE_DIR}/../SMStates/Arrow.pvsm
-        --use_saved_state)
+        --use_saved_state
+        )
   set_tests_properties(LoadSave-ServerManagerPython PROPERTIES LABELS "PARAVIEW")
 ENDIF ()
 
@@ -66,11 +70,13 @@ IF (PARAVIEW_DATA_ROOT)
   FOREACH (tfile ${PY_TESTS})
     ADD_TEST(NAME "${tfile}-ServerManagerPython"
       COMMAND $<TARGET_FILE:pvpython>
+        --enable-bt
         ${CMAKE_CURRENT_SOURCE_DIR}/${tfile}.py
         -D ${PARAVIEW_DATA_ROOT}
         -T ${ParaView_BINARY_DIR}/Testing/Temporary
         -V ${PARAVIEW_DATA_ROOT}/Baseline/${tfile}.png
-        -S ${SMSTATE_FILE_DIR})
+        -S ${SMSTATE_FILE_DIR}
+        )
     set_tests_properties(${tfile}-ServerManagerPython PROPERTIES LABELS "PARAVIEW")
   ENDFOREACH(tfile)
 ENDIF ()
@@ -88,7 +94,9 @@ SET(PY_TESTS_NO_BASELINE
   ValidateSources
 )
 
-if(PARAVIEW_BUILD_PLUGIN_SurfaceLIC AND PARAVIEW_BUILD_PLUGIN_SLACTools)
+if(BUILD_SHARED_LIBS
+  AND PARAVIEW_BUILD_PLUGIN_SurfaceLIC
+  AND PARAVIEW_BUILD_PLUGIN_SLACTools)
   list(APPEND PY_TESTS_NO_BASELINE Plugins)
 endif()
 
@@ -102,10 +110,12 @@ IF (PARAVIEW_DATA_ROOT)
   FOREACH (tfile ${PY_TESTS_NO_BASELINE})
     ADD_TEST(NAME "${tfile}-ServerManagerPython"
       COMMAND $<TARGET_FILE:pvpython>
+        --enable-bt
         ${CMAKE_CURRENT_SOURCE_DIR}/${tfile}.py
         -D ${PARAVIEW_DATA_ROOT}
         -T ${ParaView_BINARY_DIR}/Testing/Temporary
-        -S ${SMSTATE_FILE_DIR})
+        -S ${SMSTATE_FILE_DIR}
+        )
     set_tests_properties(${tfile}-ServerManagerPython PROPERTIES LABELS "PARAVIEW")
   ENDFOREACH(tfile)
 
@@ -122,10 +132,11 @@ ENDIF ()
 # Add tests for pvbatch.
 
 SET (PVBATCH_TESTS
-  Simple
-  UserTransformOnRepresentation
+  MultiView
   ParallelImageWriter
   ParallelSerialWriter
+  Simple
+  UserTransformOnRepresentation
 )
 
 IF ("1" STREQUAL ${HAS_NUMPY})
@@ -145,16 +156,19 @@ IF (PARAVIEW_DATA_ROOT)
       ADD_TEST(NAME ${tfile}-Batch
         COMMAND ${VTK_MPIRUN_EXE} ${VTK_MPI_PRENUMPROC_FLAGS} ${VTK_MPI_NUMPROC_FLAG} 2 ${VTK_MPI_PREFLAGS}
           $<TARGET_FILE:pvbatch>
+          --enable-bt
           ${CMAKE_CURRENT_SOURCE_DIR}/${tfile}.py
           -D ${PARAVIEW_DATA_ROOT}
           -T ${ParaView_BINARY_DIR}/Testing/Temporary
           -V ${PARAVIEW_DATA_ROOT}/Baseline/${tfile}.png
-          -S ${SMSTATE_FILE_DIR})
+          -S ${SMSTATE_FILE_DIR}
+          )
 
       ADD_TEST(NAME ${tfile}-SymmetricBatch
         COMMAND ${VTK_MPIRUN_EXE} ${VTK_MPI_PRENUMPROC_FLAGS} ${VTK_MPI_NUMPROC_FLAG} 2 ${VTK_MPI_PREFLAGS}
           $<TARGET_FILE:pvbatch>
           --symmetric
+          --enable-bt
           ${CMAKE_CURRENT_SOURCE_DIR}/${tfile}.py
           -D ${PARAVIEW_DATA_ROOT}
           -T ${ParaView_BINARY_DIR}/Testing/Temporary
@@ -171,6 +185,7 @@ IF (PARAVIEW_DATA_ROOT)
 
       ADD_TEST(NAME ${tfile}-SymmetricBatch
         COMMAND $<TARGET_FILE:pvbatch>
+          --enable-bt
           --symmetric
           ${CMAKE_CURRENT_SOURCE_DIR}/${tfile}.py
           -D ${PARAVIEW_DATA_ROOT}
@@ -205,6 +220,7 @@ if (PARAVIEW_USE_MPI AND VTK_MPIRUN_EXE AND NOT WIN32)
           COMMAND ${VTK_MPIRUN_EXE} ${VTK_MPI_PRENUMPROC_FLAGS}
                   ${VTK_MPI_NUMPROC_FLAG} ${VTK_MPI_MAX_NUMPROCS} ${VTK_MPI_PREFLAGS}
                   $<TARGET_FILE:pvbatch>
+                  --enable-bt
                   --symmetric
                   ${CMAKE_CURRENT_SOURCE_DIR}/TestMPI4PY.py)
     set_tests_properties(TestMPI4PY-SymmetricBatch PROPERTIES LABELS "PARAVIEW")

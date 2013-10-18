@@ -45,12 +45,10 @@ vtkPVOptions::vtkPVOptions()
   this->UseRenderingGroup = 0;
   this->ParaViewDataName = 0;
   this->StateFileName = 0;
-
   this->TestPlugin = 0;
   this->TestPluginPath = 0;
   this->SetTestPlugin("");
   this->SetTestPluginPath("");
-  
   this->TileDimensions[0] = 0;
   this->TileDimensions[1] = 0;
   this->TileMullions[0] = 0;
@@ -60,22 +58,14 @@ vtkPVOptions::vtkPVOptions()
   this->MultiClientMode = 0;
   this->MultiClientModeWithErrorMacro = 0;
   this->MultiServerMode = 0;
-
   this->RenderServerMode = 0;
   this->SymmetricMPIMode = 0;
-
   this->TellVersion = 0;
-
   this->EnableStreaming = 0;
-
   this->UseCudaInterop = 0;
-
   this->SatelliteMessageIds = 0;
-
   this->PrintMonitors = 0;
-
   this->ServerURL = 0;
-
   this->ReverseConnection = 0;
   this->UseStereoRendering = 0;
   this->UseOffscreenRendering = 0;
@@ -83,8 +73,10 @@ vtkPVOptions::vtkPVOptions()
   this->LogFileName = 0;
   this->StereoType = 0;
   this->SetStereoType("Anaglyph");
-
   this->Timeout = 0;
+  this->EnableStackTrace = 0;
+  this->ForceMPIInitOnClient = 0;
+  this->ForceNoMPIInitOnClient = 0;
 
   if (this->XMLParser)
     {
@@ -261,7 +253,23 @@ void vtkPVOptions::Initialize()
                     vtkPVOptions::ALLPROCESS);
 
   this->AddBooleanArgument("--print-monitors", 0, &this->PrintMonitors,
-                           "Print detected monitors and exit (windows only).");
+                           "Print detected monitors and exit (Windows only).");
+
+  this->AddBooleanArgument("--enable-bt", 0, &this->EnableStackTrace,
+                           "Enable stack trace signal handler.");
+
+#if defined(PARAVIEW_USE_MPI)
+  // We add these here so that "--help" on the process can print these variables
+  // out. Note the code in vtkProcessModule::Initialize() doesn't really rely on
+  // the vtkPVOptions parsing these arguments since vtkPVOptions is called on to
+  // parse the arguments only after MPI has been initialized.
+  this->AddBooleanArgument("--mpi", 0, &this->ForceMPIInitOnClient,
+                           "Initialize MPI on client processes, if possible. "
+                           "Cannot be used with --no-mpi.");
+  this->AddBooleanArgument("--no-mpi", 0, &this->ForceNoMPIInitOnClient,
+                           "Don't initialize MPI on client processes. "
+                           "Cannot be used with --mpi.");
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -296,6 +304,7 @@ int vtkPVOptions::PostProcess(int, const char* const*)
       this->TileDimensions[1] = 1;
       }
     }
+
 #ifdef PARAVIEW_ALWAYS_SECURE_CONNECTION
   if ( (this->ClientMode || this->ServerMode) && !this->ConnectID)
     {
@@ -303,6 +312,17 @@ int vtkPVOptions::PostProcess(int, const char* const*)
     return 0;
     }
 #endif //PARAVIEW_ALWAYS_SECURE_CONNECTION
+
+  // do this here for simplicity since it's
+  // a universal option. The current kwsys implementation
+  // is for POSIX compliant OS's, and a NOOP on others
+  // but passing the flag on for all ensures that when
+  // implementations for non-POSIX OS's are finished they're
+  // enabled as well.
+  if (this->EnableStackTrace)
+    {
+    vtksys::SystemInformation::SetStackTraceOnError(1);
+    }
 
   return 1;
 }
@@ -413,6 +433,9 @@ void vtkPVOptions::PrintSelf(ostream& os, vtkIndent indent)
      << (this->ServerURL? this->ServerURL : "(none)") << endl;
   os << indent << "EnableStreaming:" <<
     (this->EnableStreaming? "yes" : "no") << endl;
+
+  os << indent << "EnableStackTrace:" <<
+    (this->EnableStackTrace? "yes" : "no") << endl;
 
   os << indent << "UseCudaInterop " << this->UseCudaInterop << std::endl;
   os << indent << "SatelliteMessageIds " << this->SatelliteMessageIds << std::endl;
