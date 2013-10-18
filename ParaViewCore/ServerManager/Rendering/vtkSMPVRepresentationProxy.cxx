@@ -427,9 +427,11 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 	{
 	0, 1
 	};
+  bool hasgradrange = this->GetProperty("GradientRange");
+  if(hasgradrange){
   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange, 2);
-
+  }
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)

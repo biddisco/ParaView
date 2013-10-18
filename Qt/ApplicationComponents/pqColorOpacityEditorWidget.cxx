@@ -154,6 +154,11 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     {
       ui.OpacityEditor->hide();
     }
+  if (stc)
+     {
+       ui.ColorEditor->initialize(stc, true, NULL, false);
+     }
+
 
   pwf = stc ? stc->GetGradientLinearOpacityFunction() : NULL;
   size = pwf->GetSize();
@@ -167,10 +172,6 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       ui.GradientLinearOpacityEditor->hide();
     }
 
-  if (stc)
-    {
-      ui.ColorEditor->initialize(stc, true, NULL, false);
-    }
 
   vtkGaussianPiecewiseFunction* gpwf =
       stc ? stc->GetGradientGaussianOpacityFunction() : NULL;
@@ -178,7 +179,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   if (gpwf)
     {
       //TBD initialize stuff for gaussian
-      ui.GradientGaussianOpacityEditor->initialize(gpwf);
+      ui.GradientGaussianOpacityEditor->initialize(gpwf,NULL);
     }
   else
     {
@@ -190,7 +191,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   if (gpwf)
     {
       //TBD initialize stuff for gaussian
-      ui.ScalarGaussianOpacityEditor->initialize(gpwf);
+      ui.ScalarGaussianOpacityEditor->initialize(gpwf,stc);
     }
   else
     {
@@ -569,6 +570,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
 
   switchGradientOpacity();
   switchScalarOpacity();
+  ui.ScalarGaussianOpacityEditor->hide();
 
   hideGradientFunctions();
 
@@ -1431,6 +1433,11 @@ void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
 
   pqDataRepresentation* repr =
         pqActiveObjects::instance().activeRepresentation();
+
+  if (!repr){
+	Superclass::paintEvent(e);
+	return;
+  }
 
   if (!repr->getProxy()->GetProperty("InfoDisableGradientOpacity"))
         return;

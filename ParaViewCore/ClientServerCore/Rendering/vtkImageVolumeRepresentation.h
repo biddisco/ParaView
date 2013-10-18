@@ -41,6 +41,7 @@ class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
 class vtkImageAccumulate;
+class vtkPExtractHistogram;
 class vtkImageGradientMagnitude;
 class vtkIntArray;
 class vtkDoubleArray;
@@ -93,7 +94,7 @@ public:
    }
    */
 
-  vtkSmartPointer<vtkImageAccumulate> getHistogram()
+  vtkSmartPointer<vtkPExtractHistogram> getHistogram()
 	{
 	UpdateHistogram();
 	return AccumulateFilter;
@@ -243,7 +244,7 @@ protected:
   vtkPolyDataMapper* OutlineMapper;
 //BTX
   vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
-  vtkSmartPointer<vtkImageAccumulate> AccumulateFilter;
+  vtkSmartPointer<vtkPExtractHistogram> AccumulateFilter;
 //ETX
 
   int ColorAttributeType;

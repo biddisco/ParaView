@@ -45,10 +45,12 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
   this->finallogScale = logScal;
   this->logScale = *logScal;
 
+  this->histogramSize = size;
+
   this->dialogUi->HistogramWidget->SetData(histogramEnabled, histogram,
 	  this->histogramSize, *logScal, *enabledBarsHeightFraction);
 
-  this->histogramSize = size;
+
   this->dialogUi->stackedWidget->setCurrentIndex(0);
 
   }

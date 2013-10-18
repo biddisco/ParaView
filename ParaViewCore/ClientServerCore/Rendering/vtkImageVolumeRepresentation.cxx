@@ -35,8 +35,10 @@
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
 #include "vtkImageAccumulate.h"
+#include "vtkPExtractHistogram.h"
 #include "vtkGaussianPiecewiseFunction.h"
 #include "vtkPVImageAccumulateInformation.h"
+
 
 #include <map>
 #include <string>
@@ -585,7 +587,7 @@ vtkImageVolumeRepresentation::UpdateHistogram()
     return;
 
   if (!AccumulateFilter)
-    this->AccumulateFilter = vtkSmartPointer<vtkImageAccumulate>::New();
+    this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
 
   if (GradientRangeOutOfDate)
     {
