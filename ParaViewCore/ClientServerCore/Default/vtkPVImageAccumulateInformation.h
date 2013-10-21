@@ -3,7 +3,7 @@
 #ifndef __vtkPVImageAccumulateInformation_h
 #define __vtkPVImageAccumulateInformation_h
 
-#include "vtkPVClientServerCoreRenderingModule.h"
+#include "vtkPVClientServerCoreDefaultModule.h"
 #include "vtkPVInformation.h"
 #include "vtkIntArray.h"
 #include "vtkStdString.h"
@@ -13,7 +13,7 @@ class vtkMultiProcessStream;
 class vtkImageData;
 
 
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkPVImageAccumulateInformation : public vtkPVInformation
+class VTKPVCLIENTSERVERCOREDEFAULT_EXPORT vtkPVImageAccumulateInformation : public vtkPVInformation
 {
 public:
   static vtkPVImageAccumulateInformation* New();
