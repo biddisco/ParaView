@@ -75,6 +75,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT QvisAbstractOpacityBar : public QFrame
     virtual void   paintToPixmap(int,int) = 0;
     virtual void   paintBackground(QPainter &painter, int w, int h);
 
+
     QPixmap       *pix;
     QPixmap       *backgroundPixmap;
     bool           showBackgroundPixmap;

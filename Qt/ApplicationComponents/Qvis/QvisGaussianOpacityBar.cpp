@@ -37,6 +37,11 @@
 
 #include "QvisGaussianOpacityBar.h"
 #include "vtkGaussianPiecewiseFunction.h"
+#include "vtkDataArray.h"
+#include "vtkColorTransferFunction.h"
+#include "vtkScalarsToColors.h"
+#include "vtkEventQtSlotConnect.h"
+
 
 #include <qpainter.h>
 #include <qpolygon.h>
@@ -85,6 +90,14 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject,
 
   mousedown = false;
   setMouseTracking(true);
+
+
+
+scalarMin = 0; scalarMax = 0;
+  currentScalarArrayWidth = 0;
+  this->paintScalarColorBackground = false;
+  this->colortransferfunction = NULL;
+ // scalarValues.SetVoidArray(NULL, this->geometry().width(),0);
   }
 
 // ****************************************************************************
@@ -113,12 +126,21 @@ QvisGaussianOpacityBar::~QvisGaussianOpacityBar()
 //
 // ****************************************************************************
 
-void QvisGaussianOpacityBar::initialize(vtkGaussianPiecewiseFunction* gpwf)
+void QvisGaussianOpacityBar::initialize(vtkGaussianPiecewiseFunction* gpwf, vtkScalarsToColors* stc)
   {
   if (gpwf)
 	{
 	this->gaussianFunctionGroup = gpwf;
 	this->ngaussian = this->gaussianFunctionGroup->GetSize();
+	}
+  if(stc)
+	{
+	this->colortransferfunction = vtkColorTransferFunction::SafeDownCast(stc);
+	this->paintScalarColorBackground = true;
+	this->showBackgroundPixmap = true;
+
+	this->VTKConnect->Connect(
+		colortransferfunction, vtkCommand::ModifiedEvent, this, SLOT(updateImage()));
 	}
   }
 
@@ -133,6 +155,10 @@ void QvisGaussianOpacityBar::initialize(vtkGaussianPiecewiseFunction* gpwf)
 
  }
  */
+
+void QvisGaussianOpacityBar::updateImage(){
+  this->update();
+}
 
 void QvisGaussianOpacityBar::drawControlPoints(QPainter &painter)
   {
@@ -271,6 +297,48 @@ void QvisGaussianOpacityBar::drawControlPoints(QPainter &painter)
 	}
   }
 
+
+// ****************************************************************************
+
+
+void QvisGaussianOpacityBar::createScalarColorBackground(float *values, int width, int height){
+  double currentRangeMin, currentRangeMax;
+  this->gaussianFunctionGroup->GetRange(currentRangeMin, currentRangeMax);
+
+
+
+
+
+const unsigned char * c = this->colortransferfunction->GetTable(currentRangeMin, currentRangeMax,this->geometry().width());
+
+
+
+QImage image(QSize(this->geometry().width(),this->geometry().height()), QImage::Format_RGB32);
+image.fill(0);
+
+
+float dy = 1.0 / float(height - 1);
+
+for (int _x = 0; _x < width; _x++)
+		{
+		 for (int y = 0; y <height; y++){
+		   float yvalc = 1 - float(y) / float(height - 1);
+		   if (yvalc < qMax(values[_x], values[_x+1])-dy)
+		   image.setPixel(_x,y,qRgb((int)c[_x*3],(int)c[_x*3+1],(int)c[_x*3+2]));
+		 }
+		}
+
+QPixmap* background = new QPixmap(
+	  QPixmap::fromImage(
+		  image.scaled(this->contentsRect().width(), height,
+			  Qt::IgnoreAspectRatio, Qt::FastTransformation)));
+
+
+
+  this->SetBackgroundPixmap(background);
+
+}
+
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::paintToPixmap
 //
@@ -291,6 +359,7 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
   QPen whitepen(Qt::white, 2);
 
   QPainter painter(pix);
+
   this->paintBackground(painter, w, h);
 
   float dy = 1.0 / float(h - 1);
@@ -308,6 +377,9 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
 		}
 	  }
 	}
+  if(this->paintScalarColorBackground)
+  	createScalarColorBackground(values,w,h);
+
   delete[] values;
 
   this->drawControlPoints(painter);
@@ -487,14 +559,39 @@ void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 
   int histMinIndex = int(
 	  (currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
-		  * double(histogramSize) + 0.01);
+		  * float(histogramSize) + 0.01);
   int histMaxIndex = int(
 	  (currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
-		  * double(histogramSize) + 0.01);
+		  * float(histogramSize) + 0.01);
 
   int newHistogramSize = histMaxIndex - histMinIndex;
   //newHistogramSize = abs(newHistogramSize);
   //newHistogramSize = newHistogramSize-histMinIndex;
+//newhistogramsize should be scaled by the factor it is larger than the original histogram and
+  //consolidate bins like that
+  int consolidateFactor = 1;
+  if (newHistogramSize >= 2*histogramSize){
+	//Houston, we have a problem
+	//if we don't start consolidating bins, the widgets histogram might become huge.
+	//The range of the gaussian function is significantly larger than that of the histogram.
+	//the idea is to create black areas to the right and the left of the data in the widgets background image.
+	//unfortunately, if we go by one bin = one pixel, and the range of the gaussian function is, say, 6 million
+	//times larger, we will end with a massive background image, and the program will behave in an undetermined manner.
+
+	float consolidateFactorFloat = float(newHistogramSize)/float(histogramSize);
+	consolidateFactor = int(floor(consolidateFactorFloat+0.5f)); //round to nearest number
+	newHistogramSize = int(float(newHistogramSize)/consolidateFactorFloat);
+
+
+	histMinIndex = int(
+		  (currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
+			  * float(histogramSize)/consolidateFactorFloat + 0.01f);
+	 histMaxIndex = int(
+		  (currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
+			  * float(histogramSize)/consolidateFactorFloat + 0.01f);
+
+  }
+
 
   if (newHistogramSize != currentHistogramSize)
 	{ //needa different size
@@ -519,9 +616,11 @@ void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 
   int index = std::max(histMinIndex, 0); //index = histmindindex if the guassian min range is higher
   for (int i = std::max(-histMinIndex, 0);
-	  i < histMaxIndex && index < histogramSize; i++, index++)
+	  i < histMaxIndex && index < histogramSize; i++, index+=consolidateFactor)
 	{
-	histogramValues[i] = histogram[index];
+	for (int j = 0; j< consolidateFactor && j+index<histogramSize; j++){
+	  histogramValues[i] = histogram[index+j];
+	}
 	}
 
   currentHistogramSize = newHistogramSize;
@@ -701,9 +800,18 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
   else
 	scale = float(height - enabledBarsHeight) / float(max);
 
-  QImage* image = new QImage(QSize(width, height), QImage::Format_RGB32);
+ /* if(backgroundImage && backgroundImage->width() != width && backgroundImage->height() != height){
+	delete backgroundImage;
+	if (backgroundPixmap)
+	  delete backgroundPixmap;
+  }
 
-  image->fill(0);
+  if (!backgroundImage)
+	this->backgroundImage = new backgroun*/
+
+  QImage image(QSize(width, height), QImage::Format_RGB32);
+
+  image.fill(0);
 
   for (int i = 0; i < width; i++)
 	{
@@ -712,16 +820,17 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 	QRgb color = histogramEnabled[i] ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
 	for (int j = height - 1; j >= end; j--)
 	  {
-	  image->setPixel(i, j, color);
+	  image.setPixel(i, j, color);
 	  }
 	}
 
   QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
-		  image->scaled(this->contentsRect().width(), height,
+		  image.scaled(this->contentsRect().width(), height,
 			  Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 
   this->SetBackgroundPixmap(background);
+
 
   this->update();
 
@@ -986,7 +1095,7 @@ bool QvisGaussianOpacityBar::findGaussianControlPoint(int _x, int _y,
 // ****************************************************************************
 int QvisGaussianOpacityBar::getNumberOfGaussians()
   {
-  return ngaussian;
+  return this->gaussianFunctionGroup->GetSize();
   }
 
 // ****************************************************************************

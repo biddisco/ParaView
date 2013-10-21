@@ -124,6 +124,7 @@ void QvisAbstractOpacityBar::setBackgroundColourData(int N, int c, const unsigne
 //---------------------------------------------------------------------------
 void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
 {
+
   if (this->showBackgroundPixmap && this->backgroundPixmap) {
     if (!stretchBackgroundPixmap) {
       painter.drawPixmap(0,0, *this->backgroundPixmap);
@@ -132,6 +133,7 @@ void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
       painter.drawPixmap(painter.viewport(), *this->backgroundPixmap);
     }
   }
+
 /*
   else if (backgroundColorControlPoints && backgroundColorControlPoints->GetNumControlPoints()>1)
   {

@@ -35,8 +35,11 @@
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
 #include "vtkImageAccumulate.h"
+#include "vtkPExtractHistogram.h"
 #include "vtkGaussianPiecewiseFunction.h"
-#include "vtkPVImageAccumulateInformation.h"
+#include "vtkTable.h"
+#include "vtkVariantArray.h"
+
 
 #include <map>
 #include <string>
@@ -511,19 +514,23 @@ vtkImageVolumeRepresentation::updateGradientHistogram()
   vtkImageData *gradient = this->GradientFilter->GetOutput();
 
   AccumulateFilter->SetInputData(gradient);
-  AccumulateFilter->SetComponentExtent(0, HistogramBins - 1, 0, 0, 0, 0);
+  AccumulateFilter->SetCustomBinRanges(GradientRange[0],GradientRange[1]);
+  AccumulateFilter->SetBinCount(HistogramBins);
+/*  AccumulateFilter->SetComponentExtent(0, HistogramBins - 1, 0, 0, 0, 0);
   AccumulateFilter->SetComponentOrigin(GradientRange[0], 0, 0);
   AccumulateFilter->SetComponentSpacing(
       double(
           (GradientRange[1] - GradientRange[0]) / (double(HistogramBins - 1))),
-      0.0, 0.0);
+      0.0, 0.0);*/
   AccumulateFilter->Update();
+  std::cout << "updated accumulatefilter " <<std::endl;
 
-  int dims[3];
-  AccumulateFilter->GetOutput()->GetDimensions(dims);
+ // int dims[3];
+ // AccumulateFilter->GetOutput()->GetDimensions(dims);
 
-  this->GradientHistogram = vtkIntArray::SafeDownCast(
-      AccumulateFilter->GetOutput()->GetPointData()->GetArray("bin_values"));
+  GradientHistogram = AccumulateFilter->GetOutput();
+
+
 
 }
 
@@ -585,7 +592,7 @@ vtkImageVolumeRepresentation::UpdateHistogram()
     return;
 
   if (!AccumulateFilter)
-    this->AccumulateFilter = vtkSmartPointer<vtkImageAccumulate>::New();
+    this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
 
   if (GradientRangeOutOfDate)
     {

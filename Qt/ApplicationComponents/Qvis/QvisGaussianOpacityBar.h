@@ -42,9 +42,14 @@
 #include "QvisAbstractOpacityBar.h"
 #include "vtkType.h"
 #include "vtkSmartPointer.h"
+#include "vtkNew.h"
 
 class QPixmap;
 class vtkGaussianPiecewiseFunction;
+class vtkScalarsToColors;
+class vtkColorTransferFunction;
+class vtkEventQtSlotConnect;
+class QImage;
 
 // ****************************************************************************
 //  Class:  QvisGaussianOpacityBar
@@ -64,10 +69,17 @@ Q_OBJECT
 public:
 	QvisGaussianOpacityBar(QWidget *parent = NULL, const char *name = NULL);
 	~QvisGaussianOpacityBar();
-	void initialize(vtkGaussianPiecewiseFunction* gpwf);
+	void initialize(vtkGaussianPiecewiseFunction* gpwf, vtkScalarsToColors* stc);
 	void getRawOpacities(int, float*);
+	///returns the number of gaussians in the connected gaussianfunction
 	int getNumberOfGaussians();
+	// Description:
+	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
+	//The gaussian is scaled and shifted into the space used by the widget
 	void getGaussian(int, float*, float*, float*, float*, float*);
+	// Description:
+	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
+	//The gaussian is scaled and shifted into the space used by the widget
 	void setGaussian(int, float*, float*, float*, float*, float*);
 	void setAllGaussians(int, float*);
 	void setMaximumNumberOfGaussians(int);
@@ -91,6 +103,14 @@ protected:
 	void paintToPixmap(int, int);
 	void drawControlPoints(QPainter &painter);
 	int getTopBinPixel(int bin, float scale, int* histogram, int currentMax, int currentUnEnabledMax, bool logScale, float enabledBarsHeight, bool* histogramEnabled);
+	int currentScalarArrayWidth;
+	bool paintScalarColorBackground;
+	void createScalarColorBackground(float *values, int width, int height);
+	int scalarMin, scalarMax;
+	vtkColorTransferFunction* colortransferfunction;
+	QImage* backgroundImage;
+
+	vtkNew<vtkEventQtSlotConnect> VTKConnect;
 
 signals:
 	void mouseReleased();
@@ -101,6 +121,9 @@ signals:
 	/// signal fired to indicate that the control points changed i.e. either they
 	/// were moved, orone was added/deleted, or edited to change color, etc.
 	void controlPointsModified();
+
+	protected slots:
+	void updateImage();
 
 private:
 	enum Mode {

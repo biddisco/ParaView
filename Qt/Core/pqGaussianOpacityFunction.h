@@ -15,9 +15,9 @@ public:
     vtkSMProxy* proxy, pqServer* server, QObject* parent=NULL);
   virtual ~pqGaussianOpacityFunction();
 
-  /// Set the scalar range for the opacity function. This
+  /// Set the range for the opacity function. This
   /// will rescale all the control points to fit the 
-  /// scalar range.
+  /// new range.
   void setScalarRange(double min, double max);
 };
 
