@@ -29,13 +29,16 @@
 #
 #==========================================================================
 set (Module_SRCS
+  vtkImageVolumeRepresentation.cxx
+  vtkImageSliceRepresentation.cxx
   vtkNetworkImageSource.cxx
   vtkPVEnvironmentInformation.cxx
   vtkPVEnvironmentInformationHelper.cxx
   vtkPVFileInformation.cxx
   vtkPVFileInformationHelper.cxx
+  vtkPVImageAccumulateInformation.cxx
   vtkPVSingleOutputExtractSelection.cxx
-  vtkXMLPVAnimationWriter.cxx
+  vtkXMLPVAnimationWriter.cxx 
 )
 
 if (PARAVIEW_ENABLE_PYTHON)
