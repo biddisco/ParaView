@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>397</width>
-    <height>675</height>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -326,55 +326,6 @@
       </layout>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QStackedWidget" name="StackedShowGradientFunctions">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>350</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="page">
-      <widget class="QPushButton" name="ShowGradientFunctions">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>20</y>
-         <width>181</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Show Gradient Functions</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="page_2">
-      <widget class="QPushButton" name="HideGradientFunctions">
-       <property name="geometry">
-        <rect>
-         <x>60</x>
-         <y>20</y>
-         <width>181</width>
-         <height>27</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Hide Gradient Functions</string>
-       </property>
-      </widget>
-     </widget>
-    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">

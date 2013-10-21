@@ -368,10 +368,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   QObject::connect(ui.SaveAsPreset, SIGNAL(clicked()), this,
   SLOT(saveAsPreset()));
 
-  QObject::connect(ui.ShowGradientFunctions, SIGNAL(clicked()), this,
-  SLOT(showGradientFunctions()));
-  QObject::connect(ui.HideGradientFunctions, SIGNAL(clicked()), this,
-  SLOT(hideGradientFunctions()));
+
 
   // TODO: at some point, I'd like to add a textual editor for users to simply
   // enter the text for the transfer function control points for finer control
@@ -1411,7 +1408,6 @@ pqColorOpacityEditorWidget::showGradientFunctions()
          else
            ui.GradientLinearOpacityEditor->show();
 
-  ui.StackedShowGradientFunctions->setCurrentIndex(1);
 
 }
 
@@ -1423,7 +1419,6 @@ pqColorOpacityEditorWidget::hideGradientFunctions()
   ui.GradientLinearOpacityEditor->hide();
   ui.TwoDTransferFunction->hide();
   ui.gaussorgrad->hide();
-  ui.StackedShowGradientFunctions->setCurrentIndex(0);
 }
 
 void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
