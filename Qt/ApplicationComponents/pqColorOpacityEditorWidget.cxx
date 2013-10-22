@@ -54,6 +54,7 @@
 #include "vtkSMSessionProxyManager.h"
 #include "vtkSMTransferFunctionProxy.h"
 #include "vtkVector.h"
+#include "vtkPVSession.h"
 #include "vtkPVImageAccumulateInformation.h"
 #include "pqHistogramDialog.h"
 //#include "QvisGaussianOpacityBar.h"
@@ -264,8 +265,8 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   if (repr->getProxy()->GetProperty("DisableGradientOpacity"))
     {
       QObject::connect(ui.DisableOpacityGradient, SIGNAL(clicked()), this,
-      SLOT(disableGradientOpacity()));
-      ui.DisableOpacityGradient->setChecked(false);
+        SLOT(disableGradientOpacity()));
+        ui.DisableOpacityGradient->setChecked(false);
     /*  this->addPropertyLink(ui.DisableOpacityGradient, "checked",
       SIGNAL(clicked()), repr->getProxy(),
           repr->getProxy()->GetProperty("DisableGradientLinearOpacity"));*/
@@ -302,7 +303,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     }
 
   // vtkImageVolumeRepresentation* volumerep = vtkImageVolumeRepresentation::SafeDownCast(
-  //			vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
+  //      vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
   pqDataRepresentation* volumerepr =
       pqActiveObjects::instance().activeRepresentation();
   //vtkPVCompositeRepresentation* volumerep = vtkPVCompositeRepresentation::SafeDownCast(volumerepr);
@@ -658,6 +659,7 @@ pqColorOpacityEditorWidget::gradientGaussianCurrentChanged(int index)
     }
   this->updateCurrentData();
 }
+//-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::TwoDTransferCurrentChanged(int index)
 {
@@ -671,13 +673,10 @@ pqColorOpacityEditorWidget::TwoDTransferCurrentChanged(int index)
     }
   this->updateCurrentData();
 }
-
+//-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::showHistogramWidget()
 {
-  vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
-      vtkPVImageAccumulateInformation>::New();
-
   pqDataRepresentation* repr =
       pqActiveObjects::instance().activeRepresentation();
   if (!repr)
@@ -686,15 +685,21 @@ pqColorOpacityEditorWidget::showHistogramWidget()
       return;
     }
 
-  repr->getProxy()->InvokeCommand("UpdateHistogram");
-
-  repr->getProxy()->GatherInformation(info.GetPointer());
-  // repr->
   if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
     {
       std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
           << std::endl;
     }
+
+  repr->getProxy()->InvokeCommand("UpdateHistogram");
+
+  vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
+      vtkPVImageAccumulateInformation>::New();
+  info->SetCollectGradientHistogram(1);
+  info->SetCollectGradientRange(0);
+  repr->getProxy()->GatherInformation(info.GetPointer(), vtkPVSession::RENDER_SERVER);
+
+
   /*
    if (repr->getProxy()->GetProperty("UpdateGradientRange"))
    repr->getProxy()->InvokeCommand("UpdateGradientRange");
@@ -713,7 +718,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
           2);
     }
   ui.GradientGaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
-      info->sizeOfX, info->values);
+      info->GetsizeOfX(), info->GetValues());
   float enabledBarsHeight;
 
   bool logscale = false;
@@ -895,6 +900,7 @@ pqColorOpacityEditorWidget::gvmsPoints() const
   return values;
 }
 
+//-----------------------------------------------------------------------------
 QList<QVariant>
 pqColorOpacityEditorWidget::twoDTransferPoints() const
 {
@@ -924,48 +930,37 @@ pqColorOpacityEditorWidget::useLogScale() const
 {
   return this->Internals->Ui.UseLogScale->isChecked();
 }
-
+//-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::disableGradientOpacity()
 {
-
   pqDataRepresentation* repr =
       pqActiveObjects::instance().activeRepresentation();
-
-  // repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("GradientRange"));
-//	 disableGradientOpacity = !disableGradientOpacity;
-//	   vtkSMPropertyHelper(repr->getProxy(), "DisableGradientOpacity").Set(disableGradientOpacity);
-//	 repr->getProxy()->UpdateVTKObjects();
-
 
   if (!repr->getProxy()->GetProperty("InfoDisableGradientOpacity"))
       return;
 
-    repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
-  // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
+  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
 
-      int disabled;
-      vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
+  int disabled;
+  vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
 
+  vtkSMProperty* property = repr->getProxy()->GetProperty("DisableGradientOpacity");
+  vtkSMPropertyHelper prpty(property);
+  disabled = !disabled;
+  prpty.Set(disabled);
 
+  repr->getProxy()->UpdateVTKObjects();
 
-
-      vtkSMProperty* property = repr->getProxy()->GetProperty("DisableGradientOpacity");
-		vtkSMPropertyHelper prpty(property);
-		disabled = !disabled;
-		prpty.Set(disabled);
-
-		repr->getProxy()->UpdateVTKObjects();
-
-if(!disabled){
-  showGradientFunctions();
-}
-else
-  hideGradientFunctions();
-
+  if(!disabled){
+    showGradientFunctions();
+  }
+  else {
+    hideGradientFunctions();
+  }
 
 }
-
+//-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::switchScalarOpacity()
 {
@@ -993,11 +988,11 @@ pqColorOpacityEditorWidget::switchScalarOpacity()
       if (!repr->getProxy()->GetProperty("SwitchScalarOpacity"))
                           return;
              vtkSMProperty* property = repr->getProxy()->GetProperty("SwitchScalarOpacity");
-     		vtkSMPropertyHelper prpty(property);
-     		isGaussian = !isGaussian;
-     		prpty.Set(isGaussian);
+         vtkSMPropertyHelper prpty(property);
+         isGaussian = !isGaussian;
+         prpty.Set(isGaussian);
 
-     		repr->getProxy()->UpdateVTKObjects();
+         repr->getProxy()->UpdateVTKObjects();
       }
 
 
@@ -1049,11 +1044,11 @@ else{
   if (!repr->getProxy()->GetProperty("SwitchGradientOpacity"))
                      return;
         vtkSMProperty* property = repr->getProxy()->GetProperty("SwitchGradientOpacity");
-		vtkSMPropertyHelper prpty(property);
-		isGaussian = !isGaussian;
-		prpty.Set(isGaussian);
+    vtkSMPropertyHelper prpty(property);
+    isGaussian = !isGaussian;
+    prpty.Set(isGaussian);
 
-		repr->getProxy()->UpdateVTKObjects();
+    repr->getProxy()->UpdateVTKObjects();
 
 }
 
@@ -1376,43 +1371,43 @@ pqColorOpacityEditorWidget::saveAsPreset()
       this->choosePreset(&colorMap);
     }
 }
-
+//-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::showGradientFunctions()
 {
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
 
-
   ui.TwoDTransferFunction->show();
   ui.gaussorgrad->show();
 
-
   pqDataRepresentation* repr =
-            pqActiveObjects::instance().activeRepresentation();
-        if (!repr)
-          {
-            qDebug("No active representation.");
-            return;
-          }
+    pqActiveObjects::instance().activeRepresentation();
+  if (!repr)
+  {
+    qDebug("No active representation.");
+    return;
+  }
 
   if (!repr->getProxy()->GetProperty("IsGradientGaussianFunction"))
-         return;
+    return;
 
-       repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("IsGradientGaussianFunction"));
+  repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
-         int isGaussian;
-         vtkSMPropertyHelper(repr->getProxy(), "IsGradientGaussianFunction").Get(&isGaussian,1);
+  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("IsGradientGaussianFunction"));
 
-         if (isGaussian)
-           ui.GradientGaussianOpacityEditor->show();
-         else
-           ui.GradientLinearOpacityEditor->show();
+  int isGaussian;
+  vtkSMPropertyHelper(repr->getProxy(), "IsGradientGaussianFunction").Get(&isGaussian,1);
+
+  if (isGaussian)
+    ui.GradientGaussianOpacityEditor->show();
+  else
+    ui.GradientLinearOpacityEditor->show();
 
 
 }
-
+//-----------------------------------------------------------------------------
 void
-pqColorOpacityEditorWidget::hideGradientFunctions()
+  pqColorOpacityEditorWidget::hideGradientFunctions()
 {
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GradientGaussianOpacityEditor->hide();
@@ -1420,39 +1415,39 @@ pqColorOpacityEditorWidget::hideGradientFunctions()
   ui.TwoDTransferFunction->hide();
   ui.gaussorgrad->hide();
 }
-
+//-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
-//make sure all the buttons are correct
+  //make sure all the buttons are correct
 
   //std::cout << "pqcoloropacityeditorwidget paint event"<< std::endl;
 
   pqDataRepresentation* repr =
-        pqActiveObjects::instance().activeRepresentation();
+    pqActiveObjects::instance().activeRepresentation();
 
   if (!repr){
-	Superclass::paintEvent(e);
-	return;
+    Superclass::paintEvent(e);
+    return;
   }
 
   if (!repr->getProxy()->GetProperty("InfoDisableGradientOpacity"))
-        return;
+    return;
 
-      repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
-    // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
+  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
+  // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
 
-        int disabled;
-        vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
+  int disabled;
+  vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
 
-        if (disabled){
-          hideGradientFunctions();
-          this->Internals->Ui.DisableOpacityGradient->setChecked(false);
-        }
-          else
-        	{
-        	showGradientFunctions();
-        	this->Internals->Ui.DisableOpacityGradient->setChecked(true);
-        	}
+  if (disabled){
+    hideGradientFunctions();
+    this->Internals->Ui.DisableOpacityGradient->setChecked(false);
+  }
+  else
+  {
+    showGradientFunctions();
+    this->Internals->Ui.DisableOpacityGradient->setChecked(true);
+  }
 
-        Superclass::paintEvent(e);
+  Superclass::paintEvent(e);
 
 }

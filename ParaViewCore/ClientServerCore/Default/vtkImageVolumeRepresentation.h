@@ -25,8 +25,7 @@
 
 #include "vtkPVClientServerCoreDefaultModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
-#include "vtkVector.h"
-#include "vtkSmartPointer.h"
+#include "vtkSmartPointer.h"                    //needed for cleanup
 
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
@@ -186,6 +185,7 @@ public:
 //BTX
   void updateGradRange();
   void updateGradientHistogram();
+
 protected:
   vtkImageVolumeRepresentation();
   ~vtkImageVolumeRepresentation();
@@ -260,6 +260,7 @@ protected:
   bool SupportHistogramWidget;
   bool GradientRangeFirstTimeStartup;
   bool GradientHistogramFirstTimeStartup;
+  int  ExecuteOnClient;
 
 private:
   vtkImageVolumeRepresentation(const vtkImageVolumeRepresentation&); // Not implemented
