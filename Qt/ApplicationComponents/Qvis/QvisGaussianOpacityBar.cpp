@@ -314,7 +314,7 @@ const unsigned char * c = this->colortransferfunction->GetTable(currentRangeMin,
 
 
 QImage image(QSize(this->geometry().width(),this->geometry().height()), QImage::Format_RGB32);
-image.fill(0);
+image.fill(Qt::white);
 
 
 float dy = 1.0 / float(height - 1);
@@ -323,8 +323,14 @@ for (int _x = 0; _x < width; _x++)
 		{
 		 for (int y = 0; y <height; y++){
 		   float yvalc = 1 - float(y) / float(height - 1);
-		   if (yvalc < qMax(values[_x], values[_x+1])-dy)
-		   image.setPixel(_x,y,qRgb((int)c[_x*3],(int)c[_x*3+1],(int)c[_x*3+2]));
+
+		   if (yvalc < qMax(values[_x], values[_x+1])-dy){
+			 int r = (int)c[_x*3]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
+			 int g = (int)c[_x*3+1]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
+			 int b = (int)c[_x*3+2]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
+		   image.setPixel(_x,y,qRgb(r,g,b));
+		   }
+
 		 }
 		}
 
@@ -356,18 +362,21 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
 
   QColor white(255, 255, 255);
   QColor black(0, 0, 0);
-  QPen whitepen(Qt::white, 2);
+  QPen blackpen(Qt::black, 2);
 
   QPainter painter(pix);
 
-  this->paintBackground(painter, w, h);
 
+  if(this->paintScalarColorBackground)
+    	createScalarColorBackground(values,w,h);
+
+    this->paintBackground(painter, w, h);
   float dy = 1.0 / float(h - 1);
   for (int _x = 0; _x < w; _x++)
 	{
 	float yval1 = values[_x];
 	float yval2 = values[_x + 1];
-	painter.setPen(whitepen);
+	painter.setPen(blackpen);
 	for (int _y = 0; _y < h; _y++)
 	  {
 	  float yvalc = 1 - float(_y) / float(h - 1);
@@ -377,8 +386,7 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
 		}
 	  }
 	}
-  if(this->paintScalarColorBackground)
-  	createScalarColorBackground(values,w,h);
+
 
   delete[] values;
 
@@ -538,6 +546,11 @@ void QvisGaussianOpacityBar::mouseMoveEvent(QMouseEvent *e)
 
 //    emit mouseMoved();
   }
+
+
+int QvisGaussianOpacityBar::currentPoint(){
+  return this->currentGaussian;
+}
 
 //-------------------------------------------------------------------------------
 void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
@@ -811,7 +824,7 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 
   QImage image(QSize(width, height), QImage::Format_RGB32);
 
-  image.fill(0);
+  image.fill(Qt::white);
 
   for (int i = 0; i < width; i++)
 	{

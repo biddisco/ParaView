@@ -96,6 +96,8 @@ public:
 	double histogramRange[2];
 	void updateHistogram(double rangeMin, double rangeMax, int histogramSize, int* histogram);
 
+	int currentPoint();
+
 protected:
 	void mouseMoveEvent(QMouseEvent*);
 	void mousePressEvent(QMouseEvent*);
