@@ -3,7 +3,7 @@
 #ifndef __vtkPVImageAccumulateInformation_h
 #define __vtkPVImageAccumulateInformation_h
 
-#include "vtkPVClientServerCoreDefaultModule.h"
+#include "vtkPVClientServerCoreDefaultModule.h"  //needed for exports
 #include "vtkPVInformation.h"
 #include "vtkIntArray.h"
 #include "vtkStdString.h"
@@ -19,8 +19,6 @@ public:
   static vtkPVImageAccumulateInformation* New();
   vtkTypeMacro(vtkPVImageAccumulateInformation, vtkPVInformation);
   void PrintSelf(ostream& os, vtkIndent indent);
-  int sizeOfX;
-  int* values;
 
   // Description:
   // Transfer information about a single object into this object.
@@ -47,9 +45,16 @@ public:
 
   // Description:
   // Set/get whether to gather information only from the root.
-  vtkGetMacro(RootOnly, int);
+  virtual int GetRootOnly() { return 1; }
+  vtkGetMacro(sizeOfX, int);
 
+  vtkSetMacro(CollectGradientHistogram, int);
+  vtkGetMacro(CollectGradientHistogram, int);
 
+  vtkSetMacro(CollectGradientRange, int);
+  vtkGetMacro(CollectGradientRange, int);
+
+  int *GetValues();
 
 protected:
   vtkPVImageAccumulateInformation();
@@ -57,10 +62,17 @@ protected:
 
   void Initialize();
 
-  int RootOnly;
+  int CollectGradientHistogram;
+  int CollectGradientRange;
+  int sizeOfX;
+  vtkStdString arrayName;
+
+  //BTX
+  std::vector<int> values;
+  double GradientRange[2];
+  //ETX
   vtkSetMacro(RootOnly, int);
 
-  vtkStdString arrayName;
 
 
   vtkPVImageAccumulateInformation(const vtkPVImageAccumulateInformation&); // Not implemented
