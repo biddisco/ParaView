@@ -336,10 +336,9 @@ for (int _x = 0; _x < width; _x++)
 
 QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
-		  image.scaled(this->contentsRect().width(), height,
-			  Qt::IgnoreAspectRatio, Qt::FastTransformation)));
+		  image));
 
-
+this->stretchBackgroundPixmap = true;
 
   this->SetBackgroundPixmap(background);
 
@@ -839,10 +838,12 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 
   QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
-		  image.scaled(this->contentsRect().width(), height,
-			  Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+		  image));
+
 
   this->SetBackgroundPixmap(background);
+
+  this->stretchBackgroundPixmap = true;
 
 
   this->update();
