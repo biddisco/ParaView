@@ -39,6 +39,7 @@
 #include "vtkGaussianPiecewiseFunction.h"
 #include "vtkTable.h"
 #include "vtkVariantArray.h"
+#include "vtkMultiProcessController.h"
 
 
 #include <map>
@@ -540,14 +541,23 @@ void vtkImageVolumeRepresentation::updateGradRange()
     this->GradientFilter->SetInputArrayToProcess(0, 0, 0,
         vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
     this->GradientFilter->Update();
-    //
+    // Get the gradient output
     vtkImageData *gradient = this->GradientFilter->GetOutput();
-
+    // Get the gradient array
     vtkDataArray *grads = gradient->GetPointData()->GetArray(ColorArrayName); // this->GradientArrayName);
     if (!grads)
+      {
       grads = gradient->GetPointData()->GetScalars();
-
-    grads->GetRange(GradientRange);
+      }
+    // get the range, local to this process
+    double gradient_range_local[2];
+    grads->GetRange(gradient_range_local);
+    // now do a parallel reduction to get the global min/max
+    vtkMultiProcessController *controller = vtkMultiProcessController::GetGlobalController();
+    if (controller != NULL) {
+      controller->AllReduce(&gradient_range_local[0], &this->GradientRange[0], 1, vtkCommunicator::MIN_OP);
+      controller->AllReduce(&gradient_range_local[1], &this->GradientRange[1], 1, vtkCommunicator::MAX_OP);
+    }
   }
 }
 //----------------------------------------------------------------------------
