@@ -36,7 +36,7 @@ vtkPVImageAccumulateInformation::vtkPVImageAccumulateInformation()
   this->GradientRange[0] = 0.0;
   this->GradientRange[1] = 1.0;
   this->CollectGradientHistogram = 1;
-  this->CollectGradientRange = 0;
+  this->CollectGradientRange = 1;
   this->RootOnly = 1;
   }
 
