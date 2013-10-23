@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
+    <width>401</width>
     <height>611</height>
    </rect>
   </property>
@@ -279,7 +279,7 @@
        <item>
         <widget class="QToolButton" name="DisableOpacityGradient">
          <property name="toolTip">
-          <string>Disable Gradient Opacity</string>
+          <string>Enable Gradient Opacity</string>
          </property>
          <property name="text">
           <string>...</string>
