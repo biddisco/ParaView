@@ -206,7 +206,7 @@ protected:
   ///variable used during initialization
    bool initializingscalar;
 
-   void paintEvent(QPaintEvent *e);
+   void showEvent ( QShowEvent * event );
 
 protected slots:
   /// slots called when the current point changes on the two internal

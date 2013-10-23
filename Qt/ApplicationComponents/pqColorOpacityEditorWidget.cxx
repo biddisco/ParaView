@@ -1449,7 +1449,7 @@ void
   ui.HistogramDialog->hide();
 }
 //-----------------------------------------------------------------------------
-void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
+void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
   //make sure all the buttons are correct
 
   //std::cout << "pqcoloropacityeditorwidget paint event"<< std::endl;
@@ -1458,7 +1458,7 @@ void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
     pqActiveObjects::instance().activeRepresentation();
 
   if (!repr){
-    Superclass::paintEvent(e);
+    Superclass::showEvent(event);
     return;
   }
 
@@ -1481,6 +1481,6 @@ void pqColorOpacityEditorWidget::paintEvent(QPaintEvent *e){
     this->Internals->Ui.DisableOpacityGradient->setChecked(true);
   }
 
-  Superclass::paintEvent(e);
+  Superclass::showEvent(event);
 
 }
