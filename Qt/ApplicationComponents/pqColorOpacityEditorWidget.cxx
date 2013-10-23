@@ -707,6 +707,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
       return;
     }
 
+  repr->getProxy()->InvokeCommand("UpdateGradientRange");
   repr->getProxy()->InvokeCommand("UpdateHistogram");
 
   //
