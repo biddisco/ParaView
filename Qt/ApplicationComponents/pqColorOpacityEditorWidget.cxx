@@ -704,38 +704,28 @@ pqColorOpacityEditorWidget::showHistogramWidget()
     {
       std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
           << std::endl;
+      return;
     }
 
   repr->getProxy()->InvokeCommand("UpdateHistogram");
 
+  //
+  // Gather information from server processes, Paralell reduction of results handled in here
+  //
   vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
       vtkPVImageAccumulateInformation>::New();
   info->SetCollectGradientHistogram(1);
-  info->SetCollectGradientRange(0);
+  info->SetCollectGradientRange(1);
   repr->getProxy()->GatherInformation(info.GetPointer(), vtkPVSession::RENDER_SERVER);
 
-
-  /*
-   if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-   repr->getProxy()->InvokeCommand("UpdateGradientRange");
-   double gofrange[2] = {0, 1};
-   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
-   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
-   */
-
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   double gradientrange[2];
-  if (repr->getProxy()->GetProperty("GradientRange"))
-    {
-      repr->getProxy()->UpdatePropertyInformation(
-          repr->getProxy()->GetProperty("GradientRange"));
-      vtkSMPropertyHelper(repr->getProxy(), "GradientRange").Get(gradientrange,
-          2);
-    }
+  info->GetGradientRange(gradientrange);
+  //
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GradientGaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
       info->GetsizeOfX(), info->GetValues());
-  float enabledBarsHeight;
 
+  float enabledBarsHeight;
   bool logscale = false;
   pqHistogramDialog dialog(this, ui.GradientGaussianOpacityEditor->histogramValues,
       ui.GradientGaussianOpacityEditor->currentHistogramSize,
