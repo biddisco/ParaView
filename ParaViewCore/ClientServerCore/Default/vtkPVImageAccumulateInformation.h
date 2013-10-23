@@ -47,6 +47,7 @@ public:
   // Set/get whether to gather information only from the root.
   virtual int GetRootOnly() { return 1; }
   vtkGetMacro(sizeOfX, int);
+  vtkGetVector2Macro(GradientRange, double);
 
   vtkSetMacro(CollectGradientHistogram, int);
   vtkGetMacro(CollectGradientHistogram, int);

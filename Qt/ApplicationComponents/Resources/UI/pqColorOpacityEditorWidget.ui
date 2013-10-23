@@ -286,8 +286,7 @@
          </property>
          <property name="icon">
           <iconset resource="../../../Components/Resources/pqComponents.qrc">
-           <normaloff>:/pqWidgets/Icons/PluginRed.png</normaloff>
-           <normalon>:/pqWidgets/Icons/PluginGreen.png</normalon>:/pqWidgets/Icons/PluginRed.png</iconset>
+           <normaloff>:/pqWidgets/Icons/pqTangentOn.png</normaloff>:/pqWidgets/Icons/pqTangentOn.png</iconset>
          </property>
          <property name="checkable">
           <bool>true</bool>
