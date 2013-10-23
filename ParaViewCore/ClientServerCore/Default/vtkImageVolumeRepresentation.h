@@ -23,7 +23,7 @@
 #ifndef __vtkImageVolumeRepresentation_h
 #define __vtkImageVolumeRepresentation_h
 
-#include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
+#include "vtkPVClientServerCoreDefaultModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
 #include "vtkVector.h"
 #include "vtkSmartPointer.h"
@@ -41,11 +41,13 @@ class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
 class vtkImageAccumulate;
+class vtkPExtractHistogram;
 class vtkImageGradientMagnitude;
 class vtkIntArray;
 class vtkDoubleArray;
+class vtkVariantArray;
 
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
+class VTKPVCLIENTSERVERCOREDEFAULT_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
   {
 public:
   static vtkImageVolumeRepresentation* New();vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation)
@@ -93,7 +95,7 @@ public:
    }
    */
 
-  vtkSmartPointer<vtkImageAccumulate> getHistogram()
+  vtkSmartPointer<vtkPExtractHistogram> getHistogram()
 	{
 	UpdateHistogram();
 	return AccumulateFilter;
@@ -205,7 +207,7 @@ protected:
 
   int numbinsX;
   int histogramsize;
-  vtkIntArray * GradientHistogram;
+  vtkTable* GradientHistogram;
   int* histogram;
 
   //used to set up the imageaccumulateinformation to send the histogram data to the client.
@@ -243,7 +245,7 @@ protected:
   vtkPolyDataMapper* OutlineMapper;
 //BTX
   vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
-  vtkSmartPointer<vtkImageAccumulate> AccumulateFilter;
+  vtkSmartPointer<vtkPExtractHistogram> AccumulateFilter;
 //ETX
 
   int ColorAttributeType;

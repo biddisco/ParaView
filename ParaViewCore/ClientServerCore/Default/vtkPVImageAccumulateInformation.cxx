@@ -21,6 +21,9 @@
 #include "vtkObjectFactory.h" //needed for newmacro
 #include "vtkImageVolumeRepresentation.h"
 #include "vtkPVCompositeRepresentation.h"
+#include "vtkPExtractHistogram.h"
+#include "vtkVariantArray.h"
+#include "vtkTable.h"
 
 
 
@@ -77,22 +80,27 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
 
 
-	vtkSmartPointer<vtkImageAccumulate> histogram = volumerep->getHistogram();
+	vtkSmartPointer<vtkPExtractHistogram> histogram = volumerep->getHistogram();
 
 	int dims[3];
-	histogram->GetOutput()->GetDimensions(dims);
+	//histogram->GetOutput()->GetDimensions(dims);
 
-	values = new int[dims[0]];
+	sizeOfX = histogram->GetOutput()->GetNumberOfRows();
+	std::cout << "sizeofx " << sizeOfX << std::endl;
 
-	for(vtkIdType bin = 0; bin < dims[0]; ++bin)
+	values = new int[sizeOfX];
+
+
+	//vtkVariantArray * row =
+	for(vtkIdType bin = 0; bin < sizeOfX; ++bin)
 			   {
-				  values[bin] =  *(static_cast<int*>(histogram->GetOutput()->GetScalarPointer(bin, 0, 0)));
+				  values[bin] =  histogram->GetOutput()->GetRow(bin)->GetValue(1).ToInt();
 			   }
 
-
+	std::cout << "ended copy" << std::endl;
 	arrayName = "bin_values";
 
-	sizeOfX = dims[0];
+
 
 }
 

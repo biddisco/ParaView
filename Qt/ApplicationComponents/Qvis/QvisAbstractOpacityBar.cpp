@@ -124,6 +124,7 @@ void QvisAbstractOpacityBar::setBackgroundColourData(int N, int c, const unsigne
 //---------------------------------------------------------------------------
 void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
 {
+
   if (this->showBackgroundPixmap && this->backgroundPixmap) {
     if (!stretchBackgroundPixmap) {
       painter.drawPixmap(0,0, *this->backgroundPixmap);
@@ -132,6 +133,7 @@ void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
       painter.drawPixmap(painter.viewport(), *this->backgroundPixmap);
     }
   }
+
 /*
   else if (backgroundColorControlPoints && backgroundColorControlPoints->GetNumControlPoints()>1)
   {
@@ -147,7 +149,7 @@ void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
 */
   else
   {
-    painter.fillRect(0,0, w,h, QBrush(Qt::black));
+    painter.fillRect(0,0, w,h, QBrush(Qt::white));
   }
 }
 
@@ -256,7 +258,7 @@ QvisAbstractOpacityBar::paintEvent(QPaintEvent *e)
     if (!pix) return;
     //
     QPainter painter(this);
-    this->paintToPixmap(contentsRect().width(), contentsRect().height());
+    this->paintToPixmap(this->geometry().width(), this->geometry().height());//contentsRect().width(), contentsRect().height());
     painter.drawPixmap(contentsRect().left(), contentsRect().top(), *pix);
     painter.end();
 }
