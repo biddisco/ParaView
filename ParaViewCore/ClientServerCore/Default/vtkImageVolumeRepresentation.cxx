@@ -540,7 +540,9 @@ void vtkImageVolumeRepresentation::updateGradRange()
     this->GradientFilter->SetDimensionality(3);
     this->GradientFilter->SetInputArrayToProcess(0, 0, 0,
         vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
-    this->GradientFilter->Update();
+    std::cout << "updating whole extent" << std::endl;
+    this->GradientFilter->UpdateWholeExtent();
+    std::cout << "finished updating whole extent" << std::endl;
     // Get the gradient output
     vtkImageData *gradient = this->GradientFilter->GetOutput();
     // Get the gradient array
@@ -575,7 +577,7 @@ void vtkImageVolumeRepresentation::UpdateGradientRange()
     this->GradientFilter = vtkSmartPointer<vtkImageGradientMagnitude>::New();
     }
 
-  if (!GradientRangeOutOfDate)
+  if (!GradientRangeOutOfDate)//
     {
     return;
     }
@@ -595,7 +597,7 @@ void vtkImageVolumeRepresentation::UpdateHistogram()
       return;
     }
 
-  if (!histogramOutOfDate)
+  if (!histogramOutOfDate)//
     {
     return;
     }
@@ -605,13 +607,13 @@ void vtkImageVolumeRepresentation::UpdateHistogram()
     this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
     }
 
-  if (GradientRangeOutOfDate)
+  if (GradientRangeOutOfDate)//
     {
       UpdateGradientRange();
       histogramOutOfDate = true;
     }
 
-  if (histogramOutOfDate)
+  if (histogramOutOfDate)//
     {
     updateGradientHistogram();
     }
