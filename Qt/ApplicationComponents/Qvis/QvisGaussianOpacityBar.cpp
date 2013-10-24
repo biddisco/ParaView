@@ -863,6 +863,8 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 void QvisGaussianOpacityBar::removeGaussian(int n)
   {
   gaussianFunctionGroup->RemoveGaussianAtIndex(n);
+  this->currentGaussian = -1;
+
   }
 
 // ****************************************************************************
@@ -1018,8 +1020,14 @@ void QvisGaussianOpacityBar::setMinimumNumberOfGaussians(int n)
 void QvisGaussianOpacityBar::setCurrentGaussian(int index)
   {
   if (index < ngaussian && index >= 0)
+	{
 	currentGaussian = index;
-  }
+	}
+  else
+	{
+	this->currentGaussian =-1;
+	}
+}
 
 #define dist2(x1,y1,x2,y2) (((x2)-(x1))*((x2)-(x1)) + ((y2)-(y1))*((y2)-(y1)))
 // ****************************************************************************

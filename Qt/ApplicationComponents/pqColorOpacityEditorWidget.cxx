@@ -712,7 +712,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   // to gauantee that all pvservers are updateed together and the MPI AllReduce
   // in the vtkImageVolumeRepresentation has the correct values
   //
-  repr->getProxy()->InvokeCommand("UpdateGradientRange");
+  //repr->getProxy()->InvokeCommand("UpdateGradientRange");
   repr->getProxy()->InvokeCommand("UpdateHistogram");
 
   //
@@ -804,6 +804,10 @@ pqColorOpacityEditorWidget::updateCurrentData()
         double xvms[5];
         ggwf->GetNodeValue(ui.GradientGaussianOpacityEditor->currentPoint(), xvms);
         ui.CurrentDataValue->setText(QString::number(xvms[0]));
+        ui.CurrentDataValue->setEnabled(
+                 ui.GradientGaussianOpacityEditor->currentPoint() != 0
+                     && ui.GradientGaussianOpacityEditor->currentPoint()
+                         != (ui.GradientGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
       }
   else if (ui.ScalarGaussianOpacityEditor->currentPoint() >= 0 && pwf)
@@ -811,6 +815,11 @@ pqColorOpacityEditorWidget::updateCurrentData()
           double xvms[5];
           sgwf->GetNodeValue(ui.ScalarGaussianOpacityEditor->currentPoint(), xvms);
           ui.CurrentDataValue->setText(QString::number(xvms[0]));
+
+          ui.CurrentDataValue->setEnabled(
+                           ui.ScalarGaussianOpacityEditor->currentPoint() != 0
+                               && ui.ScalarGaussianOpacityEditor->currentPoint()
+                                   != (ui.ScalarGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
         }
   else
