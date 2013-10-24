@@ -1919,8 +1919,9 @@
                          name="UniformGridVolumeRepresentation"
                          processes="client|renderserver|dataserver"
                          si_class="vtkSIUniformGridVolumeRepresentationProxy">
-      <Documentation>Representation for rendering a vtkImageData as
-      volume.</Documentation>
+      <Documentation>
+        Representation for rendering a vtkImageData as volume.
+      </Documentation>
       <InputProperty command="SetInputConnection"
                      name="Input">
         <DataTypeDomain composite_data_supported="0"
@@ -1934,8 +1935,9 @@
                          name="Visibility"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Set the visibility for this
-        representation.</Documentation>
+        <Documentation>
+          Set the visibility for this representation.
+        </Documentation>
       </IntVectorProperty>
       <IntVectorProperty command="SetForceUseCache"
                          default_values="0"
@@ -1943,12 +1945,14 @@
                          name="ForceUseCache"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Typically UseCache and CacheKey are updated by the View
-        and representations cache based on what the view tells it. However in
-        some cases we may want to force a representation to cache irrespective
-        of the view (e.g. comparative views). In which case these ivars can up
-        set. If ForcedCacheKey is true, it overrides UseCache and CacheKey.
-        Instead, ForcedCacheKey is used.</Documentation>
+        <Documentation>
+          Typically UseCache and CacheKey are updated by the View
+          and representations cache based on what the view tells it. However in
+          some cases we may want to force a representation to cache irrespective
+          of the view (e.g. comparative views). In which case these ivars can up
+          set. If ForcedCacheKey is true, it overrides UseCache and CacheKey.
+          Instead, ForcedCacheKey is used.
+        </Documentation>
       </IntVectorProperty>
       <DoubleVectorProperty command="SetForcedCacheKey"
                             default_values="none"
@@ -1956,12 +1960,14 @@
                             name="ForcedCacheKey"
                             number_of_elements="1">
         <DoubleRangeDomain name="range" />
-        <Documentation>Typically UseCache and CacheKey are updated by the View
-        and representations cache based on what the view tells it. However in
-        some cases we may want to force a representation to cache irrespective
-        of the view (e.g. comparative views). In which case these ivars can up
-        set. If ForcedCacheKey is true, it overrides UseCache and CacheKey.
-        Instead, ForcedCacheKey is used.</Documentation>
+        <Documentation>
+          Typically UseCache and CacheKey are updated by the View
+          and representations cache based on what the view tells it. However in
+          some cases we may want to force a representation to cache irrespective
+          of the view (e.g. comparative views). In which case these ivars can up
+          set. If ForcedCacheKey is true, it overrides UseCache and CacheKey.
+          Instead, ForcedCacheKey is used.
+        </Documentation>
       </DoubleVectorProperty>
       <IntVectorProperty command="SetColorAttributeType"
                          default_values="0"
@@ -1978,8 +1984,10 @@
                             default_values=""
                             name="ColorArrayName"
                             number_of_elements="1">
-        <Documentation>Set the array name to color by. Set it to empty string
-        to use solid color.</Documentation>
+        <Documentation>
+          Set the array name to color by. Set it to empty string
+          to use solid color.
+        </Documentation>
         <ArrayListDomain attribute_type="Scalars"
                          input_domain_name="input_array_any"
                          name="array_list">
@@ -2017,48 +2025,45 @@
                          default_values="1"
                          name="Pickable"
                          number_of_elements="1">
-         </IntVectorProperty>
-          <IntVectorProperty command="GetSupportHistogramWidget"
-                         default_values="0"
+      </IntVectorProperty>
+      <IntVectorProperty command="GetSupportHistogramWidget"
+                     default_values="0"
+                     information_only="1"
+                     name="SupportHistogramWidget"
+                     number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <SimpleIntInformationHelper />
+      </IntVectorProperty>
+      <IntVectorProperty command="GetIsScalarGaussianFunction"
+                     default_values="0"
+                     information_only="1"
+                     name="IsScalarGaussianFunction"
+                     number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <SimpleIntInformationHelper />
+      </IntVectorProperty>
+      <IntVectorProperty command="GetIsGradientGaussianFunction"
+                      default_values="0"
+                      information_only="1"
+                      name="IsGradientGaussianFunction"
+                      number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <SimpleIntInformationHelper />
+      </IntVectorProperty>
+      <Property command = "UpdateGradientRange"
+               name = "UpdateGradientRange" >
+      </Property>
+      <Property command = "UpdateHistogram"
+               name = "UpdateHistogram" >
+      </Property>
+      <DoubleVectorProperty command="GetGradientRange"
+                         default_values="0 1"
                          information_only="1"
-                         name="SupportHistogramWidget"
-                         number_of_elements="1">
-             <BooleanDomain name="bool" />
-             <SimpleIntInformationHelper />
-         </IntVectorProperty>
-          <IntVectorProperty command="GetIsScalarGaussianFunction"
-                         default_values="0"
-                         information_only="1"
-                         name="IsScalarGaussianFunction"
-                         number_of_elements="1">
-             <BooleanDomain name="bool" />
-             <SimpleIntInformationHelper />
-         </IntVectorProperty>
-         <IntVectorProperty command="GetIsGradientGaussianFunction"
-                         default_values="0"
-                         information_only="1"
-                         name="IsGradientGaussianFunction"
-                         number_of_elements="1">
-             <BooleanDomain name="bool" />
-             <SimpleIntInformationHelper />
-         </IntVectorProperty>
-         <Property command = "UpdateGradientRange"
-                  name = "UpdateGradientRange" >
-                  </Property>
-         <Property command = "UpdateHistogram"
-                  name = "UpdateHistogram" >
-                  </Property>
-         <DoubleVectorProperty command="GetGradientRange"
-                            default_values="0 1"
-                            information_only="1"
                             name="GradientRange"
-                             number_of_elements="2">
+                         number_of_elements="2">
         <SimpleDoubleInformationHelper />
       </DoubleVectorProperty>
-        <Hints>
-          <NoDefault />
-        </Hints>
-        <BooleanDomain name="bool" />
+
       <IntVectorProperty command="SetInterpolationType"
                          default_values="2"
                          name="InterpolationType"
@@ -2122,8 +2127,10 @@
                          name="MapScalars"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Enable/Disable independant component usage such a
-        unsigned char RGBA data array.</Documentation>
+        <Documentation>
+          Enable/Disable independant component usage such a
+          unsigned char RGBA data array.
+        </Documentation>
       </IntVectorProperty>
       <ProxyProperty command="SetScalarOpacity"
                      name="ScalarOpacityFunction" >
@@ -2143,7 +2150,8 @@
                          name="DisableGradientOpacity"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Enable/Disable the use of the gradient opacity function
+        <Documentation>
+          Enable/Disable the use of the gradient opacity function
         </Documentation>
       </IntVectorProperty>
       <IntVectorProperty command="GetDisableGradientOpacity"
@@ -2151,15 +2159,16 @@
                          information_only="1"
                          name="InfoDisableGradientOpacity"
                          number_of_elements="1">
-             <BooleanDomain name="bool" />
-             <SimpleIntInformationHelper />
-         </IntVectorProperty>
+        <BooleanDomain name="bool" />
+        <SimpleIntInformationHelper />
+      </IntVectorProperty>
       <IntVectorProperty command="SetSwitchGradientOpacity"
                          default_values="0"
                          name="SwitchGradientOpacity"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Switch between gaussian and linear gradient function
+        <Documentation>
+          Switch between gaussian and linear gradient function
         </Documentation>
       </IntVectorProperty>
       <IntVectorProperty command="SetSwitchScalarOpacity"
@@ -2167,7 +2176,8 @@
                          name="SwitchScalarOpacity"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
-        <Documentation>Switch between gaussian and linear gradient function
+        <Documentation>
+          Switch between gaussian and linear gradient function
         </Documentation>
       </IntVectorProperty>
       <ProxyProperty command="SetScalarGaussianOpacity"
@@ -2177,9 +2187,9 @@
           <Group name="gaussian_piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
-       <ProxyProperty command="SetGradientGaussianOpacity"
-                     name="GradientGaussianOpacityFunction"
-                     skip_dependency="1">
+      <ProxyProperty command="SetGradientGaussianOpacity"
+                    name="GradientGaussianOpacityFunction"
+                    skip_dependency="1">
         <ProxyGroupDomain name="groups">
           <Group name="gaussian_piecewise_functions" />
         </ProxyGroupDomain>
@@ -2191,7 +2201,7 @@
           <Group name="two_dimenisonal_piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
-            
+
       <IntVectorProperty command="SetRequestedRenderMode"
                          default_values="0"
                          name="VolumeRenderingMode"
@@ -2213,7 +2223,7 @@
                             default_values="1"
                             name="ScalarOpacityUnitDistance"
                             number_of_elements="1"></DoubleVectorProperty>
- 	
+
       <!-- end of UniformGridVolumeRepresentation -->
     </RepresentationProxy>
 
