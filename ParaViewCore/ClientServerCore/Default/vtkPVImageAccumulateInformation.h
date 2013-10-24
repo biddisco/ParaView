@@ -46,16 +46,22 @@ public:
   // Description:
   // Set/get whether to gather information only from the root.
   virtual int GetRootOnly() { return 1; }
-  vtkGetMacro(sizeOfX, int);
-  vtkGetVector2Macro(GradientRange, double);
 
+  // Description:
+  // Getters for gathered information about histogram and gradient ranges
+  vtkGetVector2Macro(GradientRange, double);
+  vtkGetMacro(SizeOfHistogramX, int);
+  int *GetHistogramValues();
+
+  // Description:
+  // turn on/off collection of Histogram data
   vtkSetMacro(CollectGradientHistogram, int);
   vtkGetMacro(CollectGradientHistogram, int);
 
+  // Description:
+  // turn on/off collection of Gradient range data
   vtkSetMacro(CollectGradientRange, int);
   vtkGetMacro(CollectGradientRange, int);
-
-  int *GetValues();
 
 protected:
   vtkPVImageAccumulateInformation();
@@ -65,7 +71,7 @@ protected:
 
   int CollectGradientHistogram;
   int CollectGradientRange;
-  int sizeOfX;
+  int SizeOfHistogramX;
   vtkStdString arrayName;
 
   //BTX

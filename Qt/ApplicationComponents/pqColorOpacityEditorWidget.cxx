@@ -707,11 +707,18 @@ pqColorOpacityEditorWidget::showHistogramWidget()
       return;
     }
 
+  //
+  // We must update the gradient and histogram here using the proxy invoke command
+  // to gauantee that all pvservers are updateed together and the MPI AllReduce
+  // in the vtkImageVolumeRepresentation has the correct values
+  //
   repr->getProxy()->InvokeCommand("UpdateGradientRange");
   repr->getProxy()->InvokeCommand("UpdateHistogram");
 
   //
-  // Gather information from server processes, Paralell reduction of results handled in here
+  // Gather information about the histogram and gradient range from server process, 
+  // this only executes on Rank=0 because we have set RootOnly in the information 
+  // gathering class.
   //
   vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
       vtkPVImageAccumulateInformation>::New();
@@ -724,7 +731,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   //
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GradientGaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
-      info->GetsizeOfX(), info->GetValues());
+      info->GetSizeOfHistogramX(), info->GetHistogramValues());
 
   float enabledBarsHeight;
   bool logscale = false;

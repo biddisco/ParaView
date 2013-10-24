@@ -32,7 +32,7 @@ vtkStandardNewMacro(vtkPVImageAccumulateInformation);
 //----------------------------------------------------------------------------
 vtkPVImageAccumulateInformation::vtkPVImageAccumulateInformation()
   {
-  sizeOfX = 0;
+  this->SizeOfHistogramX = 0;
   this->GradientRange[0] = 0.0;
   this->GradientRange[1] = 1.0;
   this->CollectGradientHistogram = 1;
@@ -83,14 +83,11 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
     vtkSmartPointer<vtkPExtractHistogram> histogram = volumerep->getHistogram();
 
-    int dims[3];
-    //histogram->GetOutput()->GetDimensions(dims);
+    this->SizeOfHistogramX = histogram->GetOutput()->GetNumberOfRows();
+    std::cout << "sizeofx " << this->SizeOfHistogramX << std::endl;
 
-    sizeOfX = histogram->GetOutput()->GetNumberOfRows();
-    std::cout << "sizeofx " << sizeOfX << std::endl;
-
-    this->values.resize(sizeOfX);
-    for (vtkIdType bin = 0; bin < sizeOfX; ++bin)
+    this->values.resize(this->SizeOfHistogramX);
+    for (vtkIdType bin = 0; bin < this->SizeOfHistogramX; ++bin)
       {
       this->values[bin] =  histogram->GetOutput()->GetRow(bin)->GetValue(1).ToInt();
       }
@@ -138,7 +135,7 @@ void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream
       vtkErrorMacro("Error parsing dims from message.");
       return;
       }
-    this->sizeOfX = dimx;
+    this->SizeOfHistogramX = dimx;
     this->values.resize(dimx);
 
     for (int i = 0; i<dimx; i++){
@@ -171,8 +168,8 @@ void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream
   if (this->CollectGradientHistogram) 
     {
     *stream << this->arrayName.c_str();
-    *stream << this->sizeOfX;
-    for (int i = 0; i< sizeOfX; i++)
+    *stream << this->SizeOfHistogramX;
+    for (int i = 0; i< this->SizeOfHistogramX; i++)
       {
       *stream << values[i];
       }
@@ -184,7 +181,7 @@ void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream
   *stream << vtkClientServerStream::End;
   }
 //-----------------------------------------------------------------------------
-int *vtkPVImageAccumulateInformation::GetValues() 
+int *vtkPVImageAccumulateInformation::GetHistogramValues() 
   {
   if (this->values.size()>0) { return &this->values[0]; }
   return NULL;
