@@ -63,11 +63,13 @@ public:
   vtkSetMacro(CollectGradientRange, int);
   vtkGetMacro(CollectGradientRange, int);
 
+  void Initialize();
+
 protected:
   vtkPVImageAccumulateInformation();
   ~vtkPVImageAccumulateInformation();
 
-  void Initialize();
+
 
   int CollectGradientHistogram;
   int CollectGradientRange;

@@ -23,6 +23,7 @@
 #include "vtkSMSourceProxy.h"
 
 class vtkPVProminentValuesInformation;
+class vtkPVImageAccumulateInformation;
 
 class VTKPVSERVERMANAGERRENDERING_EXPORT vtkSMRepresentationProxy : public vtkSMSourceProxy
 {
@@ -39,6 +40,11 @@ public:
   // Returns information about the data that is finally rendered by this
   // representation.
   virtual vtkPVDataInformation* GetRepresentedDataInformation();
+
+  // Description:
+    // Returns information about the gradient data that is finally rendered by this
+    // representation.
+  virtual vtkPVImageAccumulateInformation* GetRepresentedGradientDataInformation();
 
   // Description:
   // Returns information about a specific array component's prominent values (or NULL).
@@ -124,7 +130,9 @@ private:
   bool SkipDependency(vtkSMProxy* producer);
 
   bool RepresentedDataInformationValid;
+  bool RepresentedGradientDataInformationValid;
   vtkPVDataInformation* RepresentedDataInformation;
+  vtkPVImageAccumulateInformation* RepresentedGradientDataInformation;
 
   bool ProminentValuesInformationValid;
   vtkPVProminentValuesInformation* ProminentValuesInformation;

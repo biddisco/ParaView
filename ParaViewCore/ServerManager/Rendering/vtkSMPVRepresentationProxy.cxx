@@ -25,6 +25,7 @@
 #include "vtkSMPropertyHelper.h"
 #include "vtkSMSessionProxyManager.h"
 #include "vtkSMTransferFunctionProxy.h"
+#include "vtkPVImageAccumulateInformation.h"
 
 #include <set>
 #include <string>
@@ -40,6 +41,7 @@ vtkSMPVRepresentationProxy::vtkSMPVRepresentationProxy()
   this->SetSIClassName("vtkSIPVRepresentationProxy");
   this->RepresentationSubProxies = new vtkStringSet();
   this->InReadXMLAttributes = false;
+  removeme = 0;
   }
 
 //----------------------------------------------------------------------------
@@ -306,6 +308,28 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(bool extend)
   }
 
 //----------------------------------------------------------------------------
+bool vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(bool extend)
+  {
+  if (!this->GetUsingScalarColoring())
+	{
+	// we are not using scalar coloring, nothing to do.
+	return false;
+	}
+
+  if (!this->GetProperty("ColorAttributeType"))
+	{
+	vtkWarningMacro("Missing 'ColorAttributeType' property.");
+	return false;
+	}
+
+  return this->RescaleGradientTransferFunctionToDataRange(
+	  vtkSMPropertyHelper(this->GetProperty("ColorArrayName")).GetAsString(0),
+	  vtkSMPropertyHelper(this->GetProperty("ColorAttributeType")).GetAsInt(0),
+	  extend);
+  }
+
+
+//----------------------------------------------------------------------------
 bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 	const char* arrayname, int attribute_type, bool extend)
   {
@@ -330,8 +354,52 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 	info = representedDataInfo->GetArrayInformation(arrayname, attribute_type);
 	}
 
+
   return this->RescaleTransferFunctionToDataRange(info, extend);
   }
+
+
+//----------------------------------------------------------------------------
+bool vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(const char* arrayname, int attribute_type, bool extend)
+  {
+
+
+  vtkPVImageAccumulateInformation * gradientInfo = NULL;
+    if (this->GetProperty("GradientRange")){
+  	gradientInfo = this->GetRepresentedGradientDataInformation();
+    }
+    else{
+  	return true; //nothing to scale
+    }
+
+  vtkSMPropertyHelper inputHelper(this->GetProperty("Input"));
+    vtkSMSourceProxy* inputProxy = vtkSMSourceProxy::SafeDownCast(
+  	  inputHelper.GetAsProxy());
+    int port = inputHelper.GetOutputPort();
+    if (!inputProxy)
+  	{
+  	// no input.
+  	vtkWarningMacro("No input present. Cannot determine data ranges.");
+  	return false;
+  	}
+
+    vtkPVDataInformation* dataInfo = inputProxy->GetDataInformation(port);
+    vtkPVArrayInformation* info = dataInfo->GetArrayInformation(arrayname,
+  	  attribute_type);
+    if (!info)
+  	{
+  	vtkPVDataInformation* representedDataInfo =
+  		this->GetRepresentedDataInformation();
+  	info = representedDataInfo->GetArrayInformation(arrayname, attribute_type);
+  	}
+
+
+
+
+  return this->RescaleGradientTransferFunctionToDataRange(gradientInfo, info, extend);
+  }
+
+
 
 //----------------------------------------------------------------------------
 bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRangeOverTime()
@@ -375,10 +443,163 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRangeOverTime(
   return info ? this->RescaleTransferFunctionToDataRange(info) : false;
   }
 
+
+
+//----------------------------------------------------------------------------
+bool vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(
+	  vtkPVImageAccumulateInformation * gradientInfo, vtkPVArrayInformation* info, bool extend){
+  if (!info)
+ 	{
+ 	vtkWarningMacro("Could not determine array range.");
+ 	return false;
+ 	}
+
+   vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
+   vtkSMProperty* gofProperty = this->GetProperty("GradientLinearOpacityFunction");
+   vtkSMProperty* ggaussfProperty = this->GetProperty("GradientGaussianOpacityFunction");
+   vtkSMProperty* TDTransfProperty = this->GetProperty("TwoDTransferFunction");
+
+   if (!lutProperty && !gofProperty)
+ 	{
+ 	vtkWarningMacro("No 'GradientOpacityFunction' and 'LookupTable' found.");
+ 	}
+   if (!lutProperty && !ggaussfProperty)
+ 	{
+ 	vtkWarningMacro("No 'GaussianOpacityFunction' and 'LookupTable' found.");
+ 	}
+   if (!lutProperty && !TDTransfProperty)
+ 	{
+ 	vtkWarningMacro("No 'TwoDTransferFunction' and 'LookupTable' found.");
+ 	}
+
+   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
+   vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
+   vtkSMProxy* ggaussf = vtkSMPropertyHelper(ggaussfProperty).GetAsProxy();
+   vtkSMProxy* TwoDTf = vtkSMPropertyHelper(TDTransfProperty).GetAsProxy();
+
+ ///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
+
+   double gofrange[2] =
+ 	{
+ 	0, 1
+ 	};
+
+   if(gradientInfo != 0)
+ 	{
+ 	gradientInfo->GetGradientRange(gofrange);
+ 	}
+
+   /*
+   bool hasgradrange = this->GetProperty("GradientRange");
+   if(hasgradrange){
+   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
+   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange, 2);
+   }
+   */
+   // We need to determine the component number to use from the lut.
+   int component = -1;
+   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
+ 	{
+ 	component = vtkSMPropertyHelper(lut, "VectorComponent").GetAsInt();
+ 	}
+
+   if (component < info->GetNumberOfComponents())
+ 	{
+ 	double range[2];
+ 	info->GetComponentRange(component, range);
+ 	if (range[1] >= range[0])
+ 	  {
+ 	  if ((range[1] - range[0] < 1e-5))
+ 		{
+ 		range[1] = range[0] + 1e-5;
+ 		}
+ 	  if ((gofrange[1] - gofrange[0] < 1e-5))
+ 		{
+ 		gofrange[1] = gofrange[0] + 1e-5;
+ 		}
+ 	  // If data range is too small then we tweak it a bit so scalar mapping
+ 	  // produces valid/reproducible results.
+ 	  if (lut)
+ 		{
+ 		vtkSMTransferFunctionProxy::RescaleTransferFunction(lut, range, extend);
+ 		vtkSMProxy* sof_lut = vtkSMPropertyHelper(lut, "ScalarOpacityFunction",
+ 			true).GetAsProxy();
+ 		vtkSMProxy* gof_lut = vtkSMPropertyHelper(lut,
+ 			"GradientLinearOpacityFunction", true).GetAsProxy();
+ 		vtkSMProxy* ggaussf_lut = vtkSMPropertyHelper(lut,
+ 			"GradientGaussianOpacityFunction", true).GetAsProxy();
+ 		vtkSMProxy* TwoDTf_lut = vtkSMPropertyHelper(lut,
+ 			"TwoDTransferFunction", true).GetAsProxy();
+ 		if (gof_lut && gof != gof_lut)
+ 		  {
+
+ 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof_lut, gofrange,
+ 			  true);
+ 		  }
+ 		if (ggaussf_lut && ggaussf != ggaussf_lut)
+ 		  {
+
+ 		  vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+ 			  ggaussf_lut, gofrange, true);
+ 		  }
+ 		if (TwoDTf_lut && TwoDTf != TwoDTf_lut)
+ 		  {
+
+ 		  vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(TwoDTf_lut,
+ 			  range, gofrange, true);
+ 		  }
+
+ 		}
+ 	  if (gof)
+ 		{
+ 		vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange,
+ 			true);
+ 		}
+ 	  if (ggaussf)
+ 		{
+ 		vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(ggaussf,
+ 			gofrange, true);
+ 		}
+ 	  if (TwoDTf)
+ 		{
+ 		vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(TwoDTf, range,
+ 			gofrange, true);
+ 		}
+
+ 	  return (lut || gof || ggaussf || TwoDTf);
+ 	  }
+
+ 	}
+   return false;
+
+
+
+
+}
+
+
+
 //----------------------------------------------------------------------------
 bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 	vtkPVArrayInformation* info, bool extend)
   {
+
+  double gofrange[2] = {0,1};
+
+  vtkPVImageAccumulateInformation * gradientInfo = NULL;
+     if (this->GetProperty("GradientRange")){
+   	gradientInfo = this->GetRepresentedGradientDataInformation();
+   	gradientInfo->GetGradientRange(gofrange);
+     }
+     else{
+   	return true; //nothing to scale
+     }
+
+
+
+
+
+
   if (!info)
 	{
 	vtkWarningMacro("Could not determine array range.");
@@ -387,52 +608,47 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 
   vtkSMProperty* lutProperty = this->GetProperty("LookupTable");
   vtkSMProperty* sofProperty = this->GetProperty("ScalarOpacityFunction");
-  vtkSMProperty* gofProperty = this->GetProperty("GradientLinearOpacityFunction");
   vtkSMProperty* sgaussfProperty = this->GetProperty(
 	  "ScalarGaussianOpacityFunction");
-  vtkSMProperty* ggaussfProperty = this->GetProperty("GradientGaussianOpacityFunction");
-  vtkSMProperty* TDTransfProperty = this->GetProperty("TwoDTransferFunction");
+  vtkSMProperty* gofProperty = this->GetProperty("GradientLinearOpacityFunction");
+     vtkSMProperty* ggaussfProperty = this->GetProperty("GradientGaussianOpacityFunction");
+     vtkSMProperty* TDTransfProperty = this->GetProperty("TwoDTransferFunction");
+
   if (!lutProperty && !sofProperty)
 	{
 	vtkWarningMacro("No 'LookupTable' and 'ScalarOpacityFunction' found.");
 	return false;
-	}
-  if (!lutProperty && !gofProperty)
-	{
-	vtkWarningMacro("No 'GradientOpacityFunction' and 'LookupTable' found.");
-	}
-  if (!lutProperty && !ggaussfProperty)
-	{
-	vtkWarningMacro("No 'GaussianOpacityFunction' and 'LookupTable' found.");
 	}
   if (!lutProperty && !sgaussfProperty)
 	{
 	vtkWarningMacro(
 		"No 'ScalarGaussianOpacityFunction' and 'LookupTable' found.");
 	}
-  if (!lutProperty && !TDTransfProperty)
-	{
-	vtkWarningMacro("No 'TwoDTransferFunction' and 'LookupTable' found.");
-	}
+
+  if (!lutProperty && !gofProperty)
+  	{
+  	vtkWarningMacro("No 'GradientOpacityFunction' and 'LookupTable' found.");
+  	}
+    if (!lutProperty && !ggaussfProperty)
+  	{
+  	vtkWarningMacro("No 'GaussianOpacityFunction' and 'LookupTable' found.");
+  	}
+    if (!lutProperty && !TDTransfProperty)
+  	{
+  	vtkWarningMacro("No 'TwoDTransferFunction' and 'LookupTable' found.");
+  	}
+
 
   vtkSMProxy* lut = vtkSMPropertyHelper(lutProperty).GetAsProxy();
   vtkSMProxy* sof = vtkSMPropertyHelper(sofProperty).GetAsProxy();
-  vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
   vtkSMProxy* sgaussf = vtkSMPropertyHelper(sgaussfProperty).GetAsProxy();
-  vtkSMProxy* ggaussf = vtkSMPropertyHelper(ggaussfProperty).GetAsProxy();
-  vtkSMProxy* TwoDTf = vtkSMPropertyHelper(TDTransfProperty).GetAsProxy();
+  vtkSMProxy* gof = vtkSMPropertyHelper(gofProperty).GetAsProxy();
+     vtkSMProxy* ggaussf = vtkSMPropertyHelper(ggaussfProperty).GetAsProxy();
+     vtkSMProxy* TwoDTf = vtkSMPropertyHelper(TDTransfProperty).GetAsProxy();
 
 ///  vtkSMProperty *prop = repr->getProxy()->GetProperty("GradientRange");
 
-  double gofrange[2] =
-	{
-	0, 1
-	};
-  bool hasgradrange = this->GetProperty("GradientRange");
-  if(hasgradrange){
-  this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
-  vtkSMPropertyHelper(this, "GradientRange").Get(gofrange, 2);
-  }
+
   // We need to determine the component number to use from the lut.
   int component = -1;
   if (lut && vtkSMPropertyHelper(lut, "VectorMode").GetAsInt() != 0)
@@ -450,10 +666,6 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		{
 		range[1] = range[0] + 1e-5;
 		}
-	  if ((gofrange[1] - gofrange[0] < 1e-5))
-		{
-		gofrange[1] = gofrange[0] + 1e-5;
-		}
 	  // If data range is too small then we tweak it a bit so scalar mapping
 	  // produces valid/reproducible results.
 	  if (lut)
@@ -461,30 +673,31 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		vtkSMTransferFunctionProxy::RescaleTransferFunction(lut, range, extend);
 		vtkSMProxy* sof_lut = vtkSMPropertyHelper(lut, "ScalarOpacityFunction",
 			true).GetAsProxy();
-		vtkSMProxy* gof_lut = vtkSMPropertyHelper(lut,
-			"GradientLinearOpacityFunction", true).GetAsProxy();
+
 		vtkSMProxy* sgaussf_lut = vtkSMPropertyHelper(lut,
 			"ScalarGaussianOpacityFunction", true).GetAsProxy();
-		vtkSMProxy* ggaussf_lut = vtkSMPropertyHelper(lut,
-			"GradientGaussianOpacityFunction", true).GetAsProxy();
-		vtkSMProxy* TwoDTf_lut = vtkSMPropertyHelper(lut,
-			"TwoDTransferFunction", true).GetAsProxy();
+		vtkSMProxy* gof_lut = vtkSMPropertyHelper(lut,
+			  "GradientLinearOpacityFunction", true).GetAsProxy();
+		  vtkSMProxy* ggaussf_lut = vtkSMPropertyHelper(lut,
+			  "GradientGaussianOpacityFunction", true).GetAsProxy();
+		  vtkSMProxy* TwoDTf_lut = vtkSMPropertyHelper(lut,
+			  "TwoDTransferFunction", true).GetAsProxy();
 		if (sof_lut && sof != sof_lut)
 		  {
 		  vtkSMTransferFunctionProxy::RescaleTransferFunction(sof_lut, range,
 			  extend);
-		  }
-		if (gof_lut && gof != gof_lut)
-		  {
-
-		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof_lut, gofrange,
-			  true);
 		  }
 		if (sgaussf_lut && sgaussf != sgaussf_lut)
 		  {
 
 		  vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
 			  sgaussf_lut, range, true);
+		  }
+		if (gof_lut && gof != gof_lut)
+		  {
+
+		  vtkSMTransferFunctionProxy::RescaleTransferFunction(gof_lut, gofrange,
+			  true);
 		  }
 		if (ggaussf_lut && ggaussf != ggaussf_lut)
 		  {
@@ -504,15 +717,15 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 		{
 		vtkSMTransferFunctionProxy::RescaleTransferFunction(sof, range, extend);
 		}
-	  if (gof)
-		{
-		vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange,
-			true);
-		}
 	  if (sgaussf)
 		{
 		vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(sgaussf,
 			range, true);
+		}
+	  if (gof)
+		{
+		vtkSMTransferFunctionProxy::RescaleTransferFunction(gof, gofrange,
+			true);
 		}
 	  if (ggaussf)
 		{
@@ -525,7 +738,7 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 			gofrange, true);
 		}
 
-	  return (lut || sof || gof || sgaussf || ggaussf || TwoDTf);
+	  return (lut || sof || sgaussf || gof || ggaussf || TwoDTf);
 	  }
 
 	}

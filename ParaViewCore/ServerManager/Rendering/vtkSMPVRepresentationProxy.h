@@ -63,8 +63,17 @@ public:
   // only be extended as needed to fit the data range.
   virtual bool RescaleTransferFunctionToDataRange(bool extend=false);
 
+  // Description:
+    // Rescales the gradient transfer functions to data range
+	// This is done seperately because the gradient data may not be available
+    //when "RescaleTransferFunctionToDataRange(bool extend=false)" is called
+    //if you wish to update both at the same time, call
+    // virtual bool RescaleAllTransferFunctionToDataRange(bool extend=false)
+    //which will call both gradient and non-gradient.
+    virtual bool RescaleGradientTransferFunctionToDataRange(bool extend=false);
 
-  virtual bool RescaleTransferFunctionToCustomRange(double minScale, double maxScale, double minGradient, double maxGradient,
+
+  virtual bool RescaleTransferFunctionToCustomRange(double minScale, double maxScale, double minGradient = 0, double maxGradient = 1,
       bool extend = false);
 
 
@@ -78,6 +87,12 @@ public:
   virtual bool RescaleTransferFunctionToDataRange(
     const char* arrayname, int attribute_type, bool extend=false);
 
+
+  // Description:
+    // Rescales the gradient transfer functions to data range
+    virtual bool RescaleGradientTransferFunctionToDataRange(
+      const char* arrayname, int attribute_type, bool extend=false);
+
   // Description:
   // Safely call RescaleTransferFunctionToDataRange() after casting the proxy to
   // appropriate type.
@@ -90,6 +105,9 @@ public:
     return self? self->RescaleTransferFunctionToDataRange(extend) : false;
     }
 
+  // Description:
+    // Safely call RescaleGradientTransferFunctionToDataRange() after casting the proxy to
+    // appropriate type.
   static bool RescaleGradientTransferFunctionsToCustomRange(vtkSMProxy* proxy, double minScale, double maxScale,
       double minGradient, double maxGradient, bool extend=false)
       {
@@ -109,6 +127,19 @@ public:
     return self?
       self->RescaleTransferFunctionToDataRange(arrayname, attribute_type, extend) : false;
     }
+
+  // Description:
+    // Safely call RescaleGradientTransferFunctionToDataRange() after casting the proxy to
+    // appropriate type.
+    static bool RescaleGradientTransferFunctionToDataRange(vtkSMProxy* proxy,
+      const char* arrayname, int attribute_type, bool extend=false)
+      {
+      vtkSMPVRepresentationProxy* self =
+        vtkSMPVRepresentationProxy::SafeDownCast(proxy);
+      return self?
+        self->RescaleGradientTransferFunctionToDataRange(arrayname, attribute_type, extend) : false;
+      }
+
 
   // Description:
   // Rescales the color transfer function and opacity transfer function using the
@@ -153,7 +184,8 @@ protected:
   // Rescales transfer function ranges using the array information provided.
   virtual bool RescaleTransferFunctionToDataRange(
     vtkPVArrayInformation* info, bool extend=false);
-
+  virtual bool RescaleGradientTransferFunctionToDataRange(
+	  vtkPVImageAccumulateInformation * gradientInfo, vtkPVArrayInformation* info, bool extend=false);
   // Description:
   // Overridden to ensure that the RepresentationTypesInfo and
   // Representations's domain are up-to-date.
@@ -172,6 +204,8 @@ protected:
   // Description:
   // Overridden to process "RepresentationType" elements.
   int ReadXMLAttributes(vtkSMSessionProxyManager* pm, vtkPVXMLElement* element);
+
+  int removeme;
 
 private:
   vtkSMPVRepresentationProxy(const vtkSMPVRepresentationProxy&); // Not implemented
