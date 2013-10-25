@@ -41,7 +41,6 @@ vtkSMPVRepresentationProxy::vtkSMPVRepresentationProxy()
   this->SetSIClassName("vtkSIPVRepresentationProxy");
   this->RepresentationSubProxies = new vtkStringSet();
   this->InReadXMLAttributes = false;
-  removeme = 0;
   }
 
 //----------------------------------------------------------------------------
