@@ -566,11 +566,11 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       this->addDecorator(this->Internals->Decorator);
     }
 
-  switchGradientOpacity();
-  switchScalarOpacity();
-  ui.ScalarGaussianOpacityEditor->hide();
+ // switchGradientOpacity();
+ // switchScalarOpacity();
+ // ui.ScalarGaussianOpacityEditor->hide();
 
-  hideGradientFunctions();
+ // hideGradientFunctions();
 
   this->updateCurrentData();
 }
@@ -805,8 +805,8 @@ pqColorOpacityEditorWidget::updateCurrentData()
         ggwf->GetNodeValue(ui.GradientGaussianOpacityEditor->currentPoint(), xvms);
         ui.CurrentDataValue->setText(QString::number(xvms[0]));
         ui.CurrentDataValue->setEnabled(
-                 ui.GradientGaussianOpacityEditor->currentPoint() != 0
-                     && ui.GradientGaussianOpacityEditor->currentPoint()
+                 ui.GradientGaussianOpacityEditor->currentPoint() != -1
+                     && ui.GradientGaussianOpacityEditor->currentPoint() >= 0
                          != (ui.GradientGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
       }
@@ -817,8 +817,8 @@ pqColorOpacityEditorWidget::updateCurrentData()
           ui.CurrentDataValue->setText(QString::number(xvms[0]));
 
           ui.CurrentDataValue->setEnabled(
-                           ui.ScalarGaussianOpacityEditor->currentPoint() != 0
-                               && ui.ScalarGaussianOpacityEditor->currentPoint()
+                           ui.ScalarGaussianOpacityEditor->currentPoint() != -1
+                               && ui.ScalarGaussianOpacityEditor->currentPoint() >= 0
                                    != (ui.ScalarGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
         }
@@ -997,6 +997,14 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
   repr->getProxy()->UpdateVTKObjects();
 
   if(!disabled){
+	  vtkDiscretizableColorTransferFunctionCollection* stc =
+	      vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
+	          this->proxy()->GetClientSideObject());
+	  if(!stc->everythingInitialized){
+		//rescale gradient ranges
+		vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(repr->getProxy());
+		stc->everythingInitialized = true;
+	  }
     showGradientFunctions();
   }
   else {
@@ -1023,11 +1031,8 @@ pqColorOpacityEditorWidget::switchScalarOpacity()
 
       int isGaussian;
       vtkSMPropertyHelper(repr->getProxy(), "IsScalarGaussianFunction").Get(&isGaussian,1);
-      if(initializingscalar){
-        initializingscalar  = false;
-      }
 
-      else{
+
 
       if (!repr->getProxy()->GetProperty("SwitchScalarOpacity"))
                           return;
@@ -1037,7 +1042,7 @@ pqColorOpacityEditorWidget::switchScalarOpacity()
          prpty.Set(isGaussian);
 
          repr->getProxy()->UpdateVTKObjects();
-      }
+
 
 
 
@@ -1078,11 +1083,6 @@ pqColorOpacityEditorWidget::switchGradientOpacity()
         int isGaussian;
         vtkSMPropertyHelper(repr->getProxy(), "IsGradientGaussianFunction").Get(&isGaussian,1);
 
-if(initializinggrad){
-  initializinggrad  = false;
-}
-
-else{
 
 
   if (!repr->getProxy()->GetProperty("SwitchGradientOpacity"))
@@ -1094,7 +1094,6 @@ else{
 
     repr->getProxy()->UpdateVTKObjects();
 
-}
 
 
 
@@ -1433,9 +1432,13 @@ pqColorOpacityEditorWidget::showGradientFunctions()
   }
 
   if (!repr->getProxy()->GetProperty("IsGradientGaussianFunction"))
-    return;
+	{
+	ui.GradientGaussianOpacityEditor->hide();
+	return;
+	}
 
-  repr->getProxy()->InvokeCommand("UpdateGradientRange");
+
+ // repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
   repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("IsGradientGaussianFunction"));
 
@@ -1443,9 +1446,15 @@ pqColorOpacityEditorWidget::showGradientFunctions()
   vtkSMPropertyHelper(repr->getProxy(), "IsGradientGaussianFunction").Get(&isGaussian,1);
 
   if (isGaussian)
+	{
     ui.GradientGaussianOpacityEditor->show();
+    ui.GradientLinearOpacityEditor->hide();
+	}
   else
+	{
     ui.GradientLinearOpacityEditor->show();
+    ui.GradientGaussianOpacityEditor->hide();
+	}
 
 
 
@@ -1479,23 +1488,50 @@ void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
   }
 
   if (!repr->getProxy()->GetProperty("InfoDisableGradientOpacity"))
-    return;
+	{
+	hideGradientFunctions();
+	}
 
-  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
-  // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
-
-  int disabled;
-  vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
-
-  if (disabled){
-    hideGradientFunctions();
-    this->Internals->Ui.DisableOpacityGradient->setChecked(false);
-  }
   else
-  {
-    showGradientFunctions();
-    this->Internals->Ui.DisableOpacityGradient->setChecked(true);
+	{
+	  repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
+	  // repr->getProxy()->UpdatePropertyInformation();//("IsGradientGaussianFunction");
+
+	  int disabled;
+	  vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
+
+	  if (disabled){
+		hideGradientFunctions();
+		this->Internals->Ui.DisableOpacityGradient->setChecked(false);
+	  }
+	  else
+	  {
+		showGradientFunctions();
+		this->Internals->Ui.DisableOpacityGradient->setChecked(true);
+	  }
+	}
+
+  //decide on scalar stuff
+  if (repr->getProxy()->GetProperty("IsScalarGaussianFunction")){
+	repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("IsScalarGaussianFunction"));
+  int isGaussian;
+	vtkSMPropertyHelper(repr->getProxy(), "IsScalarGaussianFunction").Get(&isGaussian,1);
+	if (isGaussian)
+		{
+		  this->Internals->Ui.ScalarGaussianOpacityEditor->show();
+		  this->Internals->Ui.OpacityEditor->hide();
+		}
+	  else
+		{
+		  this->Internals->Ui.ScalarGaussianOpacityEditor->hide();
+		  this->Internals->Ui.OpacityEditor->show();
+		}
   }
+  else{
+	this->Internals->Ui.ScalarGaussianOpacityEditor->hide();
+  }
+
+
 
   Superclass::showEvent(event);
 
