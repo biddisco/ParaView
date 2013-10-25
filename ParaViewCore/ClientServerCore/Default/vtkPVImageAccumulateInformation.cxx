@@ -64,10 +64,12 @@ void vtkPVImageAccumulateInformation::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
   {
+  std::cout << "copying from object " << std::endl;
   if (!obj)
     {
     this->Initialize();
     }
+
 
   vtkImageVolumeRepresentation* volumerep = vtkImageVolumeRepresentation::SafeDownCast(
     vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
@@ -112,6 +114,7 @@ void vtkPVImageAccumulateInformation::AddInformation(vtkPVImageAccumulateInforma
 //----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream* stream)
   {
+
   int N = 0;
   if (!stream->GetArgument(0, 0, &this->CollectGradientHistogram) || !stream->GetArgument(0, 1, &this->CollectGradientRange))
     {
@@ -159,6 +162,7 @@ void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream
 //-----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream)
   {
+  std::cout << "copying to stream " << std::endl;
   stream->Reset();
   *stream << vtkClientServerStream::Reply; 
 

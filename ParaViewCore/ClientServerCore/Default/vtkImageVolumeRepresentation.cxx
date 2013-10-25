@@ -565,23 +565,24 @@ void vtkImageVolumeRepresentation::updateGradRange()
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateGradientRange()
 {
-
+  std::cout << "startinggradupdate" << std::endl;
   if (GradientRangeFirstTimeStartup)
     {
+	std::cout << "gradfirststartup" << std::endl;
       GradientRangeFirstTimeStartup = false;
       return;
     }
-
+std::cout << "this->ExecuteOnClient && !GradientFilter" << std::endl;
   if (this->ExecuteOnClient && !GradientFilter)
     {
     this->GradientFilter = vtkSmartPointer<vtkImageGradientMagnitude>::New();
     }
-
+  std::cout << "GradientRangeOutOfDate" << !GradientRangeOutOfDate << std::endl;
   if (!GradientRangeOutOfDate)//
     {
     return;
     }
-
+  std::cout << "upgradinggradrange" << std::endl;
   updateGradRange();
 
   GradientRangeOutOfDate = false;

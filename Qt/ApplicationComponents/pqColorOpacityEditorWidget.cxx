@@ -734,6 +734,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   //
   //repr->getProxy()->InvokeCommand("UpdateGradientRange");
   repr->getProxy()->InvokeCommand("UpdateHistogram");
+  return;
 
   //
   // Gather information about the histogram and gradient range from server process, 
@@ -1022,6 +1023,7 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
 	          this->proxy()->GetClientSideObject());
 	  if(!stc->everythingInitialized){
 		//rescale gradient ranges
+		repr->getProxy()->InvokeCommand("UpdateHistogram");
 		vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(repr->getProxy());
 		stc->everythingInitialized = true;
 	  }
@@ -1276,14 +1278,18 @@ pqColorOpacityEditorWidget::resetRangeToData()
       return;
     }
 
-  if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-    repr->getProxy()->InvokeCommand("UpdateGradientRange");
+  if (repr->getProxy()->GetProperty("UpdateHistogram"))
+	repr->getProxy()->InvokeCommand("UpdateHistogram");
 
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
+
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
       repr->getProxy());
+  vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(
+        repr->getProxy());
+
   emit this->changeFinished();
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+ // Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   // std::cout << "width "<<ui.GradientGaussianOpacityEditor->contentsRect().width() << std::endl;
   // repr->setProperty("HistogramBins",ui.GaussianOpacityEditor->contentsRect().width());
   /*
@@ -1458,7 +1464,7 @@ pqColorOpacityEditorWidget::showGradientFunctions()
 	}
 
 
- // repr->getProxy()->InvokeCommand("UpdateGradientRange");
+//  repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
   repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("IsGradientGaussianFunction"));
 
@@ -1491,7 +1497,7 @@ void
   ui.GradientLinearOpacityEditor->hide();
   ui.TwoDTransferFunction->hide();
   ui.gaussorgrad->hide();
-  ui.HistogramDialog->hide();
+  ui.HistogramDialog->show();
 }
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
@@ -1501,6 +1507,8 @@ void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
 
   pqDataRepresentation* repr =
     pqActiveObjects::instance().activeRepresentation();
+
+  repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
   if (!repr){
     Superclass::showEvent(event);

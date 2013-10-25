@@ -307,16 +307,16 @@ vtkPVDataInformation* vtkSMRepresentationProxy::GetRepresentedDataInformation()
 //----------------------------------------------------------------------------
 vtkPVImageAccumulateInformation* vtkSMRepresentationProxy::GetRepresentedGradientDataInformation()
 {
-  if (!this->RepresentedGradientDataInformationValid)
-    {
-    vtkTimerLog::MarkStartEvent(
-      "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
-    this->RepresentedGradientDataInformation->Initialize();
-    this->GatherInformation(this->RepresentedGradientDataInformation);
-    vtkTimerLog::MarkEndEvent(
-      "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
+ // if (true)
+ //   {
+ //   vtkTimerLog::MarkStartEvent(
+  //    "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
+   // this->RepresentedGradientDataInformation->Initialize();
+    this->GatherInformation(this->RepresentedGradientDataInformation, vtkPVSession::RENDER_SERVER);
+ //   vtkTimerLog::MarkEndEvent(
+  //    "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
     this->RepresentedGradientDataInformationValid = false;
-    }
+ //   }
 
   return this->RepresentedGradientDataInformation;
 }
