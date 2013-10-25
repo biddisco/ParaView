@@ -136,8 +136,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     Superclass(smproxy, parentObject), Internals(new pqInternals(this))
 {
 
-  initializinggrad = true;
-  initializingscalar = true;
+  this->scalarOpacityAvailable = true;
+  this-> scalarGaussianAvailable = true;
+  this->gradientLinearAvailable = true;
+  this->gradientGaussianAvailable = true;
+  this->twoDTransferFunctionAvailable = true;
+
+
 
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   vtkDiscretizableColorTransferFunctionCollection* stc =
@@ -154,6 +159,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   else
     {
       ui.OpacityEditor->hide();
+      this->scalarOpacityAvailable = false;
     }
   if (stc)
      {
@@ -171,6 +177,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   else
     {
       ui.GradientLinearOpacityEditor->hide();
+      this->gradientLinearAvailable = false;
     }
 
 
@@ -185,6 +192,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   else
     {
       ui.GradientGaussianOpacityEditor->hide();
+      this->gradientGaussianAvailable = false;
     }
 
   gpwf = stc ? stc->GetScalarGaussianOpacityFunction() : NULL;
@@ -197,6 +205,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   else
     {
       ui.ScalarGaussianOpacityEditor->hide();
+      this-> scalarGaussianAvailable = false;
     }
 
   vtkTwoDTransferFunction* tdtf = stc ? stc->GetTwoDTransferFunction() : NULL;
@@ -208,6 +217,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   else
     {
       ui.TwoDTransferFunction->hide();
+      this->twoDTransferFunctionAvailable = false;
     }
 
   //change this to gaussian part---
@@ -409,14 +419,16 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       else
         {
           ui.GradientLinearOpacityEditor->hide();
+          this->gradientLinearAvailable = false;
         }
     }
   else
     {
       ui.GradientLinearOpacityEditor->hide();
+      this->gradientLinearAvailable = false;
     }
 
-  //change to gradient
+
 
   smproperty = smgroup->GetProperty("ScalarOpacityFunction");
   if (smproperty)
@@ -434,11 +446,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       else
         {
           ui.OpacityEditor->hide();
+          this->scalarOpacityAvailable = false;
         }
     }
   else
     {
       ui.OpacityEditor->hide();
+      this->scalarOpacityAvailable = false;
     }
 
   smproperty = smgroup->GetProperty("ScalarGaussianOpacityFunction");
@@ -457,11 +471,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       else
         {
           ui.ScalarGaussianOpacityEditor->hide();
+          this->scalarGaussianAvailable = false;
         }
     }
   else
     {
       ui.ScalarGaussianOpacityEditor->hide();
+      this->scalarGaussianAvailable = false;
     }
 
   smproperty = smgroup->GetProperty("GradientGaussianOpacityFunction");
@@ -480,11 +496,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       else
         {
           ui.GradientGaussianOpacityEditor->hide();
+          this->gradientGaussianAvailable = false;
         }
     }
   else
     {
       ui.GradientGaussianOpacityEditor->hide();
+      this->gradientGaussianAvailable = false;
     }
 
   smproperty = smgroup->GetProperty("TwoDTransferFunction");
@@ -503,11 +521,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       else
         {
           ui.TwoDTransferFunction->hide();
+          this->twoDTransferFunctionAvailable = false;
         }
     }
   else
     {
       ui.TwoDTransferFunction->hide();
+      this->twoDTransferFunctionAvailable = false;
     }
 
   smproperty = smgroup->GetProperty("EnableOpacityMapping");
@@ -1529,6 +1549,8 @@ void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
   }
   else{
 	this->Internals->Ui.ScalarGaussianOpacityEditor->hide();
+	if(scalarOpacityAvailable && this->Internals->Ui.OpacityEditor->isHidden())
+	  this->Internals->Ui.OpacityEditor->show();
   }
 
 

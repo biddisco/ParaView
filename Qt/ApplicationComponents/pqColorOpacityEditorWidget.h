@@ -200,13 +200,10 @@ signals:
 
 
 protected:
-
-  ///variable used during initialization
-  bool initializinggrad;
-  ///variable used during initialization
-   bool initializingscalar;
-
    void showEvent ( QShowEvent * event );
+
+   bool scalarOpacityAvailable, scalarGaussianAvailable, gradientLinearAvailable, gradientGaussianAvailable,
+	 twoDTransferFunctionAvailable;
 
 protected slots:
   /// slots called when the current point changes on the two internal
