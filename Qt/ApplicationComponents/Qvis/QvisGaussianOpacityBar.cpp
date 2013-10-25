@@ -74,7 +74,7 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject,
   setMinimumHeight(50);
   setMinimumWidth(128);
   ngaussian = 0;
-  currentGaussian = 0;
+  currentGaussian = -1;
   currentMode = modeNone;
   maximumNumberOfGaussians = -1; // unlimited
   minimumNumberOfGaussians = 0;
@@ -91,7 +91,7 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject,
   mousedown = false;
   setMouseTracking(true);
 
-
+backgroundImage = 0;
 
 scalarMin = 0; scalarMax = 0;
   currentScalarArrayWidth = 0;
