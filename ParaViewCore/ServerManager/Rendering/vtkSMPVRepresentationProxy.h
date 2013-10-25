@@ -105,6 +105,13 @@ public:
     return self? self->RescaleTransferFunctionToDataRange(extend) : false;
     }
 
+  static bool RescaleGradientTransferFunctionToDataRange(vtkSMProxy* proxy, bool extend=false)
+      {
+      vtkSMPVRepresentationProxy* self =
+        vtkSMPVRepresentationProxy::SafeDownCast(proxy);
+      return self? self->RescaleGradientTransferFunctionToDataRange(extend) : false;
+      }
+
   // Description:
     // Safely call RescaleGradientTransferFunctionToDataRange() after casting the proxy to
     // appropriate type.
@@ -205,7 +212,6 @@ protected:
   // Overridden to process "RepresentationType" elements.
   int ReadXMLAttributes(vtkSMSessionProxyManager* pm, vtkPVXMLElement* element);
 
-  int removeme;
 
 private:
   vtkSMPVRepresentationProxy(const vtkSMPVRepresentationProxy&); // Not implemented
