@@ -44,8 +44,8 @@ void pqHistogramWidget::SetData(bool* histogramEnable, int* histogra,
   }
 void pqHistogramWidget::calculateEnabledBarsHeight()
   {
-  this->enabledBarsHeight = this->geometry().height()
-	  - int(enabledBarsHeightFraction * float(this->geometry().height()));
+  this->enabledBarsHeight = this->contentsRect().height()
+	  - int(enabledBarsHeightFraction * float(this->contentsRect().height()));
 
   }
 
@@ -84,7 +84,7 @@ void pqHistogramWidget::enableAllBins()
 int pqHistogramWidget::getBin(int xCoordinate)
   {
   return int(
-	  float(xCoordinate) / float(this->geometry().width())
+	  float(xCoordinate) / float(this->contentsRect().width())
 		  * float(histogramSize));
   }
 
@@ -99,7 +99,7 @@ void pqHistogramWidget::createPixmap()
   {
 
   int width = histogramSize;
-  int height = this->geometry().height();
+  int height = this->contentsRect().height();
 
   //get max value
   int max = 0;
@@ -141,7 +141,7 @@ void pqHistogramWidget::createPixmap()
 
   unscaledImage = *image;
 
-  *image = image->scaled(this->geometry().width(), height,
+  *image = image->scaled(this->contentsRect().width(), height,
 	  Qt::IgnoreAspectRatio, Qt::FastTransformation);
 
   this->setPixmap(image);
@@ -151,12 +151,12 @@ void pqHistogramWidget::createPixmap()
 void pqHistogramWidget::drawBin(QRgb color, int bin, int endCoord)
   {
   //first make the bin completely black
-  for (int i = this->geometry().height() - 1; i >= 0; i--)
+  for (int i = this->contentsRect().height() - 1; i >= 0; i--)
 	{
 	this->unscaledImage.setPixel(bin, i, 0);
 	}
 
-  for (int i = this->geometry().height() - 1; i >= endCoord; i--)
+  for (int i = this->contentsRect().height() - 1; i >= endCoord; i--)
 	{
 	this->unscaledImage.setPixel(bin, i, color);
 	}
@@ -171,7 +171,7 @@ void pqHistogramWidget::drawBin(QRgb color, int bin, int endCoord)
 void pqHistogramWidget::scaleAndDraw()
   {
   QImage* image = new QImage(
-	  unscaledImage.scaled(this->geometry().width(), this->geometry().height(),
+	  unscaledImage.scaled(this->contentsRect().width(), this->contentsRect().height(),
 		  Qt::IgnoreAspectRatio, Qt::FastTransformation));
   this->setPixmap(image);
   }
@@ -186,10 +186,10 @@ void pqHistogramWidget::updatePixmap(int bin)
 
   float scale;
   if (logScale)
-	scale = float(this->geometry().height() - enabledBarsHeight)
+	scale = float(this->contentsRect().height() - enabledBarsHeight)
 		/ float(log10((double) (currentMax)));
   else
-	scale = float(this->geometry().height() - enabledBarsHeight)
+	scale = float(this->contentsRect().height() - enabledBarsHeight)
 		/ float(currentMax);
 
   int endCoord = getTopBinPixel(bin, scale);
@@ -205,7 +205,7 @@ int pqHistogramWidget::getTopBinPixel(int bin, float scale)
 
   if (histogram[bin] == 0)
 	{
-	return this->geometry().height();
+	return this->contentsRect().height();
 	}
 
   if (!histogramEnabled[bin] && histogram[bin] > currentMax)
@@ -230,7 +230,7 @@ int pqHistogramWidget::getTopBinPixel(int bin, float scale)
 	else
 	  finalheight = int(scale * float(histogram[bin]));
 
-	finalheight = this->geometry().height() - finalheight;
+	finalheight = this->contentsRect().height() - finalheight;
 
 	}
 
@@ -245,7 +245,7 @@ void pqHistogramWidget::updateAllBinColumns()
 void pqHistogramWidget::mousePressEvent(QMouseEvent *e)
   {
   //switch enabled disabled
-  int width = this->geometry().width();
+  int width = this->contentsRect().width();
   int selectedBin = int(
 	  float(e->x()) * (float(this->histogramSize) / float(width)));
 
@@ -286,7 +286,7 @@ void pqHistogramWidget::mouseDoubleClickEvent(QMouseEvent *e)
 
   int y = e->y();
 
-  float scale = float(this->geometry().height() - enabledBarsHeight)
+  float scale = float(this->contentsRect().height() - enabledBarsHeight)
 	  / float(currentMax);
   for (int i = 0; i < histogramSize; i++)
 	{
@@ -323,7 +323,7 @@ void pqHistogramWidget::paintEvent(QPaintEvent *e)
 
   QPainter painter(this);
   QRect dirtyRect(QPoint(0, 0),
-	  QPoint(this->geometry().width() - 1, this->geometry().height() - 1));
+	  QPoint(this->contentsRect().width() - 1, this->contentsRect().height() - 1));
 
   painter.drawImage(dirtyRect, *currentHistogramImage, dirtyRect);
   }

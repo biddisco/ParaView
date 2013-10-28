@@ -258,7 +258,7 @@ QvisAbstractOpacityBar::paintEvent(QPaintEvent *e)
     if (!pix) return;
     //
     QPainter painter(this);
-    this->paintToPixmap(this->geometry().width(), this->geometry().height());//contentsRect().width(), contentsRect().height());
+    this->paintToPixmap(this->contentsRect().width(), this->contentsRect().height());//contentsRect().width(), contentsRect().height());
     painter.drawPixmap(contentsRect().left(), contentsRect().top(), *pix);
     painter.end();
 }

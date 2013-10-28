@@ -97,7 +97,7 @@ scalarMin = 0; scalarMax = 0;
   currentScalarArrayWidth = 0;
   this->paintScalarColorBackground = false;
   this->colortransferfunction = NULL;
- // scalarValues.SetVoidArray(NULL, this->geometry().width(),0);
+ // scalarValues.SetVoidArray(NULL, this->contentsRect().width(),0);
   }
 
 // ****************************************************************************
@@ -309,12 +309,13 @@ void QvisGaussianOpacityBar::createScalarColorBackground(float *values, int widt
 
 
 
-const unsigned char * c = this->colortransferfunction->GetTable(currentRangeMin, currentRangeMax,this->geometry().width());
+const unsigned char * c = this->colortransferfunction->GetTable(currentRangeMin, currentRangeMax,this->contentsRect().width());
 
 
 
-QImage image(QSize(this->geometry().width(),this->geometry().height()), QImage::Format_RGB32);
+QImage image(QSize(this->contentsRect().width(),this->contentsRect().height()), QImage::Format_RGB32);
 image.fill(Qt::white);
+
 
 
 float dy = 1.0 / float(height - 1);
@@ -338,7 +339,7 @@ QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
 		  image));
 
-this->stretchBackgroundPixmap = false;
+this->stretchBackgroundPixmap = true;
 
   this->SetBackgroundPixmap(background);
 
@@ -364,6 +365,7 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
   QPen blackpen(Qt::black, 2);
 
   QPainter painter(pix);
+
 
 
   if(this->paintScalarColorBackground)
