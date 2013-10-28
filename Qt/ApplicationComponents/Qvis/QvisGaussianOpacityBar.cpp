@@ -324,7 +324,7 @@ for (int _x = 0; _x < width; _x++)
 		 for (int y = 0; y <height; y++){
 		   float yvalc = 1 - float(y) / float(height - 1);
 
-		   if (yvalc < qMax(values[_x], values[_x+1])-dy){
+		   if (yvalc < qMin(values[_x], values[_x+1])-dy){
 			 int r = (int)c[_x*3]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
 			 int g = (int)c[_x*3+1]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
 			 int b = (int)c[_x*3+2]*qMax(values[_x], values[_x+1])+255*(1-qMax(values[_x], values[_x+1]));
@@ -338,7 +338,7 @@ QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
 		  image));
 
-this->stretchBackgroundPixmap = true;
+this->stretchBackgroundPixmap = false;
 
   this->SetBackgroundPixmap(background);
 
