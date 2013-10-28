@@ -1023,7 +1023,7 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
 	          this->proxy()->GetClientSideObject());
 	  if(!stc->everythingInitialized){
 		//rescale gradient ranges
-		repr->getProxy()->InvokeCommand("UpdateHistogram");
+		repr->getProxy()->InvokeCommand("UpdateGradientRange");
 		vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(repr->getProxy());
 		stc->everythingInitialized = true;
 	  }

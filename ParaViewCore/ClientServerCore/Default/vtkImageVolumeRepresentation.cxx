@@ -556,9 +556,12 @@ void vtkImageVolumeRepresentation::updateGradRange()
     grads->GetRange(gradient_range_local);
     // now do a parallel reduction to get the global min/max
     vtkMultiProcessController *controller = vtkMultiProcessController::GetGlobalController();
+    std::cout << "controller " << controller << std::endl;
     if (controller != NULL) {
+      std::cout << "reducing" << std::endl;
       controller->AllReduce(&gradient_range_local[0], &this->GradientRange[0], 1, vtkCommunicator::MIN_OP);
       controller->AllReduce(&gradient_range_local[1], &this->GradientRange[1], 1, vtkCommunicator::MAX_OP);
+      std::cout << "finished reducing" << std::endl;
     }
   }
 }
@@ -586,39 +589,40 @@ std::cout << "this->ExecuteOnClient && !GradientFilter" << std::endl;
   updateGradRange();
 
   GradientRangeOutOfDate = false;
+  histogramOutOfDate = true;
 
 }
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateHistogram()
 {
-
+std::cout << "updateHistogram" << std::endl;
   if (GradientHistogramFirstTimeStartup)
     {
       GradientHistogramFirstTimeStartup = false;
       return;
     }
-
+  std::cout << "updateHistogram2" << std::endl;
   if (!histogramOutOfDate)//
     {
     return;
     }
-
+  std::cout << "updateHistogram3" << std::endl;
   if (this->ExecuteOnClient && !AccumulateFilter)
     {
     this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
     }
-
+  std::cout << "updateHistogram4" << std::endl;
   if (GradientRangeOutOfDate)//
     {
       UpdateGradientRange();
       histogramOutOfDate = true;
     }
-
+  std::cout << "updateHistogram5" << std::endl;
   if (histogramOutOfDate)//
     {
     updateGradientHistogram();
     }
-
+  std::cout << "updateHistogram6" << std::endl;
   histogramOutOfDate = false;
 }
 //----------------------------------------------------------------------------
