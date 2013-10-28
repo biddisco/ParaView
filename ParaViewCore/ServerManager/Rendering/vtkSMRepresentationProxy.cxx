@@ -50,6 +50,7 @@ vtkSMRepresentationProxy::~vtkSMRepresentationProxy()
 {
   this->RepresentedDataInformation->Delete();
   this->ProminentValuesInformation->Delete();
+  this->RepresentedGradientDataInformation->Delete();
 }
 
 //----------------------------------------------------------------------------
