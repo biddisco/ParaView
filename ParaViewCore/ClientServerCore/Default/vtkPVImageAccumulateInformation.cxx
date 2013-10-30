@@ -64,7 +64,6 @@ void vtkPVImageAccumulateInformation::PrintSelf(ostream& os, vtkIndent indent)
 //----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
   {
-  std::cout << "copying from object " << std::endl;
   if (!obj)
     {
     this->Initialize();
@@ -73,6 +72,9 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
   vtkImageVolumeRepresentation* volumerep = vtkImageVolumeRepresentation::SafeDownCast(
     vtkPVCompositeRepresentation::SafeDownCast(obj)->GetActiveRepresentation());
+
+  this->CollectGradientHistogram = !volumerep->GetHistogramOutOfDate();
+  this->CollectGradientRange = !volumerep->GetGradientRangeOutOfDate();
 
   if (!volumerep)
     {
@@ -86,7 +88,6 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
     vtkSmartPointer<vtkPExtractHistogram> histogram = volumerep->getHistogram();
 
     this->SizeOfHistogramX = histogram->GetOutput()->GetNumberOfRows();
-    std::cout << "sizeofx " << this->SizeOfHistogramX << std::endl;
 
     this->values.resize(this->SizeOfHistogramX);
     for (vtkIdType bin = 0; bin < this->SizeOfHistogramX; ++bin)
@@ -94,7 +95,6 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
       this->values[bin] =  histogram->GetOutput()->GetRow(bin)->GetValue(1).ToInt();
       }
 
-    std::cout << "ended copy" << std::endl;
     this->arrayName = "bin_values";
     }
 
@@ -114,7 +114,6 @@ void vtkPVImageAccumulateInformation::AddInformation(vtkPVImageAccumulateInforma
 //----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream* stream)
   {
-
   int N = 0;
   if (!stream->GetArgument(0, 0, &this->CollectGradientHistogram) || !stream->GetArgument(0, 1, &this->CollectGradientRange))
     {
@@ -150,6 +149,10 @@ void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream
       }
     N = 4+dimx;
     }
+  else
+	{
+	N = 2;
+	}
   if (this->CollectGradientRange) 
     {
     if (!stream->GetArgument(0, N, &(this->GradientRange[0])) || !stream->GetArgument(0, N+1, &(this->GradientRange[1])))
@@ -162,7 +165,6 @@ void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream
 //-----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream)
   {
-  std::cout << "copying to stream " << std::endl;
   stream->Reset();
   *stream << vtkClientServerStream::Reply; 
 

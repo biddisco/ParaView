@@ -73,6 +73,9 @@ public:
   vtkSetStringMacro(ColorArrayName);
   vtkGetStringMacro(ColorArrayName);
 
+  vtkGetMacro(GradientRangeOutOfDate,bool);
+  vtkGetMacro(HistogramOutOfDate,bool);
+
   vtkGetVector2Macro(GradientRange, double);
 
   bool GetIsScalarGaussianFunction();
@@ -96,7 +99,7 @@ public:
 
   vtkSmartPointer<vtkPExtractHistogram> getHistogram()
 	{
-	UpdateHistogram();
+	//UpdateHistogram();
 	return AccumulateFilter;
 	}
 
@@ -192,7 +195,7 @@ protected:
 
   // Description:
     // Used to determine if the histogram has not been created or belongs to a different data set.
-  bool histogramOutOfDate;
+  bool HistogramOutOfDate;
   // Description:
   // Used to determine if the gradient range has not been determined or belongs to a different data set.
   bool GradientRangeOutOfDate;

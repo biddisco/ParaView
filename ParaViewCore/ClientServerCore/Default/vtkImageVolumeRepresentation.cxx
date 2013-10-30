@@ -87,7 +87,7 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   HistogramBins = 100;
 
   connected = false;
-  histogramOutOfDate = true;
+  HistogramOutOfDate = true;
   GradientRangeOutOfDate = true;
 
   GradientRangeFirstTimeStartup = true;
@@ -227,7 +227,7 @@ vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
       this->VolumeMapper->RemoveAllInputs();
       this->Actor->SetEnableLOD(1);
     }
-  this->histogramOutOfDate = true;
+  this->HistogramOutOfDate = true;
   this->GradientRangeOutOfDate = true;
   return this->Superclass::RequestData(request, inputVector, outputVector);
 }
@@ -521,7 +521,6 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
             (GradientRange[1] - GradientRange[0]) / (double(HistogramBins - 1))),
         0.0, 0.0);*/
     AccumulateFilter->Update();
-    std::cout << "updated accumulatefilter " <<std::endl;
 
    // int dims[3];
    // AccumulateFilter->GetOutput()->GetDimensions(dims);
@@ -540,9 +539,7 @@ void vtkImageVolumeRepresentation::updateGradRange()
     this->GradientFilter->SetDimensionality(3);
     this->GradientFilter->SetInputArrayToProcess(0, 0, 0,
         vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
-    std::cout << "updating whole extent" << std::endl;
     this->GradientFilter->UpdateWholeExtent();
-    std::cout << "finished updating whole extent" << std::endl;
     // Get the gradient output
     vtkImageData *gradient = this->GradientFilter->GetOutput();
     // Get the gradient array
@@ -556,74 +553,60 @@ void vtkImageVolumeRepresentation::updateGradRange()
     grads->GetRange(gradient_range_local);
     // now do a parallel reduction to get the global min/max
     vtkMultiProcessController *controller = vtkMultiProcessController::GetGlobalController();
-    std::cout << "controller " << controller << std::endl;
     if (controller != NULL) {
-      std::cout << "reducing" << std::endl;
       controller->AllReduce(&gradient_range_local[0], &this->GradientRange[0], 1, vtkCommunicator::MIN_OP);
       controller->AllReduce(&gradient_range_local[1], &this->GradientRange[1], 1, vtkCommunicator::MAX_OP);
-      std::cout << "finished reducing" << std::endl;
     }
   }
 }
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateGradientRange()
 {
-  std::cout << "startinggradupdate" << std::endl;
   if (GradientRangeFirstTimeStartup)
     {
-	std::cout << "gradfirststartup" << std::endl;
       GradientRangeFirstTimeStartup = false;
       return;
     }
-std::cout << "this->ExecuteOnClient && !GradientFilter" << std::endl;
   if (this->ExecuteOnClient && !GradientFilter)
     {
     this->GradientFilter = vtkSmartPointer<vtkImageGradientMagnitude>::New();
     }
-  std::cout << "GradientRangeOutOfDate" << !GradientRangeOutOfDate << std::endl;
   if (!GradientRangeOutOfDate)//
     {
     return;
     }
-  std::cout << "upgradinggradrange" << std::endl;
   updateGradRange();
 
   GradientRangeOutOfDate = false;
-  histogramOutOfDate = true;
+  HistogramOutOfDate = true;
 
 }
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateHistogram()
 {
-std::cout << "updateHistogram" << std::endl;
   if (GradientHistogramFirstTimeStartup)
     {
       GradientHistogramFirstTimeStartup = false;
       return;
     }
-  std::cout << "updateHistogram2" << std::endl;
-  if (!histogramOutOfDate)//
+  if (!HistogramOutOfDate)//
     {
     return;
     }
-  std::cout << "updateHistogram3" << std::endl;
   if (this->ExecuteOnClient && !AccumulateFilter)
     {
     this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
     }
-  std::cout << "updateHistogram4" << std::endl;
   if (GradientRangeOutOfDate)//
     {
       UpdateGradientRange();
-      histogramOutOfDate = true;
+      HistogramOutOfDate = true;
     }
-  std::cout << "updateHistogram5" << std::endl;
-  if (histogramOutOfDate)//
+  if (HistogramOutOfDate)//
     {
     updateGradientHistogram();
     }
-  std::cout << "updateHistogram6" << std::endl;
-  histogramOutOfDate = false;
+  HistogramOutOfDate = false;
 }
 //----------------------------------------------------------------------------
 bool vtkImageVolumeRepresentation::GetIsScalarGaussianFunction(){
