@@ -734,7 +734,7 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   //
   //repr->getProxy()->InvokeCommand("UpdateGradientRange");
   repr->getProxy()->InvokeCommand("UpdateHistogram");
-  return;
+ // return;
 
   //
   // Gather information about the histogram and gradient range from server process, 
@@ -743,8 +743,8 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   //
   vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
       vtkPVImageAccumulateInformation>::New();
-  info->SetCollectGradientHistogram(1);
-  info->SetCollectGradientRange(1);
+ // info->SetCollectGradientHistogram(1);
+ // info->SetCollectGradientRange(1);
   repr->getProxy()->GatherInformation(info.GetPointer(), vtkPVSession::RENDER_SERVER);
 
   double gradientrange[2];
@@ -1278,8 +1278,8 @@ pqColorOpacityEditorWidget::resetRangeToData()
       return;
     }
 
-  if (repr->getProxy()->GetProperty("UpdateHistogram"))
-	repr->getProxy()->InvokeCommand("UpdateHistogram");
+  if (repr->getProxy()->GetProperty("UpdateGradientRange"))
+	repr->getProxy()->InvokeCommand("UpdateGradientRange");
 
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
 
