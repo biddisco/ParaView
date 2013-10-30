@@ -99,6 +99,7 @@ public:
 	int currentPoint();
 
 protected:
+	bool UseLogScale;
 	void mouseMoveEvent(QMouseEvent*);
 	void mousePressEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
@@ -113,6 +114,8 @@ protected:
 	QImage* backgroundImage;
 
 	vtkNew<vtkEventQtSlotConnect> VTKConnect;
+
+	double currentFunctionRange[2];
 
 signals:
 	void mouseReleased();

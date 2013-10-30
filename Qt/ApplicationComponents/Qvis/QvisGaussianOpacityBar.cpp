@@ -97,6 +97,8 @@ scalarMin = 0; scalarMax = 0;
   currentScalarArrayWidth = 0;
   this->paintScalarColorBackground = false;
   this->colortransferfunction = NULL;
+
+  this->UseLogScale = false;
  // scalarValues.SetVoidArray(NULL, this->contentsRect().width(),0);
   }
 
@@ -113,6 +115,14 @@ scalarMin = 0; scalarMax = 0;
 
 QvisGaussianOpacityBar::~QvisGaussianOpacityBar()
   {
+  if (this->histogramValues)
+	{
+	 delete [] this->histogramValues;
+	}
+  if (this->histogramEnabled)
+	{
+	  delete [] this->histogramEnabled;
+	}
   }
 
 // ****************************************************************************
@@ -370,10 +380,26 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
 
   if(this->paintScalarColorBackground)
     	createScalarColorBackground(values,w,h);
+  else
+	{
+	double cfuncRange[2];
+	this->gaussianFunctionGroup->GetRange(cfuncRange);
+	if ((cfuncRange[0] != this->currentFunctionRange[0] ||cfuncRange[1] != this->currentFunctionRange[1]) &&
+		currentHistogramSize > 0)
+	  {
+	  cfuncRange[0] = this->currentFunctionRange[0];
+	  cfuncRange[1] = this->currentFunctionRange[1]; //we're overwriting currentfunctionrange below
+	  int* tempHistogram = new int[currentHistogramSize];
+	  memcpy(tempHistogram,this->histogramValues,currentHistogramSize*sizeof(int));
+	  updateHistogram(cfuncRange[0],cfuncRange[1],currentHistogramSize,tempHistogram);
+	  generateBackgroundHistogram(this->UseLogScale);
+	  delete [] tempHistogram;
+	  }
+	}
 
     this->paintBackground(painter, w, h);
   float dy = 1.0 / float(h - 1);
-  for (int _x = 0; _x < w; _x++)
+  for (int _x = 0; _x < w-1; _x++)
 	{
 	float yval1 = values[_x];
 	float yval2 = values[_x + 1];
@@ -387,6 +413,17 @@ void QvisGaussianOpacityBar::paintToPixmap(int w, int h)
 		}
 	  }
 	}
+  //last column on the right
+  float yval1 = values[w-2];
+  float yval2 = values[w-1];
+  for (int _y = 0; _y < h; _y++)
+  	  {
+  	  float yvalc = 1 - float(_y) / float(h - 1);
+  	  if (yvalc >= qMin(yval1, yval2) - dy && yvalc < qMax(yval1, yval2))
+  		{
+  		painter.drawPoint(w-1, _y);
+  		}
+  	  }
 
 
   delete[] values;
@@ -557,11 +594,10 @@ int QvisGaussianOpacityBar::currentPoint(){
 void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 	int histogramSize, int* histogram)
   {
-  double currentFunctionRange[2];
-  this->gaussianFunctionGroup->GetRange(currentFunctionRange);
+  this->gaussianFunctionGroup->GetRange(this->currentFunctionRange);
 
-  if (rangeMin == currentFunctionRange[0] && rangeMax == currentFunctionRange[1]
-	  && histogramSize == currentHistogramSize)
+  if (rangeMin == this->currentFunctionRange[0] && rangeMax == this->currentFunctionRange[1]
+	  && histogramSize == this->currentHistogramSize)
 	{
 	//no changes to size or range. histogram takes up entire image.
 	for (int i = 0; i < histogramSize; i++)
@@ -572,10 +608,10 @@ void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 	}
 
   int histMinIndex = int(
-	  (currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
+	  (this->currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
 		  * float(histogramSize) + 0.01);
   int histMaxIndex = int(
-	  (currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
+	  (this->currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
 		  * float(histogramSize) + 0.01);
 
   int newHistogramSize = histMaxIndex - histMinIndex;
@@ -598,25 +634,25 @@ void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 
 
 	histMinIndex = int(
-		  (currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
+		  (this->currentFunctionRange[0] - rangeMin) / (rangeMax - rangeMin)
 			  * float(histogramSize)/consolidateFactorFloat + 0.01f);
 	 histMaxIndex = int(
-		  (currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
+		  (this->currentFunctionRange[1] - rangeMin) / (rangeMax - rangeMin)
 			  * float(histogramSize)/consolidateFactorFloat + 0.01f);
 
   }
 
 
   if (newHistogramSize != currentHistogramSize)
-	{ //needa different size
+	{ //need a different size
 	if (this->histogramEnabled)
 	  {
-	  delete this->histogramEnabled;
+	  delete [] this->histogramEnabled;
 	  }
 	this->histogramEnabled = new bool[newHistogramSize];
 	if (this->histogramValues)
 	  {
-	  delete this->histogramValues;
+	  delete [] this->histogramValues;
 	  }
 	this->histogramValues = new int[newHistogramSize];
 	}
@@ -630,7 +666,7 @@ void QvisGaussianOpacityBar::updateHistogram(double rangeMin, double rangeMax,
 
   int index = std::max(histMinIndex, 0); //index = histmindindex if the guassian min range is higher
   for (int i = std::max(-histMinIndex, 0);
-	  i < histMaxIndex && index < histogramSize; i++, index+=consolidateFactor)
+	  i < newHistogramSize && index < histogramSize; i++, index+=consolidateFactor)
 	{
 	for (int j = 0; j< consolidateFactor && j+index<histogramSize; j++){
 	  histogramValues[i] = histogram[index+j];
@@ -790,6 +826,8 @@ int QvisGaussianOpacityBar::getTopBinPixel(int bin, float scale, int* histogram,
 
 void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
   {
+
+  this->UseLogScale = useLogScale;
   this->showBackgroundPixmap = true;
 
   int enabledBarsHeight = 8;
@@ -840,7 +878,8 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 
   QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
-		  image));
+		  image.scaled(this->contentsRect().width(),this->contentsRect().height(),
+			  Qt::IgnoreAspectRatio,Qt::FastTransformation)));
 
 
   this->SetBackgroundPixmap(background);
