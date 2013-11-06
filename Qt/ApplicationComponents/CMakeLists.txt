@@ -415,6 +415,10 @@ vtk_module_library(pqApplicationComponents
   ${__Module_MOC_SRCS}
   ${__Module_UI_SRCS})
 
+#if(BUILD_TESTING)
+#  add_subdirectory(Qvis/Testing/Cxx)
+#endif()
+
 #IF (NOT PV_INSTALL_NO_DEVELOPMENT)
 #  # Headers
 #  GLOB_INSTALL_DEVELOPMENT(

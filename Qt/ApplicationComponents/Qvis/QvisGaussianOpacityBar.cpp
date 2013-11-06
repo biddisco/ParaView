@@ -449,6 +449,7 @@ void QvisGaussianOpacityBar::mousePressEvent(QMouseEvent *e)
 
   if (e->button() == Qt::RightButton)
 	{
+
 	if (findGaussianControlPoint(_x, _y, &currentGaussian, &currentMode))
 	  {
 	  if (getNumberOfGaussians() > minimumNumberOfGaussians)
