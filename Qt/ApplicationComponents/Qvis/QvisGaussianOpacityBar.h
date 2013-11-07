@@ -73,46 +73,78 @@ public:
 	void getRawOpacities(int, float*);
 	///returns the number of gaussians in the connected gaussianfunction
 	int getNumberOfGaussians();
-	// Description:
-	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
-	//The gaussian is scaled and shifted into the space used by the widget
-	void getGaussian(int, float*, float*, float*, float*, float*);
-	// Description:
-	//gets a gaussian from the connected vtkpiecewisegaussianfunction.
-	//The gaussian is scaled and shifted into the space used by the widget
-	void setGaussian(int, float*, float*, float*, float*, float*);
+	/// Description:
+	/// adds as an array of gaussians to the function.
+	/// The gaussian is scaled and shifted into the space used by the function
 	void setAllGaussians(int, float*);
+	/// Description:
+	/// Set the maximum number of gaussians allowed to be used in the widget
+	/// Will conflict with the functions used by the widget if it has more than that number
 	void setMaximumNumberOfGaussians(int);
+	/// Description:
+	/// Set the minimum number of gaussians allowed in the widget
+	/// If there are less gaussians, then none can be deleted until the number is higher than the minimum
 	void setMinimumNumberOfGaussians(int);
+	/// Description:
+	/// sets which gaussian is currently selected. If index is out of range, it is set to -1
 	void setCurrentGaussian(int);
-
+	/// Description:
+	/// generate the histogram used in the background. The currently stored histogram values are used.
 	void generateBackgroundHistogram(bool useLogScale);
 
+	/// Description:
+	///Sets the range of the function used by the widget. WARNING, THIS WILL ONLY HAPPEN ON THE CLIENT.
 	void setFunctionRange(double range[2]);
 
+	/// Description:
+	/// size of the currently stored histogram.
 	int currentHistogramSize;
+	/// Description:
+	/// size of the currently stored histogram.
 	bool* histogramEnabled;
+	/// Description:
+	/// The current histogram. array value = bin
 	int* histogramValues;
+	/// Description:
+	/// range of the current histogram
 	double histogramRange[2];
+	/// Description:
+	/// copies a histogram. If the histogram to be copied has a larger range than the function of
+	/// the widget, than a subsection is copied. If the histogramrange isn't as large, then the
+	/// areas above or below will be empty.
 	void updateHistogram(double rangeMin, double rangeMax, int histogramSize, int* histogram);
-
-	int currentPoint();
+	/// Description:
+	/// Gets the currently selected Gaussian
+	int getCurrentGaussian();
 
 protected:
+	/// Description:
+	/// Used for Histogram only.
 	bool UseLogScale;
 	void mouseMoveEvent(QMouseEvent*);
 	void mousePressEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
 	void paintToPixmap(int, int);
+	/// Description:
+	/// Draw control points of the gaussians.
 	void drawControlPoints(QPainter &painter);
+	/// Description:
+	/// get the highest pixel in the background histogram for a histogram bin. Because origin is in top left, the lower the value, the higher the pixel.
 	int getTopBinPixel(int bin, float scale, int* histogram, int currentMax, int currentUnEnabledMax, bool logScale, float enabledBarsHeight, bool* histogramEnabled);
-	int currentScalarArrayWidth;
+	/// Description:
+	/// Controls whether or not the color background is painted
 	bool paintScalarColorBackground;
+	/// Description:
+	/// Generates the background colors based on the colortransferfunction
 	void createScalarColorBackground(float *values, int width, int height);
-	int scalarMin, scalarMax;
+	/// Description:
+	/// Colortransferfunction used to generate scalarcolorbackground
 	vtkColorTransferFunction* colortransferfunction;
+	/// Description:
+	/// What it says on the tin. Store images you want to use as background here
 	QImage* backgroundImage;
-
+	/// Description:
+	/// Connection used to update when the colortransferfunctions is changed
 	vtkNew<vtkEventQtSlotConnect> VTKConnect;
 
 	double currentFunctionRange[2];
@@ -162,18 +194,27 @@ private:
 	enum gaussvalue {
 		gaussX, gaussH, gaussW, gaussBx, gaussBy
 	};
-
+	/// Description:
+	/// The function the widget uses and displays.
 	vtkSmartPointer<vtkGaussianPiecewiseFunction> gaussianFunctionGroup;
-
+	/// Description:
+	/// Gets node from the gaussianpiecewisefunction
 	Gaussian getNode(int index);
+	/// Description:
+	/// Sets node on in the function
 	void setNode(int index, Gaussian &gauss);
+	/// Description:
+	/// remove a gaussian from the function
 	void removeNode(int index);
+	/// Description:
+	/// Set one value of a gaussian
 	void setGaussValue(int index, double value, gaussvalue v);
+	/// Description:
+	// Get one Value of a gaussian
 	double getGaussValue(int index, gaussvalue v);
 
 	// the list of gaussians
 	int ngaussian;
-	std::vector<Gaussian> gaussian;
 
 	// the current interaction mode and the current gaussian
 	Mode currentMode;

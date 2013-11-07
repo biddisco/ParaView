@@ -93,8 +93,6 @@ QvisGaussianOpacityBar::QvisGaussianOpacityBar(QWidget *parentObject,
 
 backgroundImage = 0;
 
-scalarMin = 0; scalarMax = 0;
-  currentScalarArrayWidth = 0;
   this->paintScalarColorBackground = false;
   this->colortransferfunction = NULL;
 
@@ -587,7 +585,7 @@ void QvisGaussianOpacityBar::mouseMoveEvent(QMouseEvent *e)
   }
 
 
-int QvisGaussianOpacityBar::currentPoint(){
+int QvisGaussianOpacityBar::getCurrentGaussian(){
   return this->currentGaussian;
 }
 
@@ -877,6 +875,9 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
 	  }
 	}
 
+  if (!image.isNull())
+	{
+
   QPixmap* background = new QPixmap(
 	  QPixmap::fromImage(
 		  image.scaled(this->contentsRect().width(),this->contentsRect().height(),
@@ -886,6 +887,11 @@ void QvisGaussianOpacityBar::generateBackgroundHistogram(bool useLogScale)
   this->SetBackgroundPixmap(background);
 
   this->stretchBackgroundPixmap = true;
+	}
+  else
+	{
+	this->stretchBackgroundPixmap = false;
+	}
 
 
   this->update();
@@ -1162,45 +1168,7 @@ int QvisGaussianOpacityBar::getNumberOfGaussians()
   return this->gaussianFunctionGroup->GetSize();
   }
 
-// ****************************************************************************
-//  Method:  QvisGaussianOpacityBar::getGaussian
-//
-//  Purpose:
-//
-//
-//  Programmer:  Jeremy Meredith
-//  Creation:    January 31, 2001
-//
-// ****************************************************************************
-void QvisGaussianOpacityBar::getGaussian(int i, float *_x, float *h, float *w,
-	float *bx, float *by)
-  {
-  *_x = gaussian[i].x;
-  *h = gaussian[i].h;
-  *w = gaussian[i].w;
-  *bx = gaussian[i].bx;
-  *by = gaussian[i].by;
-  }
 
-// ****************************************************************************
-//  Method:  QvisGaussianOpacityBar::setGaussian
-//
-//  Purpose: Set the parameters of a particular Gaussian
-//
-//
-//  Programmer:  John Biddiscombe
-//  Creation:    January 31, 2005
-//
-// ****************************************************************************
-void QvisGaussianOpacityBar::setGaussian(int i, float *_x, float *h, float *w,
-	float *bx, float *by)
-  {
-  gaussian[i].x = *_x;
-  gaussian[i].h = *h;
-  gaussian[i].w = *w;
-  gaussian[i].bx = *bx;
-  gaussian[i].by = *by;
-  }
 
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::setAllGaussians

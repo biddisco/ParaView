@@ -514,6 +514,8 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
     AccumulateFilter->SetInputConnection(this->GradientFilter->GetOutputPort());
     AccumulateFilter->SetCustomBinRanges(GradientRange[0],GradientRange[1]);
     AccumulateFilter->SetBinCount(HistogramBins);
+    this->AccumulateFilter->SetInputArrayToProcess(0, 0, 0,
+           vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
   /*  AccumulateFilter->SetComponentExtent(0, HistogramBins - 1, 0, 0, 0, 0);
     AccumulateFilter->SetComponentOrigin(GradientRange[0], 0, 0);
     AccumulateFilter->SetComponentSpacing(

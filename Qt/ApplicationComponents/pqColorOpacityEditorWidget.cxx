@@ -820,26 +820,26 @@ pqColorOpacityEditorWidget::updateCurrentData()
               && ui.OpacityEditor->currentPoint()
                   != (ui.OpacityEditor->numberOfControlPoints() - 1));
     }
-  else if (ui.GradientGaussianOpacityEditor->currentPoint() >= 0 && pwf)
+  else if (ui.GradientGaussianOpacityEditor->getCurrentGaussian() >= 0 && pwf)
       {
         double xvms[5];
-        ggwf->GetNodeValue(ui.GradientGaussianOpacityEditor->currentPoint(), xvms);
+        ggwf->GetNodeValue(ui.GradientGaussianOpacityEditor->getCurrentGaussian(), xvms);
         ui.CurrentDataValue->setText(QString::number(xvms[0]));
         ui.CurrentDataValue->setEnabled(
-                 ui.GradientGaussianOpacityEditor->currentPoint() != -1
-                     && ui.GradientGaussianOpacityEditor->currentPoint() >= 0
+                 ui.GradientGaussianOpacityEditor->getCurrentGaussian() != -1
+                     && ui.GradientGaussianOpacityEditor->getCurrentGaussian() >= 0
                          != (ui.GradientGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
       }
-  else if (ui.ScalarGaussianOpacityEditor->currentPoint() >= 0 && pwf)
+  else if (ui.ScalarGaussianOpacityEditor->getCurrentGaussian() >= 0 && pwf)
         {
           double xvms[5];
-          sgwf->GetNodeValue(ui.ScalarGaussianOpacityEditor->currentPoint(), xvms);
+          sgwf->GetNodeValue(ui.ScalarGaussianOpacityEditor->getCurrentGaussian(), xvms);
           ui.CurrentDataValue->setText(QString::number(xvms[0]));
 
           ui.CurrentDataValue->setEnabled(
-                           ui.ScalarGaussianOpacityEditor->currentPoint() != -1
-                               && ui.ScalarGaussianOpacityEditor->currentPoint() >= 0
+                           ui.ScalarGaussianOpacityEditor->getCurrentGaussian() != -1
+                               && ui.ScalarGaussianOpacityEditor->getCurrentGaussian() >= 0
                                    != (ui.ScalarGaussianOpacityEditor->getNumberOfGaussians() - 1));
 
         }

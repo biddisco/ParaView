@@ -133,20 +133,6 @@ void QvisAbstractOpacityBar::paintBackground(QPainter &painter, int w, int h)
       painter.drawPixmap(painter.viewport(), *this->backgroundPixmap);
     }
   }
-
-/*
-  else if (backgroundColorControlPoints && backgroundColorControlPoints->GetNumControlPoints()>1)
-  {
-    unsigned char *cols = new unsigned char[w*3];
-    backgroundColorControlPoints->GetColors(cols, w);
-    for (int x=0; x<w; ++x) {
-      QRgb bgCols = QColor(cols[x*3+0], cols[x*3+1], cols[x*3+2]).rgb();
-      painter.setPen(bgCols);
-      painter.drawLine(x,0, x, h-1);
-    }
-    delete[] cols;
-  }
-*/
   else
   {
     painter.fillRect(0,0, w,h, QBrush(Qt::white));
