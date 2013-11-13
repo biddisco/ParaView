@@ -2296,6 +2296,20 @@ found and the point will be rejected.</Documentation>
         <Documentation>This property specifies the input to the Gradient
         Magnitude filter.</Documentation>
       </InputProperty>
+      <StringVectorProperty command="SetInputArrayToProcess"
+                            element_types="0 0 0 0 2"
+                            name="SelectInputScalars"
+                            number_of_elements="5">
+        <ArrayListDomain attribute_type="Scalars"
+                         name="array_list">
+          <RequiredProperties>
+            <Property function="Input"
+                      name="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Documentation>This property lists the name of the array from which to
+        compute the gradient.</Documentation>
+      </StringVectorProperty>
       <IntVectorProperty command="SetDimensionality"
                          default_values="3"
                          name="Dimensionality"
