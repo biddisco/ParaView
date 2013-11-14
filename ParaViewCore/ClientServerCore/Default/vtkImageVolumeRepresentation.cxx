@@ -559,6 +559,10 @@ void vtkImageVolumeRepresentation::updateGradRange()
       controller->AllReduce(&gradient_range_local[0], &this->GradientRange[0], 1, vtkCommunicator::MIN_OP);
       controller->AllReduce(&gradient_range_local[1], &this->GradientRange[1], 1, vtkCommunicator::MAX_OP);
     }
+    else{
+      this->GradientRange[0] = gradient_range_local[0];
+      this->GradientRange[1] = gradient_range_local[1];
+    }
   }
 }
 //----------------------------------------------------------------------------
@@ -617,5 +621,13 @@ bool vtkImageVolumeRepresentation::GetIsScalarGaussianFunction(){
 //----------------------------------------------------------------------------
 bool vtkImageVolumeRepresentation::GetIsGradientGaussianFunction(){
   return this->Property->GetuseGradientGaussian();
+}
+
+void vtkImageVolumeRepresentation::EnableUseAdjustMapperGradientRangeFactor(){
+  this->Property->SetUseAdjustMapperGradientRangeFactor(true);
+}
+
+void vtkImageVolumeRepresentation::DisableUseAdjustMapperGradientRangeFactor(){
+  this->Property->SetUseAdjustMapperGradientRangeFactor(false);
 }
 
