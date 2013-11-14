@@ -1025,12 +1025,14 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
 		//rescale gradient ranges
 		repr->getProxy()->InvokeCommand("UpdateGradientRange");
 		vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(repr->getProxy());
+		repr->getProxy()->InvokeCommand("EnableUseAdjustMapperGradientRangeFactor");
 		stc->everythingInitialized = true;
 	  }
     showGradientFunctions();
   }
   else {
     hideGradientFunctions();
+    repr->getProxy()->InvokeCommand("DisableUseAdjustMapperGradientRangeFactor");
   }
 
 }
