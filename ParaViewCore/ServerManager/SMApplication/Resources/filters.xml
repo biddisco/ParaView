@@ -2108,6 +2108,64 @@ found and the point will be rejected.</Documentation>
       </Hints>
       <!-- End FeatureEdges -->
     </SourceProxy>
+    
+    <!-- ==================================================================== -->
+    <SourceProxy class="vtkImageChangeInformation"
+                 label="Image Change Information"
+                 name="ImageChangeInformation">
+      <Documentation long_help="modify spacing, origin and extent of imagedata"
+      short_help="modify spacing, origin and extent.">
+      vtkImageChangeInformation modifies the spacing, origin, or extent of the data without changing the data itself. 
+      The data is not resampled by this filter, only the information accompanying the data is modified.</Documentation>
+      <InputProperty command="SetInputConnection"
+                     name="Input">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkImageData" />
+        </DataTypeDomain>
+        <InputArrayDomain attribute_type="point"
+                          name="input_array"
+                          number_of_components="1" />
+        <Documentation>This property specifies the input to the Gradient
+        filter.</Documentation>
+      </InputProperty>
+      <StringVectorProperty command="SetInputArrayToProcess"
+                            element_types="0 0 0 0 2"
+                            name="SelectInputScalars"
+                            number_of_elements="5">
+        <ArrayListDomain attribute_type="Scalars"
+                         name="array_list">
+          <RequiredProperties>
+            <Property function="Input"
+                      name="Input" />
+          </RequiredProperties>
+        </ArrayListDomain>
+        <Documentation>This property lists the name of the array from which to
+        compute the gradient.</Documentation>
+      </StringVectorProperty>
+      <DoubleVectorProperty command="SetSpacingScale"
+                         default_values="1 1 1"
+                         label="Spacing Scale"
+                         name="SpacingScale"
+                         number_of_elements="3"
+                         panel_visibility="default">
+        <DoubleRangeDomain name="range" />
+        <Documentation>spacingscale</Documentation>
+      </DoubleVectorProperty>
+      <DoubleVectorProperty command="SetOutputSpacing"
+                         default_values="1.0e+299 1.0e+299 1.0e+299"
+                         label="Output Spacing"
+                         name="OutputSpacing"
+                         number_of_elements="3"
+                         panel_visibility="default">
+        <DoubleRangeDomain name="range" />
+        <Documentation>spacingscale</Documentation>
+      </DoubleVectorProperty>
+      <!-- End ImageChangeInformation -->
+    </SourceProxy>
     <!-- ==================================================================== -->
     <SourceProxy class="vtkImageGradient"
                  label="Gradient"
