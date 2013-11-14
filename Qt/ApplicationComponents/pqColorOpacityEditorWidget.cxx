@@ -1487,7 +1487,7 @@ pqColorOpacityEditorWidget::showGradientFunctions()
 
 
 
-         ui.HistogramDialog->show();
+  ui.HistogramDialog->show();
 
 }
 //-----------------------------------------------------------------------------
@@ -1499,7 +1499,7 @@ void
   ui.GradientLinearOpacityEditor->hide();
   ui.TwoDTransferFunction->hide();
   ui.gaussorgrad->hide();
-  ui.HistogramDialog->show();
+  ui.HistogramDialog->hide();
 }
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
