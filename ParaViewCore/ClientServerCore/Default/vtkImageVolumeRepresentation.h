@@ -37,7 +37,7 @@ class vtkTwoDTransferFunction;
 class vtkPolyDataMapper;
 class vtkPVCacheKeeper;
 class vtkPVLODVolume;
-class vtkSmartVolumeMapper
+class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
 class vtkImageAccumulate;
 class vtkPExtractHistogram;
