@@ -15,8 +15,12 @@
 #include "pqApplicationComponentsModule.h"
 #include "vtkTwoDTransferFunction.h"
 #include "vtkSmartPointer.h"
+#include "vtkNew.h"
 //---------------------------------------------------------------------------
 class QPixmap;
+class vtkScalarsToColors;
+class vtkColorTransferFunction;
+class vtkEventQtSlotConnect;
 //---------------------------------------------------------------------------
 class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisAbstractOpacityBar
 {
@@ -40,9 +44,13 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
     void          setBackgroundGradientData(int x, int y, int *data);
     void          setUnderlayColourData(int N, int c, const unsigned char *data);
 
-    void 		  initialize(vtkTwoDTransferFunction* function);
+    void 		      initialize(vtkTwoDTransferFunction* function, vtkScalarsToColors* stc);
 
     void          createRGBAData(unsigned char *data);
+
+
+    protected slots:
+    void updateImage();
 
   protected:
     void          mouseMoveEvent(QMouseEvent*);
@@ -56,8 +64,21 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
 
 
 
+    /// Description:
+    /// Colortransferfunction used to generate scalarcolorbackground
+    vtkColorTransferFunction* colortransferfunction;
+    /// Description:
+    /// Controls whether or not the color background is painted
+    bool paintScalarColorBackground;
+    /// Description:
+    /// Generates the background colors based on the colortransferfunction
+    void createScalarColorBackground();
+    /// Description:
+      /// Connection used to update when the colortransferfunctions is changed
+      vtkNew<vtkEventQtSlotConnect> VTKConnect;
 
-
+      double * backgroundOpacityValues;
+      int currentbackgroundOpacityValuesSize;
 
 
 

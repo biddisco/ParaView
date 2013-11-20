@@ -132,6 +132,16 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="pqTransferFunctionEditor" name="TwoDTransferFunctionEditor" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>150</height>
+          </size>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item>
@@ -401,6 +411,12 @@
    <class>Qvis2DTransferFunctionWidget</class>
    <extends>QWidget</extends>
    <header>Qvis/Qvis2DTransferFunctionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqTransferFunctionEditor</class>
+   <extends>QWidget</extends>
+   <header>Qvis/pqTransferFunctionEditor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

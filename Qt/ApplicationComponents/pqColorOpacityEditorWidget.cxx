@@ -212,7 +212,8 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   if (tdtf)
     {
       //TBD initialize stuff for gaussian
-      ui.TwoDTransferFunction->initialize(tdtf);
+      ui.TwoDTransferFunction->initialize(tdtf, stc);
+      ui.TwoDTransferFunctionEditor->initialize(tdtf, stc);
     }
   else
     {
@@ -255,7 +256,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
           //TBD uncomment the gaussian line after the guassian stuff is finished. Currently
           //I'm worried that it somehow might cause problems (though I think it doesn't).
           // ui.GaussianOpacityEditor->setBackgroundColourData(N, 3, colors);
-          ui.TwoDTransferFunction->setUnderlayColourData(N, 3, colors);
+         // ui.TwoDTransferFunction->setUnderlayColourData(N, 3, colors);
 //      this->Internals->XMin->setValue(minmax[0]);
 //      this->Internals->XMax->setValue(minmax[1]);
         }

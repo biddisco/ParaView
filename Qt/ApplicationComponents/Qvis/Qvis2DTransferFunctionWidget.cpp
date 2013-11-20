@@ -9,6 +9,9 @@
 #include <qimage.h>
 #include <qnamespace.h>
 #include <QMouseEvent>
+#include "vtkEventQtSlotConnect.h"
+#include "vtkColorTransferFunction.h"
+#include "vtkScalarsToColors.h"
 
 #include <iostream>
 #include <cmath>
@@ -30,6 +33,12 @@ Qvis2DTransferFunctionWidget::Qvis2DTransferFunctionWidget(QWidget *parentObject
     this->maximumNumberOfRegions = -1; // unlimited
     this->minimumNumberOfRegions =  0;
     this->UnderlayColourPixmap   =  NULL;
+    currentbackgroundOpacityValuesSize = 0;
+    this->backgroundOpacityValues = 0;
+    this->paintScalarColorBackground = true;
+    this->colortransferfunction = 0;
+    lasty = 0;
+    lastx = 0;
 
     // set a default:
    // this->addRegion(0.25f, 0.25f, 0.5f, 0.5f, this->defaultTFMode, 1.0);
@@ -45,12 +54,25 @@ Qvis2DTransferFunctionWidget::~Qvis2DTransferFunctionWidget()
 
 //---------------------------------------------------------------------------
 
-void Qvis2DTransferFunctionWidget::initialize(vtkTwoDTransferFunction* function){
+void Qvis2DTransferFunctionWidget::initialize(vtkTwoDTransferFunction* function, vtkScalarsToColors* stc){
 	if(function){
 			this->transferFunction = function;
 			this->nregion = this->transferFunction->GetSize();
 		}
+	if(stc)
+	  {
+	  this->colortransferfunction = vtkColorTransferFunction::SafeDownCast(stc);
+	  this->paintScalarColorBackground = true;
+	  this->showBackgroundPixmap = true;
 
+	  this->VTKConnect->Connect(
+	    colortransferfunction, vtkCommand::ModifiedEvent, this, SLOT(updateImage()));
+	  }
+
+}
+
+void Qvis2DTransferFunctionWidget::updateImage(){
+  this->update();
 }
 
 //----------------------------------------------------------------------------
@@ -145,6 +167,8 @@ void Qvis2DTransferFunctionWidget::setRegionValue(int index, double value, vtkTw
 		this->transferFunction->SetRegionValue(index, value*this->transferFunction->getYRange(), v);
 	else if (v == vtkTwoDTransferFunction::REGION_MAX)
 		this->transferFunction->SetRegionValue(index, value, v);
+	else if (v == vtkTwoDTransferFunction::REGION_MODE)
+    this->transferFunction->SetRegionValue(index, value, v);
 
 
 
@@ -365,8 +389,8 @@ void Qvis2DTransferFunctionWidget::drawControlPoints(QPainter &painter)
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::drawRegions(QPainter &painter)
 {
-  QColor   white(255, 255, 255 );
-  QPen     whitepen(Qt::white, 2);
+  QColor   black(0, 0, 0 );
+  QPen     blackpen(Qt::black, 2);
   QPen     redpen(Qt::red, 2);
   QPen     cyanpen (QColor(100,255,255), 2);;
   QPen     greenpen(QColor(100,255,0),  2);;
@@ -382,7 +406,7 @@ void Qvis2DTransferFunctionWidget::drawRegions(QPainter &painter)
       else           painter.setPen(cyanpen);
     }
     else {
-      painter.setPen(whitepen);
+      painter.setPen(blackpen);
     }
     int x1 = Val2x(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_X));
     int y1 = Val2y(pix,getRegionValue(p,vtkTwoDTransferFunction::REGION_Y));
@@ -397,11 +421,13 @@ void Qvis2DTransferFunctionWidget::paintToPixmap(int w,int h)
 {
   QPainter painter(pix);
   //
+  this->createScalarColorBackground();
+
   this->paintBackground(painter,w,h);
   //
   this->drawRegions(painter);
   //
-  this->drawColourBars(painter);
+ // this->drawColourBars(painter);
   //
   this->drawControlPoints(painter);
 }
@@ -430,6 +456,59 @@ void Qvis2DTransferFunctionWidget::createRGBAData(unsigned char *data)
     }
   }
 }
+
+//---------------------------------------------------------------------------
+void Qvis2DTransferFunctionWidget::createScalarColorBackground()
+  {
+  double currentRangeMinX, currentRangeMaxX, currentRangeMinY, currentRangeMaxY;
+  this->transferFunction->GetRange(currentRangeMinX, currentRangeMaxX, currentRangeMinY, currentRangeMaxY);
+
+
+  const unsigned char * c = this->colortransferfunction->GetTable(currentRangeMinX, currentRangeMaxX,this->contentsRect().width());
+
+  int size = this->contentsRect().width()*this->contentsRect().height();
+
+  if (size != this->currentbackgroundOpacityValuesSize){
+    if(this->backgroundOpacityValues)
+      delete backgroundOpacityValues;
+    this->backgroundOpacityValues = new double[size];
+  }
+
+  //we definitely need something to check if the function has changed
+  this->transferFunction->GetTable(currentRangeMinX,currentRangeMaxX,currentRangeMinY,currentRangeMaxY,
+      this->contentsRect().width(),this->contentsRect().height(),this->backgroundOpacityValues);
+
+
+
+
+  QImage image(QSize(this->contentsRect().width(),this->contentsRect().height()), QImage::Format_RGB32);
+  image.fill(Qt::white);
+
+  for (int i = 0; i< this->contentsRect().width(); i++)
+    {
+    for (int j = 0; j< this->contentsRect().height(); j++)
+      {
+      int r = (int)c[i*3]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+      int g = (int)c[i*3+1]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+      int b = (int)c[i*3+2]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+      image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
+      }
+  }
+
+  QPixmap* background = new QPixmap(
+      QPixmap::fromImage(
+        image));
+
+  this->stretchBackgroundPixmap = false;
+
+    this->SetBackgroundPixmap(background);
+
+  }
+
+
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::mousePressEvent(QMouseEvent *e)
 {
@@ -580,8 +659,9 @@ void Qvis2DTransferFunctionWidget::getRawOpacities(int n, float *opacity)
 void Qvis2DTransferFunctionWidget::setActiveRegionMode(int index)
 {
   if (this->activeRegion!=-1) {
-    region[this->activeRegion].TFMode = TransferFnMode(index);
+    setRegionValue(index,TransferFnMode(index),vtkTwoDTransferFunction::REGION_MODE);
     this->defaultTFMode = index;
+    emit controlPointsModified();
     this->repaint();
   }
 }
@@ -589,13 +669,14 @@ void Qvis2DTransferFunctionWidget::setActiveRegionMode(int index)
 int Qvis2DTransferFunctionWidget::getActiveRegionMode()
 {
   if (this->activeRegion==-1) return -1;
-  return region[this->activeRegion].TFMode;
+  return getRegionValue(this->activeRegion,vtkTwoDTransferFunction::REGION_MODE);
 }
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::setActiveRegionMaximum(float mx)
 {
   if (this->activeRegion!=-1) {
-    region[this->activeRegion].maximum = mx;
+    setRegionValue(this->activeRegion,mx,vtkTwoDTransferFunction::REGION_MAX);
+    emit controlPointsModified();
     this->repaint();
   }
 }

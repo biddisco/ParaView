@@ -33,11 +33,13 @@ set (Module_SRCS
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.cxx
   #
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.h
   #
   pqAboutDialogReaction.cxx
   pqAboutDialogReaction.h
@@ -248,6 +250,7 @@ set (Module_MOC_HDRS
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
   ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.h
   #
   pqAboutDialogReaction.h
   pqAlwaysConnectedBehavior.h
@@ -381,6 +384,7 @@ set (Module_UI_FILES
   Resources/UI/pqMainControlsToolbar.ui
   Resources/UI/pqPipelineBrowserContextMenu.ui
   Resources/UI/pqTransferFunctionWidgetPropertyWidgetDialog.ui
+  Resources/UI/pqTransferFunctionEditor.ui
   Resources/UI/pqVCRToolbar.ui
 )
 
