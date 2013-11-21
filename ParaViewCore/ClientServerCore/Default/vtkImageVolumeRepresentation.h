@@ -150,7 +150,8 @@ public:
   void SetShade(bool);
   void SetIndependantComponents(bool);
 
-  void SetDisableGradientOpacity(bool use);
+  void SetDisableGradientOpacity(bool disable);
+  void SetDisableTwoDTransferFunction(bool disable);
   void EnableUseAdjustMapperGradientRangeFactor();
   void DisableUseAdjustMapperGradientRangeFactor();
 
@@ -162,6 +163,7 @@ public:
   void UpdateHistogram();
 
   bool GetDisableGradientOpacity();
+  bool GetDisableTwoDTransferFunction();
 
   // Description:
   // Provides access to the actor used by this representation.

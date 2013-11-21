@@ -487,7 +487,23 @@ void vtkImageVolumeRepresentation::SetRequestedRenderMode(int mode)
 {
   this->VolumeMapper->SetRequestedRenderMode(mode);
 }
-
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SetDisableTwoDTransferFunction(bool disable)
+{
+  if (!disable)
+    {
+      this->Property->DisableTwoDTransferFunctionOff(0);
+    }
+  else
+    {
+      this->Property->DisableTwoDTransferFunctionOn(0);
+    }
+}
+//----------------------------------------------------------------------------
+bool vtkImageVolumeRepresentation::GetDisableTwoDTransferFunction()
+{
+  return this->Property->twoDTransferFunctionDisabled(0);
+}
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetDisableGradientOpacity(bool disable)
 {

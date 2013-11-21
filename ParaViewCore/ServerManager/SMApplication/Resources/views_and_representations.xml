@@ -1604,6 +1604,10 @@
                       panel_visibility="never" />
             <Property name="InfoDisableGradientOpacity"
                       panel_visibility="never" />
+            <Property name="DisableTwoDTransferFunction"
+                      panel_visibility="never" />
+            <Property name="InfoDisableTwoDTransferFunction"
+                      panel_visibility="never" />
             <Property name="SwitchGradientOpacity"
                       panel_visibility="never" />
             <Property name="SwitchScalarOpacity"
@@ -2165,6 +2169,22 @@
              <BooleanDomain name="bool" />
              <SimpleIntInformationHelper />
          </IntVectorProperty>
+     <IntVectorProperty command="GetDisableTwoDTransferFunction"
+                     default_values="0"
+                     information_only="1"
+                     name="InfoDisableTwoDTransferFunction"
+                     number_of_elements="1">
+         <BooleanDomain name="bool" />
+         <SimpleIntInformationHelper />
+     </IntVectorProperty>
+     <IntVectorProperty command="SetDisableTwoDTransferFunction"
+                         default_values="1"
+                         name="DisableTwoDTransferFunction"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Enable/Disable the use of the gradient opacity function
+        </Documentation>
+      </IntVectorProperty>
       <IntVectorProperty command="SetSwitchGradientOpacity"
                          default_values="0"
                          name="SwitchGradientOpacity"
