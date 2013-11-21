@@ -164,6 +164,9 @@ public slots:
   void hideGradientFunctions();
 
 
+  void showTwoDTransferFunction();
+  void hideTwoDTransferFunction();
+
 
 
 
@@ -235,12 +238,14 @@ protected slots:
 
 
   void disableGradientOpacity();
+  void disableTwoDTransferFunction();
 
 
 private:
   Q_DISABLE_COPY(pqColorOpacityEditorWidget);
 
   bool disableGradientOpac;
+  bool disableTwoDTransferFunc;
 
   class pqInternals;
   pqInternals* Internals;

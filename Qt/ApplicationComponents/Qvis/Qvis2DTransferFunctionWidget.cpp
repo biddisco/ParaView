@@ -168,7 +168,7 @@ void Qvis2DTransferFunctionWidget::setRegionValue(int index, double value, vtkTw
 	else if (v == vtkTwoDTransferFunction::REGION_MAX)
 		this->transferFunction->SetRegionValue(index, value, v);
 	else if (v == vtkTwoDTransferFunction::REGION_MODE)
-    this->transferFunction->SetRegionValue(index, value, v);
+    this->transferFunction->SetRegionMode(index, TransferFnMode(value+0.01));
 
 
 
@@ -659,7 +659,7 @@ void Qvis2DTransferFunctionWidget::getRawOpacities(int n, float *opacity)
 void Qvis2DTransferFunctionWidget::setActiveRegionMode(int index)
 {
   if (this->activeRegion!=-1) {
-    setRegionValue(index,TransferFnMode(index),vtkTwoDTransferFunction::REGION_MODE);
+    setRegionValue(this->activeRegion,TransferFnMode(index),vtkTwoDTransferFunction::REGION_MODE);
     this->defaultTFMode = index;
     emit controlPointsModified();
     this->repaint();

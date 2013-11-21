@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>pqTransferFunctionEditor</class>
+ <widget class="QWidget" name="pqTransferFunctionEditor">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>327</width>
+    <height>283</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>O p a c i t y L e v e l</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" colspan="2">
+      <widget class="Qvis2DTransferFunctionWidget" name="TransferFunction">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>1</horstretch>
+         <verstretch>1</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
+       <zorder></zorder>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <property name="text">
+        <string>Transfer Function Mode</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QSlider" name="OpacityLevel">
+       <property name="maximum">
+        <number>4999</number>
+       </property>
+       <property name="singleStep">
+        <number>1</number>
+       </property>
+       <property name="pageStep">
+        <number>10</number>
+       </property>
+       <property name="value">
+        <number>4999</number>
+       </property>
+       <property name="sliderPosition">
+        <number>4999</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition">
+        <enum>QSlider::TicksBelow</enum>
+       </property>
+       <property name="tickInterval">
+        <number>250</number>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="TransferFunctionMode">
+       <item>
+        <property name="text">
+         <string>Uniform</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Right Half Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Left Half Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Top Half Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Bottom Half Gaussian</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Sine</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Ramp Right</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Ramp Left</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Qvis2DTransferFunctionWidget</class>
+   <extends>QFrame</extends>
+   <header>Qvis/Qvis2DTransferFunctionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

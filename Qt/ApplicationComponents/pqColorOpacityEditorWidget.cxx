@@ -57,6 +57,7 @@
 #include "vtkPVSession.h"
 #include "vtkPVImageAccumulateInformation.h"
 #include "pqHistogramDialog.h"
+#include "vtkTwoDTransferFunction.h"
 //#include "QvisGaussianOpacityBar.h"
 
 #include <QDoubleValidator>
@@ -212,12 +213,11 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   if (tdtf)
     {
       //TBD initialize stuff for gaussian
-      ui.TwoDTransferFunction->initialize(tdtf, stc);
       ui.TwoDTransferFunctionEditor->initialize(tdtf, stc);
     }
   else
     {
-      ui.TwoDTransferFunction->hide();
+      ui.TwoDTransferFunctionEditor->hide();
       this->twoDTransferFunctionAvailable = false;
     }
 
@@ -228,46 +228,10 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
    this->proxy()->GetClientSideObject());
    */
   //----
-//--------------------------------------------------------------
-  /*
-   Experimental addition of colour data to Qvis widgets
-   */
-//--------------------------------------------------------------
-  if (stc)
-    {
-      int N = 0;
-      const unsigned char *colors = NULL;
-      double minmax[2] =
-        { 0.0, 1.0 };
-      vtkPiecewiseFunction* pwf = stc ? stc->GetScalarOpacityFunction() : NULL;
-      if (pwf)
-        {
-//      ui.OpacityEditor->initialize(stc, false, pwf, true);
-        }
-      if (stc)
-        {
-          N = stc->GetNumberOfValues();
-          stc->GetRange(minmax);
-          colors = stc->GetTable(minmax[0], minmax[1], N);
-        }
 
-      if (N > 0 && colors)
-        {
-          //TBD uncomment the gaussian line after the guassian stuff is finished. Currently
-          //I'm worried that it somehow might cause problems (though I think it doesn't).
-          // ui.GaussianOpacityEditor->setBackgroundColourData(N, 3, colors);
-         // ui.TwoDTransferFunction->setUnderlayColourData(N, 3, colors);
-//      this->Internals->XMin->setValue(minmax[0]);
-//      this->Internals->XMax->setValue(minmax[1]);
-        }
-    }
 
-//--------------------------------------------------------------
-  /*
-   End : Experimental addition of colour data to Qvis widgets
-   */
-//--------------------------------------------------------------
   disableGradientOpac = false;
+  disableTwoDTransferFunc = false;
 
 //  ui.DisableOpacityGradient->setCheckable(true);
   pqDataRepresentation* repr =
@@ -286,6 +250,19 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     {
       ui.DisableOpacityGradient->hide();
     }
+  if (repr->getProxy()->GetProperty("TwoDTransferFunction"))
+      {
+        QObject::connect(ui.DisableTwoDTransferFunction, SIGNAL(clicked()), this,
+          SLOT(disableTwoDTransferFunction()));
+          ui.DisableTwoDTransferFunction->setChecked(false);
+      /*  this->addPropertyLink(ui.DisableOpacityGradient, "checked",
+        SIGNAL(clicked()), repr->getProxy(),
+            repr->getProxy()->GetProperty("DisableGradientLinearOpacity"));*/
+      }
+    else
+      {
+        ui.DisableTwoDTransferFunction->hide();
+      }
 
   if (repr->getProxy()->GetProperty("SwitchGradientOpacity"))
     {
@@ -335,7 +312,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
        this, SLOT(scalarGaussianCurrentChanged(int)));
   QObject::connect(ui.GradientGaussianOpacityEditor, SIGNAL(currentPointChanged(int)),
       this, SLOT(gradientGaussianCurrentChanged(int)));
-  QObject::connect(ui.TwoDTransferFunction, SIGNAL(activeRegionChanged(int)),
+  QObject::connect(ui.TwoDTransferFunctionEditor, SIGNAL(activeRegionChanged(int)),
       this, SLOT(TwoDTransferCurrentChanged(int)));
 
   QObject::connect(ui.ColorEditor, SIGNAL(controlPointsModified()), this,
@@ -349,7 +326,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       SIGNAL(ScalarxhwbbPointsChanged()));
   QObject::connect(ui.GradientGaussianOpacityEditor, SIGNAL(controlPointsModified()),
       this, SIGNAL(xhwbbPointsChanged()));
-  QObject::connect(ui.TwoDTransferFunction, SIGNAL(controlPointsModified()),
+  QObject::connect(ui.TwoDTransferFunctionEditor, SIGNAL(controlPointsModified()),
       this, SIGNAL(twoDTransferPointsChanged()));
 
   QObject::connect(ui.ColorEditor, SIGNAL(controlPointsModified()), this,
@@ -360,7 +337,7 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
       this, SLOT(updateCurrentData()));
   QObject::connect(ui.GradientGaussianOpacityEditor, SIGNAL(controlPointsModified()),
       this, SLOT(updateCurrentData()));
-  QObject::connect(ui.TwoDTransferFunction, SIGNAL(controlPointsModified()),
+  QObject::connect(ui.TwoDTransferFunctionEditor, SIGNAL(controlPointsModified()),
       this, SLOT(updateCurrentData()));
 
   QObject::connect(ui.ResetRangeToData, SIGNAL(clicked()), this,
@@ -521,13 +498,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
         }
       else
         {
-          ui.TwoDTransferFunction->hide();
+          ui.TwoDTransferFunctionEditor->hide();
           this->twoDTransferFunctionAvailable = false;
         }
     }
   else
     {
-      ui.TwoDTransferFunction->hide();
+      ui.TwoDTransferFunctionEditor->hide();
       this->twoDTransferFunctionAvailable = false;
     }
 
@@ -626,7 +603,7 @@ pqColorOpacityEditorWidget::opacityCurrentChanged(vtkIdType index)
       ui.GradientLinearOpacityEditor->setCurrentPoint(-1);
       ui.GradientGaussianOpacityEditor->setCurrentGaussian(-1);
       ui.ScalarGaussianOpacityEditor->setCurrentGaussian(-1);
-      ui.TwoDTransferFunction->setCurrentRegion(-1);
+      ui.TwoDTransferFunctionEditor->setCurrentRegion(-1);
     }
   this->updateCurrentData();
 }
@@ -642,7 +619,7 @@ pqColorOpacityEditorWidget::gradientLinearCurrentChanged(vtkIdType index)
       ui.ColorEditor->setCurrentPoint(-1);
       ui.GradientGaussianOpacityEditor->setCurrentGaussian(-1);
       ui.ScalarGaussianOpacityEditor->setCurrentGaussian(-1);
-      ui.TwoDTransferFunction->setCurrentRegion(-1);
+      ui.TwoDTransferFunctionEditor->setCurrentRegion(-1);
     }
   this->updateCurrentData();
 }
@@ -658,7 +635,7 @@ pqColorOpacityEditorWidget::colorCurrentChanged(vtkIdType index)
       ui.GradientLinearOpacityEditor->setCurrentPoint(-1);
       ui.GradientGaussianOpacityEditor->setCurrentGaussian(-1);
       ui.ScalarGaussianOpacityEditor->setCurrentGaussian(-1);
-      ui.TwoDTransferFunction->setCurrentRegion(-1);
+      ui.TwoDTransferFunctionEditor->setCurrentRegion(-1);
     }
   this->updateCurrentData();
 }
@@ -674,7 +651,7 @@ pqColorOpacityEditorWidget::scalarGaussianCurrentChanged(int index)
         ui.GradientLinearOpacityEditor->setCurrentPoint(-1);
         ui.ColorEditor->setCurrentPoint(-1);
         ui.GradientGaussianOpacityEditor->setCurrentGaussian(-1);
-        ui.TwoDTransferFunction->setCurrentRegion(-1);
+        ui.TwoDTransferFunctionEditor->setCurrentRegion(-1);
       }
     this->updateCurrentData();
 }
@@ -690,7 +667,7 @@ pqColorOpacityEditorWidget::gradientGaussianCurrentChanged(int index)
       ui.GradientLinearOpacityEditor->setCurrentPoint(-1);
       ui.ColorEditor->setCurrentPoint(-1);
       ui.ScalarGaussianOpacityEditor->setCurrentGaussian(-1);
-      ui.TwoDTransferFunction->setCurrentRegion(-1);
+      ui.TwoDTransferFunctionEditor->setCurrentRegion(-1);
     }
   this->updateCurrentData();
 }
@@ -1030,13 +1007,65 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
 		stc->everythingInitialized = true;
 	  }
     showGradientFunctions();
+    repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableTwoDTransferFunction"));
+
+     vtkSMPropertyHelper(repr->getProxy(), "InfoDisableTwoDTransferFunction").Get(&disabled,1);
+     if(!disabled)
+       {
+       disableTwoDTransferFunction();
+       }
   }
   else {
     hideGradientFunctions();
-    repr->getProxy()->InvokeCommand("DisableUseAdjustMapperGradientRangeFactor");
   }
 
 }
+//-----------------------------------------------------------------------------
+
+void pqColorOpacityEditorWidget::disableTwoDTransferFunction()
+  {
+  pqDataRepresentation* repr =
+        pqActiveObjects::instance().activeRepresentation();
+
+    if (!repr->getProxy()->GetProperty("InfoDisableTwoDTransferFunction"))
+        return;
+
+    repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableTwoDTransferFunction"));
+
+    int disabled;
+    vtkSMPropertyHelper(repr->getProxy(), "InfoDisableTwoDTransferFunction").Get(&disabled,1);
+
+    vtkSMProperty* property = repr->getProxy()->GetProperty("DisableTwoDTransferFunction");
+    vtkSMPropertyHelper prpty(property);
+    disabled = !disabled;
+    prpty.Set(disabled);
+
+    repr->getProxy()->UpdateVTKObjects();
+
+    if(!disabled){
+      vtkDiscretizableColorTransferFunctionCollection* stc =
+          vtkDiscretizableColorTransferFunctionCollection::SafeDownCast(
+              this->proxy()->GetClientSideObject());
+      if(!stc->everythingInitialized){
+      //rescale gradient ranges
+      repr->getProxy()->InvokeCommand("UpdateGradientRange");
+      vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(repr->getProxy());
+      repr->getProxy()->InvokeCommand("EnableUseAdjustMapperGradientRangeFactor");
+      stc->everythingInitialized = true;
+      }
+      showTwoDTransferFunction();
+      repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
+
+       vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
+       if(!disabled)
+         {
+         disableGradientOpacity();
+         }
+    }
+    else {
+      hideTwoDTransferFunction();
+    }
+  }
 //-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::switchScalarOpacity()
@@ -1448,8 +1477,7 @@ void
 pqColorOpacityEditorWidget::showGradientFunctions()
 {
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-
-  ui.TwoDTransferFunction->show();
+  //ui.TwoDTransferFunctionEditor->hide();
   ui.gaussorgrad->show();
 
   pqDataRepresentation* repr =
@@ -1498,10 +1526,48 @@ void
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.GradientGaussianOpacityEditor->hide();
   ui.GradientLinearOpacityEditor->hide();
-  ui.TwoDTransferFunction->hide();
   ui.gaussorgrad->hide();
   ui.HistogramDialog->hide();
+  ui.DisableOpacityGradient->setChecked(false);
 }
+
+//-----------------------------------------------------------------------------
+
+void
+pqColorOpacityEditorWidget::hideTwoDTransferFunction()
+{
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+  ui.TwoDTransferFunctionEditor->hide();
+  ui.DisableTwoDTransferFunction->setChecked(false);
+}
+
+
+
+
+void
+  pqColorOpacityEditorWidget::showTwoDTransferFunction()
+{
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+
+
+  pqDataRepresentation* repr =
+      pqActiveObjects::instance().activeRepresentation();
+    if (!repr)
+    {
+      qDebug("No active representation.");
+      return;
+    }
+
+    if (!repr->getProxy()->GetProperty("TwoDTransferFunction"))
+    {
+    return;
+    }
+  ui.TwoDTransferFunctionEditor->show();
+
+
+}
+
+
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
   //make sure all the buttons are correct
@@ -1564,6 +1630,27 @@ void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
 	  this->Internals->Ui.OpacityEditor->show();
   }
 
+  //decide on twodstuff
+  if (!repr->getProxy()->GetProperty("InfoTwoDTransferFunction"))
+   {
+   hideTwoDTransferFunction();
+   }
+  else
+    {
+    repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoTwoDTransferFunction"));
+    int disabled;
+    vtkSMPropertyHelper(repr->getProxy(), "InfoTwoDTransferFunction").Get(&disabled,1);
+    if(disabled)
+      {
+      hideTwoDTransferFunction();
+      this->Internals->Ui.DisableTwoDTransferFunction->setChecked(false);
+      }
+    else
+      {
+      showTwoDTransferFunction();
+      this->Internals->Ui.DisableTwoDTransferFunction->setChecked(true);
+      }
+    }
 
 
   Superclass::showEvent(event);

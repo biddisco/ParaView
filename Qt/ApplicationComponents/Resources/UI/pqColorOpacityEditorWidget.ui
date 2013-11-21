@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>401</width>
-    <height>611</height>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <number>0</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0,0,0,0,0">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -118,16 +118,6 @@
           <size>
            <width>16777215</width>
            <height>70</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="Qvis2DTransferFunctionWidget" name="TwoDTransferFunction" native="true">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>150</height>
           </size>
          </property>
         </widget>
@@ -307,6 +297,23 @@
         </widget>
        </item>
        <item>
+        <widget class="QToolButton" name="DisableTwoDTransferFunction">
+         <property name="text">
+          <string>...</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../Components/Resources/pqComponents.qrc">
+           <normaloff>:/pqWidgets/Icons/pqSurfaceSelectionCell24.png</normaloff>:/pqWidgets/Icons/pqSurfaceSelectionCell24.png</iconset>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -405,12 +412,6 @@
    <class>QvisGaussianOpacityBar</class>
    <extends>QWidget</extends>
    <header>Qvis/QvisGaussianOpacityBar.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>Qvis2DTransferFunctionWidget</class>
-   <extends>QWidget</extends>
-   <header>Qvis/Qvis2DTransferFunctionWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
