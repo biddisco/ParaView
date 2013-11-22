@@ -39,6 +39,7 @@ class vtkPVCacheKeeper;
 class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
+class vtkPImageAccumulate;
 class vtkImageAccumulate;
 class vtkPExtractHistogram;
 class vtkImageGradientMagnitude;
@@ -75,6 +76,8 @@ public:
 
   vtkGetMacro(GradientRangeOutOfDate,bool);
   vtkGetMacro(HistogramOutOfDate,bool);
+  vtkGetMacro(TwoDHistogramOutOfDate,bool);
+
 
   vtkGetVector2Macro(GradientRange, double);
 
@@ -102,6 +105,12 @@ public:
 	//UpdateHistogram();
 	return AccumulateFilter;
 	}
+
+  vtkSmartPointer<vtkPImageAccumulate> getTwoDHistogram()
+    {
+    //UpdateHistogram();
+    return this->TwoDAccumulateFilter;
+    }
 
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
@@ -161,6 +170,7 @@ public:
 
   void UpdateGradientRange();
   void UpdateHistogram();
+  void UpdateTwoDHistogram();
 
   bool GetDisableGradientOpacity();
   bool GetDisableTwoDTransferFunction();
@@ -192,6 +202,8 @@ public:
 //BTX
   void updateGradRange();
   void updateGradientHistogram();
+  void createTwoDHistogram();
+
 
 protected:
   vtkImageVolumeRepresentation();
@@ -204,6 +216,8 @@ protected:
   // Used to determine if the gradient range has not been determined or belongs to a different data set.
   bool GradientRangeOutOfDate;
 
+  bool TwoDHistogramOutOfDate;
+
   // Description:
   // Fill input port information.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
@@ -211,6 +225,8 @@ protected:
   // Description:
   virtual int RequestData(vtkInformation*, vtkInformationVector**,
 	  vtkInformationVector*);
+
+  void SaveScalarData();
 
   int numbinsX;
   int histogramsize;
@@ -253,6 +269,8 @@ protected:
 //BTX
   vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
   vtkSmartPointer<vtkPExtractHistogram> AccumulateFilter;
+  vtkSmartPointer<vtkPImageAccumulate> TwoDAccumulateFilter;
+  vtkSmartPointer<vtkImageData> GradientAndScalarData;
 //ETX
 
   int ColorAttributeType;
@@ -267,6 +285,7 @@ protected:
   bool SupportHistogramWidget;
   bool GradientRangeFirstTimeStartup;
   bool GradientHistogramFirstTimeStartup;
+  bool TwoDHistogramFirstTimeStartup;
   int  ExecuteOnClient;
 
 private:

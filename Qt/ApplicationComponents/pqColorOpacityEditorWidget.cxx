@@ -743,6 +743,11 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   //dialog.
 
   ui.GradientGaussianOpacityEditor->generateBackgroundHistogram(logscale);
+
+
+  repr->getProxy()->InvokeCommand("UpdateTwoDHistogram");
+
+
   this->update();
 }
 

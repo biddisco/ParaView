@@ -1590,6 +1590,8 @@
                       panel_visibility="never" />
             <Property name="UpdateHistogram"
                       panel_visibility="never" />
+            <Property name="UpdateTwoDHistogram"
+                      panel_visibility="never" />
             <Property name="EnableUseAdjustMapperGradientRangeFactor"
                       panel_visibility="never" />
             <Property name="DisableUseAdjustMapperGradientRangeFactor"
@@ -2055,6 +2057,9 @@
                   </Property>
          <Property command = "UpdateHistogram"
                   name = "UpdateHistogram" >
+                  </Property>
+          <Property command = "UpdateTwoDHistogram"
+                  name = "UpdateTwoDHistogram" >
                   </Property>
          <Property command = "EnableUseAdjustMapperGradientRangeFactor"
         name = "EnableUseAdjustMapperGradientRangeFactor" >

@@ -34,13 +34,15 @@
 #include "vtkVolumeProperty.h"
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
-#include "vtkImageAccumulate.h"
+#include "vtkPImageAccumulate.h"
 #include "vtkPExtractHistogram.h"
 #include "vtkGaussianPiecewiseFunction.h"
 #include "vtkTable.h"
 #include "vtkVariantArray.h"
 #include "vtkMultiProcessController.h"
 
+
+#include <vtksys/ios/sstream>
 
 #include <map>
 #include <string>
@@ -229,6 +231,7 @@ vtkImageVolumeRepresentation::RequestData(vtkInformation* request,
     }
   this->HistogramOutOfDate = true;
   this->GradientRangeOutOfDate = true;
+  this->TwoDHistogramOutOfDate = true;
   return this->Superclass::RequestData(request, inputVector, outputVector);
 }
 
@@ -530,8 +533,12 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
     AccumulateFilter->SetInputConnection(this->GradientFilter->GetOutputPort());
     AccumulateFilter->SetCustomBinRanges(GradientRange[0],GradientRange[1]);
     AccumulateFilter->SetBinCount(HistogramBins);
+
+    vtksys_ios::ostringstream newname;
+      newname << this->ColorArrayName << "GradientMagnitude";
+
     this->AccumulateFilter->SetInputArrayToProcess(0, 0, 0,
-           vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
+           vtkDataObject::FIELD_ASSOCIATION_POINTS, newname.str().c_str());
   /*  AccumulateFilter->SetComponentExtent(0, HistogramBins - 1, 0, 0, 0, 0);
     AccumulateFilter->SetComponentOrigin(GradientRange[0], 0, 0);
     AccumulateFilter->SetComponentSpacing(
@@ -549,6 +556,22 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
 
   }
 }
+
+//---------------------------------------------------------------------------
+
+void vtkImageVolumeRepresentation::createTwoDHistogram()
+  {
+
+  vtkSmartPointer<vtkImageData> imageData =
+                  vtkSmartPointer<vtkImageData>::New();
+  imageData->CopyStructure(vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput()));
+  imageData->GetPointData()->ShallowCopy(GradientFilter->GetOutput()->GetPointData());
+  imageData->GetPointData()->SetActiveScalars(this->ColorArrayName);
+  this->TwoDAccumulateFilter->SetInputData(imageData);
+  this->TwoDAccumulateFilter->Update();
+  }
+
+
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::updateGradRange()
 {
@@ -579,8 +602,16 @@ void vtkImageVolumeRepresentation::updateGradRange()
       this->GradientRange[0] = gradient_range_local[0];
       this->GradientRange[1] = gradient_range_local[1];
     }
+
+
   }
 }
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::SaveScalarData()
+  {
+  GradientAndScalarData->GetPointData()->AddArray(this->CacheKeeper->GetOutput()->GetFieldData()->GetArray(ColorArrayName));
+  }
+
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateGradientRange()
 {
@@ -623,12 +654,43 @@ void vtkImageVolumeRepresentation::UpdateHistogram()
     {
       UpdateGradientRange();
       HistogramOutOfDate = true;
+      TwoDHistogramOutOfDate = true;
     }
   if (HistogramOutOfDate)//
     {
     updateGradientHistogram();
     }
   HistogramOutOfDate = false;
+}
+
+
+//----------------------------------------------------------------------------
+void vtkImageVolumeRepresentation::UpdateTwoDHistogram()
+{
+  if (this->TwoDHistogramFirstTimeStartup)
+    {
+    this->TwoDHistogramFirstTimeStartup = false;
+      return;
+    }
+  if (!TwoDHistogramOutOfDate)//
+    {
+    return;
+    }
+  if (this->ExecuteOnClient && !TwoDAccumulateFilter)
+    {
+    this->TwoDAccumulateFilter = vtkSmartPointer<vtkPImageAccumulate>::New();
+    }
+  if (GradientRangeOutOfDate)//
+    {
+      UpdateGradientRange();
+      TwoDHistogramOutOfDate = true;
+      HistogramOutOfDate = true;
+    }
+  if (TwoDHistogramOutOfDate)//
+    {
+    createTwoDHistogram();
+    }
+  TwoDHistogramOutOfDate = false;
 }
 //----------------------------------------------------------------------------
 bool vtkImageVolumeRepresentation::GetIsScalarGaussianFunction(){

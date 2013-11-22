@@ -2,6 +2,7 @@ vtk_module(vtkPVClientServerCoreDefault
   DEPENDS
     vtkPVClientServerCoreRendering
     vtkPVVTKExtensionsDefault
+    vtkFiltersParallel
   PRIVATE_DEPENDS
     vtksys
   TEST_LABELS

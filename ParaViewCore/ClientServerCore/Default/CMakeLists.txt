@@ -37,6 +37,7 @@ set (Module_SRCS
   vtkPVFileInformation.cxx
   vtkPVFileInformationHelper.cxx
   vtkPVImageAccumulateInformation.cxx
+  vtkPVTwoDHistogramInformation.cxx
   vtkPVSingleOutputExtractSelection.cxx
   vtkXMLPVAnimationWriter.cxx 
 )
