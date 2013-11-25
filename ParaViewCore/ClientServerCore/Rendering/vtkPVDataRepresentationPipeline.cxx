@@ -116,6 +116,7 @@ int vtkPVDataRepresentationPipeline::ProcessRequest(vtkInformation* request,
       }
     }
 
+  if (request->Has(REQUEST_INFORMATION())) { request->Set(REQUEST_REGENERATE_INFORMATION(),1); }
   return this->Superclass::ProcessRequest(request, inInfo, outInfo);
 }
 
