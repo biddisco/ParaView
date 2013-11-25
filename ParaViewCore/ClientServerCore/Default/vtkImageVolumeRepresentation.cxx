@@ -566,7 +566,11 @@ void vtkImageVolumeRepresentation::createTwoDHistogram()
                   vtkSmartPointer<vtkImageData>::New();
   imageData->CopyStructure(vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput()));
   imageData->GetPointData()->ShallowCopy(GradientFilter->GetOutput()->GetPointData());
-  imageData->GetPointData()->SetActiveScalars(this->ColorArrayName);
+
+  vtksys_ios::ostringstream newname;
+    newname << this->ColorArrayName << "GradientMagnitude";
+
+  imageData->GetPointData()->SetActiveScalars(newname.str().c_str());
   this->TwoDAccumulateFilter->SetInputData(imageData);
   this->TwoDAccumulateFilter->Update();
   }

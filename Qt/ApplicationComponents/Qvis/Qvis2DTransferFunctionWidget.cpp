@@ -12,9 +12,9 @@
 #include "vtkEventQtSlotConnect.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkScalarsToColors.h"
+#include "vtkMath.h"
 
 #include <iostream>
-#include <cmath>
 #include <cstdlib>
 
 //---------------------------------------------------------------------------
@@ -168,10 +168,7 @@ void Qvis2DTransferFunctionWidget::setRegionValue(int index, double value, vtkTw
 	else if (v == vtkTwoDTransferFunction::REGION_MAX)
 		this->transferFunction->SetRegionValue(index, value, v);
 	else if (v == vtkTwoDTransferFunction::REGION_MODE)
-    this->transferFunction->SetRegionMode(index, TransferFnMode(value+0.01));
-
-
-
+    this->transferFunction->SetRegionMode(index, TransferFnMode(vtkMath::Round(value)));
 }
 
 void Qvis2DTransferFunctionWidget::setRegionMode(int index, TransferFnMode mo){
