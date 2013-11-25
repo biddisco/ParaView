@@ -441,22 +441,24 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
 	  number_of_components, component);
   vtkSMPropertyHelper(lutProxy, "ScalarOpacityFunction").Set(sof->getProxy());
 
+  QString alterableArrayName = arrayname;
+ // gradLinearArrayName.append(")
   // An opacity function is created as a "slave" to this lookup table
   pqScalarOpacityFunction* gof = this->createOpacityFunction(server,
-	  "Gradient_Stuff", 1, 0);
+      alterableArrayName.append("GradientLinear"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "GradientLinearOpacityFunction").Set(gof->getProxy());
 
   pqGaussianOpacityFunction* gaof = this->createGaussianOpacityFunction(server,
-	  "Gaussian_Stuff", 1, 0);
+      alterableArrayName.append("GradientGaussian"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "GradientGaussianOpacityFunction").Set(
 	  gaof->getProxy());
   pqGaussianOpacityFunction* sgaof = this->createGaussianOpacityFunction(server,
-	  "Scalar_Gaussian_Stuff", 1, 0);
+      alterableArrayName.append("ScalarGaussian"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "ScalarGaussianOpacityFunction").Set(
 	  sgaof->getProxy());
 
   pqTwoDTransferFunction* tdtf = this->createTwoDTransferFunction(server,
-	  "TwoD_Stuff", 1, 0);
+      alterableArrayName.append("TwoDTransferFunction"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "TwoDTransferFunction").Set(tdtf->getProxy());
   lutProxy->UpdateVTKObjects();
 
