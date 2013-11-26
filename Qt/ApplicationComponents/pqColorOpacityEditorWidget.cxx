@@ -56,6 +56,7 @@
 #include "vtkVector.h"
 #include "vtkPVSession.h"
 #include "vtkPVImageAccumulateInformation.h"
+#include "vtkPVTwoDHistogramInformation.h"
 #include "pqHistogramDialog.h"
 #include "vtkTwoDTransferFunction.h"
 //#include "QvisGaussianOpacityBar.h"
@@ -748,6 +749,13 @@ pqColorOpacityEditorWidget::showHistogramWidget()
   repr->getProxy()->InvokeCommand("UpdateTwoDHistogram");
 
 
+  vtkSmartPointer<vtkPVTwoDHistogramInformation> infotwod = vtkSmartPointer<
+        vtkPVTwoDHistogramInformation>::New();
+    repr->getProxy()->GatherInformation(infotwod.GetPointer(), vtkPVSession::RENDER_SERVER);
+
+   ui.TwoDTransferFunctionEditor->generateHistogramBackground(infotwod->getDimensionAtIndex(0), infotwod->getDimensionAtIndex(1), infotwod->GetHistogramValues());
+
+
   this->update();
 }
 
@@ -1382,7 +1390,7 @@ pqColorOpacityEditorWidget::resetRangeToCustom()
   double range[2];
   stc->GetRange(range);
   double grange[2];
-  stc->GetGradientLinearOpacityFunction()->GetRange(grange);
+  stc->GetGradientGaussianOpacityFunction()->GetRange(grange);
 
   pqRescaleRange dialog(this);
   dialog.setRange(range[0], range[1]);
@@ -1392,6 +1400,17 @@ pqColorOpacityEditorWidget::resetRangeToCustom()
       this->resetRangeToCustom(dialog.getMinimum(), dialog.getMaximum(),
           dialog.getMinimumGradient(), dialog.getMaximumGradient());
     }
+
+  pqDataRepresentation* repr =
+       pqActiveObjects::instance().activeRepresentation();
+   if (!repr)
+     {
+       qDebug("No active representation.");
+       return;
+     }
+   if (repr->getProxy()->GetProperty("UseCustomGradientRange"))
+       repr->getProxy()->InvokeCommand("UseCustomGradientRange");
+
 
 }
 
@@ -1582,7 +1601,7 @@ void pqColorOpacityEditorWidget::showEvent ( QShowEvent * event ) {
   pqDataRepresentation* repr =
     pqActiveObjects::instance().activeRepresentation();
 
-  repr->getProxy()->InvokeCommand("UpdateGradientRange");
+
 
   if (!repr){
     Superclass::showEvent(event);

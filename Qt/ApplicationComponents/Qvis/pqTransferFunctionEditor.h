@@ -50,6 +50,8 @@ public:
   void initialize(vtkTwoDTransferFunction* function, vtkScalarsToColors* stc);
 
   void setCurrentRegion(int index);
+
+  void generateHistogramBackground(int width, int height, int* array);
 protected slots :
 
   void onTFModeChanged(int index);

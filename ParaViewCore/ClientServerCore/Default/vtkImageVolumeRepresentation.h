@@ -77,6 +77,7 @@ public:
   vtkGetMacro(GradientRangeOutOfDate,bool);
   vtkGetMacro(HistogramOutOfDate,bool);
   vtkGetMacro(TwoDHistogramOutOfDate,bool);
+  vtkGetMacro(customGradientRangeUsed,bool);
 
 
   vtkGetVector2Macro(GradientRange, double);
@@ -172,6 +173,8 @@ public:
   void UpdateHistogram();
   void UpdateTwoDHistogram();
 
+  void UseCustomGradientRange();
+
   bool GetDisableGradientOpacity();
   bool GetDisableTwoDTransferFunction();
 
@@ -227,6 +230,8 @@ protected:
 	  vtkInformationVector*);
 
   void SaveScalarData();
+
+  void updateGradients();
 
   int numbinsX;
   int histogramsize;
@@ -286,6 +291,8 @@ protected:
   bool GradientRangeFirstTimeStartup;
   bool GradientHistogramFirstTimeStartup;
   bool TwoDHistogramFirstTimeStartup;
+  bool customGradientRangeUsed;
+  bool customScalarRangeUsed;
   int  ExecuteOnClient;
 
 private:

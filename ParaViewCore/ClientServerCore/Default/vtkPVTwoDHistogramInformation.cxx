@@ -91,14 +91,17 @@ void vtkPVTwoDHistogramInformation::CopyFromObject(vtkObject* obj)
     vtkSmartPointer<vtkPImageAccumulate> histogram = volumerep->getTwoDHistogram();
     histogram->GetOutput()->GetDimensions(this->dimensions);
 
-    std::cout << "dims 0 " << this->dimensions[0] << std::endl;
-    std::cout << "dims 1 " << this->dimensions[1] << std::endl;
-    std::cout << "dims 2 " << this->dimensions[2] << std::endl;
+    this->SizeOfHistogram = this->dimensions[0];
+    this->SizeOfHistogram *= this->dimensions[1]>0 ? this->dimensions[1] : 1;
+    this->SizeOfHistogram *= this->dimensions[2]>0 ? this->dimensions[2] : 1;
 
     this->values.resize(this->SizeOfHistogram);
-    for (vtkIdType bin = 0; bin < this->SizeOfHistogram; ++bin)
+    for (vtkIdType binx = 0; binx < this->dimensions[0]; ++binx)
       {
-      this->values[bin] =  *static_cast<int*>(histogram->GetOutput()->GetScalarPointer(bin,0,0));
+      for (vtkIdType biny = 0; biny < this->dimensions[1]; ++biny)
+        {
+        this->values[binx*dimensions[1]+biny] =  *static_cast<int*>(histogram->GetOutput()->GetScalarPointer(binx,biny,0));
+        }
       }
 
     this->arrayName = "bin_values";
@@ -139,6 +142,7 @@ void vtkPVTwoDHistogramInformation::CopyFromStream(const vtkClientServerStream* 
     this->SizeOfHistogram *= this->dimensions[1]>0 ? this->dimensions[1] : 1;
     this->SizeOfHistogram *= this->dimensions[2]>0 ? this->dimensions[2] : 1;
     this->values.resize(this->SizeOfHistogram);
+    std::cout << "values size " << values.size() << std::endl;
 
     for (int i = 0; i<this->SizeOfHistogram; i++){
       if (!stream->GetArgument(0, 4+i, &(values[i])))
@@ -161,7 +165,6 @@ void vtkPVTwoDHistogramInformation::CopyToStream(vtkClientServerStream* stream)
 
   if (this->CollectTwoDHistogram)
     {
-    *stream << this->arrayName.c_str();
     *stream << this->dimensions[0];
     *stream << this->dimensions[1];
     *stream << this->dimensions[2];

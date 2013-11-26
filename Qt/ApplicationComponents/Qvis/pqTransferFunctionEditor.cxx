@@ -226,3 +226,9 @@ void pqTransferFunctionEditor::onActiveRegionChanged(int region)
   reprProxy->UpdateVTKObjects();
   this->updateAllViews();
 }
+
+void pqTransferFunctionEditor::generateHistogramBackground(int width, int height, int* array)
+  {
+  this->Internals->TransferFunction->generateHistogramBackground(width, height, array);
+  }
+

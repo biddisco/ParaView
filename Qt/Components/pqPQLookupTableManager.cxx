@@ -447,16 +447,17 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   pqScalarOpacityFunction* gof = this->createOpacityFunction(server,
       alterableArrayName.append("GradientLinear"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "GradientLinearOpacityFunction").Set(gof->getProxy());
-
+  alterableArrayName = arrayname;
   pqGaussianOpacityFunction* gaof = this->createGaussianOpacityFunction(server,
       alterableArrayName.append("GradientGaussian"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "GradientGaussianOpacityFunction").Set(
 	  gaof->getProxy());
+  alterableArrayName = arrayname;
   pqGaussianOpacityFunction* sgaof = this->createGaussianOpacityFunction(server,
       alterableArrayName.append("ScalarGaussian"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "ScalarGaussianOpacityFunction").Set(
 	  sgaof->getProxy());
-
+  alterableArrayName = arrayname;
   pqTwoDTransferFunction* tdtf = this->createTwoDTransferFunction(server,
       alterableArrayName.append("TwoDTransferFunction"), 1, 0);
   vtkSMPropertyHelper(lutProxy, "TwoDTransferFunction").Set(tdtf->getProxy());
@@ -485,8 +486,7 @@ pqGaussianOpacityFunction* pqPQLookupTableManager::getGaussianOpacityFunction(
   {
   pqInternal::Key key(server->GetConnectionID(), arrayname,
 	  number_of_components);
-
-  if (this->Internal->OpacityFuncs.contains(key))
+  if (this->Internal->GaussianOpacityFuncs.contains(key))
 	{
 	return this->Internal->GaussianOpacityFuncs[key].data();
 	}
@@ -503,7 +503,6 @@ pqTwoDTransferFunction* pqPQLookupTableManager::getTwoDTransferFunction(
   {
   pqInternal::Key key(server->GetConnectionID(), arrayname,
 	  number_of_components);
-
   if (this->Internal->TwoDTransferFuncs.contains(key))
 	{
 	return this->Internal->TwoDTransferFuncs[key];
@@ -590,7 +589,6 @@ pqGaussianOpacityFunction* pqPQLookupTableManager::createGaussianOpacityFunction
   vtkSMProxy* GaussianopacityFunction = pxm->NewProxy(
 	  "gaussian_piecewise_functions", "GaussianPiecewiseFunction");
   //opacityFunction->UpdateVTKObjects();
-
   QString name = this->Internal->getRegistrationName(
 	  QString(GaussianopacityFunction->GetXMLName()), arrayname,
 	  number_of_components, component);
@@ -621,7 +619,6 @@ pqTwoDTransferFunction* pqPQLookupTableManager::createTwoDTransferFunction(
   vtkSMProxy* TwoDTransferfunc = pxm->NewProxy(
 	  "two_dimenisonal_piecewise_functions", "TwoDTransferFunction");
   //opacityFunction->UpdateVTKObjects();
-
   QString name = this->Internal->getRegistrationName(
 	  QString(TwoDTransferfunc->GetXMLName()), arrayname, number_of_components,
 	  component);

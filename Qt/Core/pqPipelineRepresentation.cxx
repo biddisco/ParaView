@@ -85,6 +85,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqSMAdaptor.h"
 #include "pqUndoStack.h"
 
+#include <string.h>
+
 //-----------------------------------------------------------------------------
 class pqPipelineRepresentation::pqInternal
 {
@@ -634,6 +636,7 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
   vtkSMProxy* TDTf = 0;
   if (lut_mgr)
     {
+    std::string alterableArrayName(arrayname);
     int number_of_components = this->getNumberOfComponents(
       arrayname, fieldtype);
     pqScalarsToColors* pqlut = lut_mgr->getLookupTable(
@@ -643,22 +646,22 @@ void pqPipelineRepresentation::colorByArray(const char* arrayname, int fieldtype
       this->getServer(), arrayname, number_of_components, 0);
     opf = (pqOPF)? pqOPF->getProxy() : 0;
     number_of_components = this->getNumberOfComponents(
-    		"Gradient_Stuff", fieldtype);
+        (alterableArrayName + "GradientLinear").c_str(), fieldtype);
     pqGradientOpacityFunction* pqGPF = lut_mgr->getGradientOpacityFunction(
-         this->getServer(), "Gradient_Stuff", 1, 0);
+         this->getServer(), (alterableArrayName + "GradientLinear").c_str(), 1, 0);
        gpf = (pqGPF)? pqGPF->getProxy() : 0;
 
    pqGaussianOpacityFunction* pqGradientGaussPF = lut_mgr->getGaussianOpacityFunction(
-			this->getServer(), "Gaussian_Stuff", 1, 0);
+			this->getServer(), (alterableArrayName + "GradientGaussian").c_str(), 1, 0);
 		  gradientGausspf = (pqGradientGaussPF)? pqGradientGaussPF->getProxy() : 0;
 
     pqGaussianOpacityFunction* pqScalarGaussPF = lut_mgr->getGaussianOpacityFunction(
-                           this->getServer(), "Scalar_Gaussian_Stuff", 1, 0);
+                           this->getServer(), (alterableArrayName + "ScalarGaussian").c_str(), 1, 0);
                      scalarGausspf = (pqScalarGaussPF)? pqScalarGaussPF->getProxy() : 0;
 
 
 	  pqTwoDTransferFunction* pqTwoDTransFunc = lut_mgr->getTwoDTransferFunction(
-				this->getServer(), "TwoD_Stuff", 1, 0);
+				this->getServer(), (alterableArrayName + "TwoDTransferFunction").c_str(), 1, 0);
 	  TDTf = (pqTwoDTransFunc)? pqTwoDTransFunc->getProxy() : 0;
     }
   else

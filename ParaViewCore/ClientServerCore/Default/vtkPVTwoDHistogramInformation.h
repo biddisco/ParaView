@@ -57,6 +57,8 @@ public:
   vtkSetMacro(CollectTwoDHistogram, int);
   vtkGetMacro(CollectTwoDHistogram, int);
 
+  int getDimensionAtIndex(int index) {return dimensions[index];}
+
 
 
   void Initialize();

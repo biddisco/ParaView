@@ -39,6 +39,7 @@ Qvis2DTransferFunctionWidget::Qvis2DTransferFunctionWidget(QWidget *parentObject
     this->colortransferfunction = 0;
     lasty = 0;
     lastx = 0;
+    this->histogramBackground = NULL;
 
     // set a default:
    // this->addRegion(0.25f, 0.25f, 0.5f, 0.5f, this->defaultTFMode, 1.0);
@@ -481,19 +482,53 @@ void Qvis2DTransferFunctionWidget::createScalarColorBackground()
   QImage image(QSize(this->contentsRect().width(),this->contentsRect().height()), QImage::Format_RGB32);
   image.fill(Qt::white);
 
-  for (int i = 0; i< this->contentsRect().width(); i++)
+  if (this->histogramBackground)
     {
-    for (int j = 0; j< this->contentsRect().height(); j++)
+  QImage scaledhisto = QImage(this->histogramBackground->scaled(this->contentsRect().width(),this->contentsRect().height(),
+      Qt::IgnoreAspectRatio,Qt::FastTransformation));
+
+    for (int i = 0; i< this->contentsRect().width(); i++)
       {
-      int r = (int)c[i*3]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
-          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-      int g = (int)c[i*3+1]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
-          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-      int b = (int)c[i*3+2]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
-          255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-      image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
+      for (int j = 0; j< this->contentsRect().height(); j++)
+        {
+        int r = (int)c[i*3]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+            255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+        r = int (double(255-qRed(scaledhisto.pixel(i,j)))/255.0*double(r));/* +
+            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(r);*/
+        /*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j])*double(qRed(scaledhisto.pixel(i,j)));/* +
+            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(r);*/
+
+        int g = (int)c[i*3+1]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+            255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+        g = int (double(255-qGreen(scaledhisto.pixel(i,j)))/255.0*double(g));/* +
+            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(g);*/
+
+        int b = (int)c[i*3+2]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+            255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+        b = int (double(255-qBlue(scaledhisto.pixel(i,j)))/255.0*double(b));/* +
+            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(b);*/
+
+        image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
+        }
       }
-  }
+    }
+  else
+    {
+    for (int i = 0; i< this->contentsRect().width(); i++)
+         {
+         for (int j = 0; j< this->contentsRect().height(); j++)
+           {
+            int r = (int)c[i*3]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+                        255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+            int g = (int)c[i*3+1]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+                255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+            int b = (int)c[i*3+2]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
+                255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
+            image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
+            }
+         }
+    }
+
 
   QPixmap* background = new QPixmap(
       QPixmap::fromImage(
@@ -826,3 +861,31 @@ void Qvis2DTransferFunctionWidget::setAllRegions(int n, float *regiondata)
   this->update();
 }
 //-----------------------------------------------------------------------------
+void Qvis2DTransferFunctionWidget::generateHistogramBackground(int width, int height, int* array)
+{
+  //find max
+  int size = width * height;
+  int max = 0;
+  for (int i = 0; i< size; i++)
+    {
+    max = array[i]>max ? array[i] : max;
+    }
+  float maxf = float(max);
+
+  if (histogramBackground)
+    delete histogramBackground;
+  histogramBackground = new QImage(width, height, QImage::Format_RGB32);
+  histogramBackground->fill(qRgb(255,255,255));
+  for (int i = 0; i< width; i++)
+    {
+    for (int j = 0; j<height; j++)
+      {
+      int v = int(255.0f*float(array[i*height+j])/maxf);
+      histogramBackground->setPixel(i,j,qRgb(v,v,v));
+      }
+    }
+
+ // QPixmap* bg = new QPixmap(QPixmap::fromImage(*(this->histogramBackground)));
+
+ // this->SetBackgroundPixmap(bg);
+}

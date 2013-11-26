@@ -47,6 +47,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
     void 		      initialize(vtkTwoDTransferFunction* function, vtkScalarsToColors* stc);
 
     void          createRGBAData(unsigned char *data);
+    void          generateHistogramBackground(int width, int height, int* array);
 
 
     protected slots:
@@ -60,6 +61,8 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
     void          drawControlPoints(QPainter &painter);
     void          drawColourBars(QPainter &painter);
     void          drawRegions(QPainter &painter);
+
+    QImage        *histogramBackground;
 
 
 

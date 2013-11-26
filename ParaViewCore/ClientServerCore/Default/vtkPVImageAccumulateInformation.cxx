@@ -75,6 +75,7 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
   this->CollectGradientHistogram = !volumerep->GetHistogramOutOfDate();
   this->CollectGradientRange = !volumerep->GetGradientRangeOutOfDate();
+  this->CollectGradientRange = this->CollectGradientRange | volumerep->GetcustomGradientRangeUsed();
 
   if (!volumerep)
     {
