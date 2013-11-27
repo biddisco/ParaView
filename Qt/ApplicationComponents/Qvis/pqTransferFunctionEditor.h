@@ -57,9 +57,7 @@ protected slots :
   void onTFModeChanged(int index);
   void onOpacityLevelChanged(int value);
   void onActiveRegionChanged(int region);
-  void onRegionValuesModified();
 
-  void updateAllViews();
 
 protected:
   QList<QVariant> regionControlPoints();

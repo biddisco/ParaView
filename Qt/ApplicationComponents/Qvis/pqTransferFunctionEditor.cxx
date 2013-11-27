@@ -59,17 +59,13 @@ using namespace std;
 class pqTransferFunctionEditor::pqInternals: public Ui::pqTransferFunctionEditor
 {
 public:
-  pqPipelineRepresentation* Representation;
   vtkSmartPointer<vtkEventQtSlotConnect> VTKConnect;
   pqPropertyLinks Links;
-  int BlockSignals;
   int Updating;
 
   pqInternals()
   {
-    Representation = NULL;
     VTKConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    BlockSignals = 0;
     Updating = 0;
   }
 
@@ -93,8 +89,7 @@ pqTransferFunctionEditor::pqTransferFunctionEditor(QWidget *parent, Qt::WindowFl
   // Connect the transfer function widgets
   //
 
-  connect(this->Internals->TransferFunction, SIGNAL(mouseReleased()), this,
-      SLOT(onRegionValuesModified()), Qt::QueuedConnection);
+
 
 
   this->connect(this->Internals->TransferFunctionMode, SIGNAL(currentIndexChanged(int)), this, 
@@ -165,23 +160,7 @@ void pqTransferFunctionEditor::setRegionControlPoints(const QList<QVariant>& val
     }
   this->Internals->TransferFunction->blockSignals(false);
 }
-//-----------------------------------------------------------------------------
-void pqTransferFunctionEditor::onRegionValuesModified()
-{
-  pqPipelineRepresentation* repr = this->Internals->Representation;
-  vtkSMProxy* reprProxy = (repr) ? repr->getProxy() : NULL;
-  if (!reprProxy)
-    return;
-/*
-  this->SetProxyValue(this->Internals->RegionControlPointsProperty,
-      this->regionControlPoints(), false);
-*/
-  if (this->Internals->BlockSignals)
-    return;
 
-  reprProxy->UpdateVTKObjects();
-  this->updateAllViews();
-}
 
 void pqTransferFunctionEditor::setCurrentRegion(int index)
   {
@@ -189,14 +168,7 @@ void pqTransferFunctionEditor::setCurrentRegion(int index)
   }
 
 
-//-----------------------------------------------------------------------------
-void pqTransferFunctionEditor::updateAllViews()
-{
-  if (this->Internals->Representation)
-    {
-    this->Internals->Representation->renderViewEventually();
-    }
-}
+
 //-----------------------------------------------------------------------------
 void pqTransferFunctionEditor::onTFModeChanged(int index)
 {
@@ -212,19 +184,15 @@ void pqTransferFunctionEditor::onOpacityLevelChanged(int value)
 //-----------------------------------------------------------------------------
 void pqTransferFunctionEditor::onActiveRegionChanged(int region)
 {
-  pqPipelineRepresentation* repr = this->Internals->Representation;
-  vtkSMProxy* reprProxy = (repr) ? repr->getProxy() : NULL;
-  if (!reprProxy) return;
-  if (this->Internals->BlockSignals) return;
+
   //
   if (this->Internals->TransferFunction->getActiveRegionMaximum()>-1) {
     float val = this->Internals->TransferFunction->getActiveRegionMaximum();
     int     m = this->Internals->TransferFunction->getActiveRegionMode();
     this->Internals->OpacityLevel->setValue(val*this->Internals->OpacityLevel->maximum());
+    this->Internals->OpacityLevel->update();
     this->Internals->TransferFunctionMode->setCurrentIndex(m);
   }
-  reprProxy->UpdateVTKObjects();
-  this->updateAllViews();
 }
 
 void pqTransferFunctionEditor::generateHistogramBackground(int width, int height, int* array)
