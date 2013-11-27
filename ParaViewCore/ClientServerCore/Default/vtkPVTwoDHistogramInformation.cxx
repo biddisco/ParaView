@@ -140,7 +140,6 @@ void vtkPVTwoDHistogramInformation::CopyFromStream(const vtkClientServerStream* 
     this->SizeOfHistogram *= this->dimensions[1]>0 ? this->dimensions[1] : 1;
     this->SizeOfHistogram *= this->dimensions[2]>0 ? this->dimensions[2] : 1;
     this->values.resize(this->SizeOfHistogram);
-    std::cout << "values size " << values.size() << std::endl;
 
     for (int i = 0; i<this->SizeOfHistogram; i++){
       if (!stream->GetArgument(0, 4+i, &(values[i])))
