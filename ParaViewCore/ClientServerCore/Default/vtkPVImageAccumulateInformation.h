@@ -50,6 +50,7 @@ public:
   // Description:
   // Getters for gathered information about histogram and gradient ranges
   vtkGetVector2Macro(GradientRange, double);
+  vtkGetVector2Macro(CurrentGradientRange, double);
   vtkGetMacro(SizeOfHistogramX, int);
   int *GetHistogramValues();
 
@@ -79,6 +80,7 @@ protected:
   //BTX
   std::vector<int> values;
   double GradientRange[2];
+  double CurrentGradientRange[2];
   //ETX
   vtkSetMacro(RootOnly, int);
 

@@ -687,74 +687,100 @@ pqColorOpacityEditorWidget::TwoDTransferCurrentChanged(int index)
     }
   this->updateCurrentData();
 }
+
+//-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::showTwoDHistogram()
+  {
+
+  pqDataRepresentation* repr =
+          pqActiveObjects::instance().activeRepresentation();
+      if (!repr)
+        {
+          qDebug("No active representation.");
+          return;
+        }
+
+      if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
+            {
+              std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
+                  << std::endl;
+              return;
+            }
+
+  repr->getProxy()->InvokeCommand("UpdateTwoDHistogram");
+
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+         vtkSmartPointer<vtkPVTwoDHistogramInformation> infotwod = vtkSmartPointer<
+               vtkPVTwoDHistogramInformation>::New();
+           repr->getProxy()->GatherInformation(infotwod.GetPointer(), vtkPVSession::RENDER_SERVER);
+
+          ui.TwoDTransferFunctionEditor->generateHistogramBackground(infotwod->getDimensionAtIndex(0),
+              infotwod->getDimensionAtIndex(1), infotwod->GetHistogramValues());
+  }
+
+//-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::showOneDHistogram()
+  {
+  pqDataRepresentation* repr =
+        pqActiveObjects::instance().activeRepresentation();
+    if (!repr)
+      {
+        qDebug("No active representation.");
+        return;
+      }
+
+    if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
+      {
+        std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
+            << std::endl;
+        return;
+      }
+
+    repr->getProxy()->InvokeCommand("UpdateHistogram");
+
+
+    vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
+         vtkPVImageAccumulateInformation>::New();
+     repr->getProxy()->GatherInformation(info.GetPointer(), vtkPVSession::RENDER_SERVER);
+
+     double gradientrange[2];
+     info->GetCurrentGradientRange(gradientrange);
+     //
+     Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+     ui.GradientGaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
+         info->GetSizeOfHistogramX(), info->GetHistogramValues());
+
+     float enabledBarsHeight;
+     bool logscale = false;
+     pqHistogramDialog dialog(this, ui.GradientGaussianOpacityEditor->histogramValues,
+         ui.GradientGaussianOpacityEditor->currentHistogramSize,
+         ui.GradientGaussianOpacityEditor->histogramEnabled, &logscale,
+         &enabledBarsHeight);
+     //dialog.setData();
+     dialog.exec();
+
+     ui.GradientGaussianOpacityEditor->generateBackgroundHistogram(logscale);
+
+
+
+
+  }
+
+
+
+
 //-----------------------------------------------------------------------------
 void
 pqColorOpacityEditorWidget::showHistogramWidget()
 {
-  pqDataRepresentation* repr =
-      pqActiveObjects::instance().activeRepresentation();
-  if (!repr)
+  if (this->Internals->Ui.TwoDTransferFunctionEditor->isHidden())
     {
-      qDebug("No active representation.");
-      return;
+    showOneDHistogram();
     }
-
-  if (!repr->getProxy()->GetProperty("SupportHistogramWidget"))
+  else
     {
-      std::cout << "Did not find SupportHistogramWidget in showhistogramtest"
-          << std::endl;
-      return;
+    showTwoDHistogram();
     }
-
-  //
-  // We must update the gradient and histogram here using the proxy invoke command
-  // to gauantee that all pvservers are updateed together and the MPI AllReduce
-  // in the vtkImageVolumeRepresentation has the correct values
-  //
-  //repr->getProxy()->InvokeCommand("UpdateGradientRange");
-  repr->getProxy()->InvokeCommand("UpdateHistogram");
- // return;
-
-  //
-  // Gather information about the histogram and gradient range from server process, 
-  // this only executes on Rank=0 because we have set RootOnly in the information 
-  // gathering class.
-  //
-  vtkSmartPointer<vtkPVImageAccumulateInformation> info = vtkSmartPointer<
-      vtkPVImageAccumulateInformation>::New();
- // info->SetCollectGradientHistogram(1);
- // info->SetCollectGradientRange(1);
-  repr->getProxy()->GatherInformation(info.GetPointer(), vtkPVSession::RENDER_SERVER);
-
-  double gradientrange[2];
-  info->GetGradientRange(gradientrange);
-  //
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  ui.GradientGaussianOpacityEditor->updateHistogram(gradientrange[0], gradientrange[1],
-      info->GetSizeOfHistogramX(), info->GetHistogramValues());
-
-  float enabledBarsHeight;
-  bool logscale = false;
-  pqHistogramDialog dialog(this, ui.GradientGaussianOpacityEditor->histogramValues,
-      ui.GradientGaussianOpacityEditor->currentHistogramSize,
-      ui.GradientGaussianOpacityEditor->histogramEnabled, &logscale,
-      &enabledBarsHeight);
-  //dialog.setData();
-  dialog.exec();
-  //dialog.
-
-  ui.GradientGaussianOpacityEditor->generateBackgroundHistogram(logscale);
-
-
-  repr->getProxy()->InvokeCommand("UpdateTwoDHistogram");
-
-
-  vtkSmartPointer<vtkPVTwoDHistogramInformation> infotwod = vtkSmartPointer<
-        vtkPVTwoDHistogramInformation>::New();
-    repr->getProxy()->GatherInformation(infotwod.GetPointer(), vtkPVSession::RENDER_SERVER);
-
-   ui.TwoDTransferFunctionEditor->generateHistogramBackground(infotwod->getDimensionAtIndex(0), infotwod->getDimensionAtIndex(1), infotwod->GetHistogramValues());
-
 
   this->update();
 }
@@ -1019,7 +1045,7 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
 		repr->getProxy()->InvokeCommand("EnableUseAdjustMapperGradientRangeFactor");
 		stc->everythingInitialized = true;
 	  }
-    showGradientFunctions();
+
     repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableTwoDTransferFunction"));
 
      vtkSMPropertyHelper(repr->getProxy(), "InfoDisableTwoDTransferFunction").Get(&disabled,1);
@@ -1027,6 +1053,8 @@ pqColorOpacityEditorWidget::disableGradientOpacity()
        {
        disableTwoDTransferFunction();
        }
+
+     showGradientFunctions();
   }
   else {
     hideGradientFunctions();
@@ -1066,7 +1094,7 @@ void pqColorOpacityEditorWidget::disableTwoDTransferFunction()
       repr->getProxy()->InvokeCommand("EnableUseAdjustMapperGradientRangeFactor");
       stc->everythingInitialized = true;
       }
-      showTwoDTransferFunction();
+
       repr->getProxy()->UpdatePropertyInformation(repr->getProxy()->GetProperty("InfoDisableGradientOpacity"));
 
        vtkSMPropertyHelper(repr->getProxy(), "InfoDisableGradientOpacity").Get(&disabled,1);
@@ -1074,6 +1102,7 @@ void pqColorOpacityEditorWidget::disableTwoDTransferFunction()
          {
          disableGradientOpacity();
          }
+       showTwoDTransferFunction();
     }
     else {
       hideTwoDTransferFunction();
@@ -1401,15 +1430,7 @@ pqColorOpacityEditorWidget::resetRangeToCustom()
           dialog.getMinimumGradient(), dialog.getMaximumGradient());
     }
 
-  pqDataRepresentation* repr =
-       pqActiveObjects::instance().activeRepresentation();
-   if (!repr)
-     {
-       qDebug("No active representation.");
-       return;
-     }
-   if (repr->getProxy()->GetProperty("UseCustomGradientRange"))
-       repr->getProxy()->InvokeCommand("UseCustomGradientRange");
+
 
 
 }
@@ -1563,6 +1584,7 @@ pqColorOpacityEditorWidget::hideTwoDTransferFunction()
   Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
   ui.TwoDTransferFunctionEditor->hide();
   ui.DisableTwoDTransferFunction->setChecked(false);
+  ui.HistogramDialog->hide();
 }
 
 
@@ -1587,6 +1609,7 @@ void
     return;
     }
   ui.TwoDTransferFunctionEditor->show();
+  ui.HistogramDialog->show();
 
 
 }

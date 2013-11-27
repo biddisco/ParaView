@@ -207,6 +207,8 @@ protected:
 
    bool scalarOpacityAvailable, scalarGaussianAvailable, gradientLinearAvailable, gradientGaussianAvailable,
 	 twoDTransferFunctionAvailable;
+   void showTwoDHistogram();
+   void showOneDHistogram();
 
 protected slots:
   /// slots called when the current point changes on the two internal

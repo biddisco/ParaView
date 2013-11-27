@@ -40,8 +40,8 @@ class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
 class vtkPImageAccumulate;
-class vtkImageAccumulate;
-class vtkPExtractHistogram;
+//class vtkImageAccumulate;
+//class vtkPExtractHistogram;
 class vtkImageGradientMagnitude;
 class vtkIntArray;
 class vtkDoubleArray;
@@ -77,10 +77,12 @@ public:
   vtkGetMacro(GradientRangeOutOfDate,bool);
   vtkGetMacro(HistogramOutOfDate,bool);
   vtkGetMacro(TwoDHistogramOutOfDate,bool);
-  vtkGetMacro(customGradientRangeUsed,bool);
+
 
 
   vtkGetVector2Macro(GradientRange, double);
+
+  void getGradientFunctionRange(double* range);
 
   bool GetIsScalarGaussianFunction();
   bool GetIsGradientGaussianFunction();
@@ -101,7 +103,7 @@ public:
    }
    */
 
-  vtkSmartPointer<vtkPExtractHistogram> getHistogram()
+  vtkSmartPointer<vtkPImageAccumulate> getHistogram()
 	{
 	//UpdateHistogram();
 	return AccumulateFilter;
@@ -173,7 +175,6 @@ public:
   void UpdateHistogram();
   void UpdateTwoDHistogram();
 
-  void UseCustomGradientRange();
 
   bool GetDisableGradientOpacity();
   bool GetDisableTwoDTransferFunction();
@@ -235,7 +236,7 @@ protected:
 
   int numbinsX;
   int histogramsize;
-  vtkTable* GradientHistogram;
+  vtkImageData* GradientHistogram;
   int* histogram;
 
   //used to set up the imageaccumulateinformation to send the histogram data to the client.
@@ -273,7 +274,7 @@ protected:
   vtkPolyDataMapper* OutlineMapper;
 //BTX
   vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
-  vtkSmartPointer<vtkPExtractHistogram> AccumulateFilter;
+  vtkSmartPointer<vtkPImageAccumulate> AccumulateFilter;
   vtkSmartPointer<vtkPImageAccumulate> TwoDAccumulateFilter;
   vtkSmartPointer<vtkImageData> GradientAndScalarData;
 //ETX
@@ -284,6 +285,7 @@ protected:
   int GradientVectorComponent;
   double DataBounds[6];
   double GradientRange[2];
+  double HistogramGradientRange[2];
   int HistogramBins;
   int UseGradientFunction;
   bool connected;
@@ -291,8 +293,6 @@ protected:
   bool GradientRangeFirstTimeStartup;
   bool GradientHistogramFirstTimeStartup;
   bool TwoDHistogramFirstTimeStartup;
-  bool customGradientRangeUsed;
-  bool customScalarRangeUsed;
   int  ExecuteOnClient;
 
 private:

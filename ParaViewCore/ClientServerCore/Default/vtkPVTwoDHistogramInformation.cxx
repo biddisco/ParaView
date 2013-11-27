@@ -126,7 +126,6 @@ void vtkPVTwoDHistogramInformation::CopyFromStream(const vtkClientServerStream* 
     }
   if (this->CollectTwoDHistogram)
     {
-    char* name = 0;
     for (int i = 0; i< 3; i++)
       {
       if (!stream->GetArgument(0, i+1, &this->dimensions[i]))
@@ -136,7 +135,6 @@ void vtkPVTwoDHistogramInformation::CopyFromStream(const vtkClientServerStream* 
             }
       }
 
-    this->arrayName = name;
 
     this->SizeOfHistogram = this->dimensions[0];
     this->SizeOfHistogram *= this->dimensions[1]>0 ? this->dimensions[1] : 1;
@@ -147,7 +145,7 @@ void vtkPVTwoDHistogramInformation::CopyFromStream(const vtkClientServerStream* 
     for (int i = 0; i<this->SizeOfHistogram; i++){
       if (!stream->GetArgument(0, 4+i, &(values[i])))
         {
-        vtkErrorMacro("Error parsing array name from message.");
+        vtkErrorMacro("Error parsing array values from message.");
         return;
         }
       }

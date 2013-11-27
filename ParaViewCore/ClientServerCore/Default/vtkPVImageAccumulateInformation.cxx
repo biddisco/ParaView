@@ -15,13 +15,12 @@ PURPOSE.  See the above copyright notice for more information.
 #include "vtkPVImageAccumulateInformation.h"
 #include "vtkClientServerStream.h"
 #include "vtkMultiProcessStream.h"
-#include "vtkImageAccumulate.h"
+#include "vtkPImageAccumulate.h"
 #include "vtkImageData.h"
 #include "vtkPointData.h"
 #include "vtkObjectFactory.h" //needed for newmacro
 #include "vtkImageVolumeRepresentation.h"
 #include "vtkPVCompositeRepresentation.h"
-#include "vtkPExtractHistogram.h"
 #include "vtkVariantArray.h"
 #include "vtkTable.h"
 
@@ -75,7 +74,7 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
   this->CollectGradientHistogram = !volumerep->GetHistogramOutOfDate();
   this->CollectGradientRange = !volumerep->GetGradientRangeOutOfDate();
-  this->CollectGradientRange = this->CollectGradientRange | volumerep->GetcustomGradientRangeUsed();
+
 
   if (!volumerep)
     {
@@ -86,14 +85,16 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
 
   if (this->CollectGradientHistogram) {
 
-    vtkSmartPointer<vtkPExtractHistogram> histogram = volumerep->getHistogram();
+    vtkSmartPointer<vtkPImageAccumulate> histogram = volumerep->getHistogram();
 
-    this->SizeOfHistogramX = histogram->GetOutput()->GetNumberOfRows();
+    int dimensions[3];
+     histogram->GetOutput()->GetDimensions(dimensions);
+     this->SizeOfHistogramX = dimensions[0];
 
     this->values.resize(this->SizeOfHistogramX);
     for (vtkIdType bin = 0; bin < this->SizeOfHistogramX; ++bin)
       {
-      this->values[bin] =  histogram->GetOutput()->GetRow(bin)->GetValue(1).ToInt();
+      this->values[bin] =   *static_cast<int*>(histogram->GetOutput()->GetScalarPointer(bin,0,0));
       }
 
     this->arrayName = "bin_values";
@@ -102,6 +103,7 @@ void vtkPVImageAccumulateInformation::CopyFromObject(vtkObject* obj)
   if (this->CollectGradientRange) 
     {
     volumerep->GetGradientRange(this->GradientRange);
+    volumerep->getGradientFunctionRange(this->CurrentGradientRange);
     // @TODO need to do an MPI gather of the ranges from each node containing gradient data
     }
   }
@@ -162,6 +164,11 @@ void vtkPVImageAccumulateInformation::CopyFromStream(const vtkClientServerStream
       return;
       }
     }
+  if (!stream->GetArgument(0, N+2, &(this->CurrentGradientRange[0])) || !stream->GetArgument(0, N+3, &(this->CurrentGradientRange[1])))
+    {
+    vtkErrorMacro("Error getting gradient range from message.");
+    return;
+    }
   }
 //-----------------------------------------------------------------------------
 void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream)
@@ -185,6 +192,8 @@ void vtkPVImageAccumulateInformation::CopyToStream(vtkClientServerStream* stream
     {
     *stream << this->GradientRange[0] << this->GradientRange[1];
     }
+  *stream << this->CurrentGradientRange[0] << this->CurrentGradientRange[1];
+
   *stream << vtkClientServerStream::End;
   }
 //-----------------------------------------------------------------------------

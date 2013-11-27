@@ -35,8 +35,9 @@
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
 #include "vtkPImageAccumulate.h"
-#include "vtkPExtractHistogram.h"
+//#include "vtkPExtractHistogram.h"
 #include "vtkGaussianPiecewiseFunction.h"
+#include "vtkTwoDTransferFunction.h"
 #include "vtkTable.h"
 #include "vtkVariantArray.h"
 #include "vtkMultiProcessController.h"
@@ -95,6 +96,8 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
 
   GradientRangeFirstTimeStartup = true;
   GradientHistogramFirstTimeStartup = true;
+  TwoDHistogramFirstTimeStartup = true;
+  TwoDHistogramOutOfDate = true;
   this->ExecuteOnClient = true;
 }
 
@@ -532,30 +535,24 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
 {
   if (this->ExecuteOnClient) {
     AccumulateFilter->SetInputConnection(this->GradientFilter->GetOutputPort());
-    AccumulateFilter->SetCustomBinRanges(GradientRange[0],GradientRange[1]);
-    AccumulateFilter->SetBinCount(HistogramBins);
+    this->Property->GetGradientGaussianOpacity()->GetRange(this->HistogramGradientRange);
+    this->AccumulateFilter->SetComponentExtent(0, 99, 0, 99,0,0);
+       this->AccumulateFilter->SetComponentOrigin(this->HistogramGradientRange[0], 0, 0);
+       this->AccumulateFilter->SetComponentSpacing((this->HistogramGradientRange[1]-this->HistogramGradientRange[0])/99, 0, 0);
 
     vtksys_ios::ostringstream newname;
       newname << this->ColorArrayName << "GradientMagnitude";
 
     this->AccumulateFilter->SetInputArrayToProcess(0, 0, 0,
            vtkDataObject::FIELD_ASSOCIATION_POINTS, newname.str().c_str());
-  /*  AccumulateFilter->SetComponentExtent(0, HistogramBins - 1, 0, 0, 0, 0);
-    AccumulateFilter->SetComponentOrigin(GradientRange[0], 0, 0);
-    AccumulateFilter->SetComponentSpacing(
-        double(
-            (GradientRange[1] - GradientRange[0]) / (double(HistogramBins - 1))),
-        0.0, 0.0);*/
+
     AccumulateFilter->Update();
 
-   // int dims[3];
-   // AccumulateFilter->GetOutput()->GetDimensions(dims);
+
 
     GradientHistogram = AccumulateFilter->GetOutput();
   }
-  else {
 
-  }
 }
 
 //---------------------------------------------------------------------------
@@ -566,43 +563,43 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
 
 void vtkImageVolumeRepresentation::createTwoDHistogram()
   {
+  if (this->ExecuteOnClient) {
+    vtkSmartPointer<vtkImageData> imageData =
+                    vtkSmartPointer<vtkImageData>::New();
+    imageData->CopyStructure(vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput()));
+    //imageData->GetPointData()->ShallowCopy(GradientFilter->GetOutput()->GetPointData());
+    vtkDataArray *scalars = vtkDataSet::SafeDownCast(this->CacheKeeper->GetOutput())->GetPointData()->GetArray(this->ColorArrayName);
+    //imageData->GetPointData()->AddArray(scalars);
 
-  vtkSmartPointer<vtkImageData> imageData =
-                  vtkSmartPointer<vtkImageData>::New();
-  imageData->CopyStructure(vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput()));
-  //imageData->GetPointData()->ShallowCopy(GradientFilter->GetOutput()->GetPointData());
-  vtkDataArray *scalars = vtkDataSet::SafeDownCast(this->CacheKeeper->GetOutput())->GetPointData()->GetArray(this->ColorArrayName);
-  //imageData->GetPointData()->AddArray(scalars);
+    vtksys_ios::ostringstream newname;
+      newname << this->ColorArrayName << "GradientMagnitude";
 
-  vtksys_ios::ostringstream newname;
-    newname << this->ColorArrayName << "GradientMagnitude";
+    vtkDataArray *mags = vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput())->GetPointData()->GetArray(newname.str().c_str());
+    //
+   // std::cout << this->GradientFilter->GetOutput()->GetScalarType() << std::endl;
+    vtkSmartPointer<vtkDoubleArray> da = vtkSmartPointer<vtkDoubleArray>::New();
+    vtkIdType N = scalars->GetNumberOfTuples();
+    da->SetNumberOfComponents(2);
+    da->SetNumberOfTuples(scalars->GetNumberOfTuples());
+    double *raw = static_cast<double*>(da->GetVoidPointer(0));
+    for  (vtkIdType i=0; i<N; i++) {
+      raw[i*2 + 0] = scalars->GetTuple1(i);
+      raw[i*2 + 1] = mags->GetTuple1(i);
+    }
+    da->SetName(this->ColorArrayName);
+    //
+  double range[4];
+  this->Property->GetTwoDTransferFunction()->GetRange(range);
 
-  vtkDataArray *mags = vtkDataSet::SafeDownCast(this->GradientFilter->GetOutput())->GetPointData()->GetArray(newname.str().c_str());
-  //
- // std::cout << this->GradientFilter->GetOutput()->GetScalarType() << std::endl;
-  vtkSmartPointer<vtkDoubleArray> da = vtkSmartPointer<vtkDoubleArray>::New();
-  vtkIdType N = scalars->GetNumberOfTuples();
-  da->SetNumberOfComponents(2);
-  da->SetNumberOfTuples(scalars->GetNumberOfTuples());
-  double *raw = static_cast<double*>(da->GetVoidPointer(0));
-  for  (vtkIdType i=0; i<N; i++) {
-    raw[i*2 + 0] = scalars->GetTuple1(i);
-    raw[i*2 + 1] = mags->GetTuple1(i);
-  }
-  da->SetName(this->ColorArrayName);
-  //
-double scalarrange[2];
-double gradrange[2];
-this->Property->GetScalarGaussianOpacity()->GetRange(scalarrange);
-this->Property->GetGradientGaussianOpacity()->GetRange(gradrange);
-imageData->GetPointData()->SetScalars(da);
-  this->TwoDAccumulateFilter->SetInputData(imageData);
-  this->TwoDAccumulateFilter->SetInputArrayToProcess(0,0,0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
-  this->TwoDAccumulateFilter->SetInputArrayToProcess(1,0,0, vtkDataObject::FIELD_ASSOCIATION_POINTS, newname.str().c_str());
-  this->TwoDAccumulateFilter->SetComponentExtent(0, 99, 0, 99,0,0);
-  this->TwoDAccumulateFilter->SetComponentOrigin(scalarrange[0], gradrange[0], 0);
-  this->TwoDAccumulateFilter->SetComponentSpacing((scalarrange[1]-scalarrange[0])/98, (gradrange[1]-gradrange[0])/98, 0);
-  this->TwoDAccumulateFilter->Update();
+  imageData->GetPointData()->SetScalars(da);
+    this->TwoDAccumulateFilter->SetInputData(imageData);
+    this->TwoDAccumulateFilter->SetInputArrayToProcess(0,0,0, vtkDataObject::FIELD_ASSOCIATION_POINTS, this->ColorArrayName);
+    this->TwoDAccumulateFilter->SetInputArrayToProcess(1,0,0, vtkDataObject::FIELD_ASSOCIATION_POINTS, newname.str().c_str());
+    this->TwoDAccumulateFilter->SetComponentExtent(0, 99, 0, 99,0,0);
+    this->TwoDAccumulateFilter->SetComponentOrigin(range[0], range[2], 0);
+    this->TwoDAccumulateFilter->SetComponentSpacing((range[1]-range[0])/99, (range[3]-range[2])/99, 0);
+    this->TwoDAccumulateFilter->Update();
+    }
   }
 
 //----------------------------------------------------------------------------
@@ -675,7 +672,7 @@ void vtkImageVolumeRepresentation::UpdateGradientRange()
 
   GradientRangeOutOfDate = false;
   HistogramOutOfDate = true;
-  customGradientRangeUsed = false;
+
 
 }
 //----------------------------------------------------------------------------
@@ -692,20 +689,13 @@ void vtkImageVolumeRepresentation::UpdateHistogram()
     }
   if (this->ExecuteOnClient && !AccumulateFilter)
     {
-    this->AccumulateFilter = vtkSmartPointer<vtkPExtractHistogram>::New();
+    this->AccumulateFilter = vtkSmartPointer<vtkPImageAccumulate>::New();
     }
-  if (GradientRangeOutOfDate && !customGradientRangeUsed)//
+  if (GradientRangeOutOfDate )//
     {
       UpdateGradientRange();
       HistogramOutOfDate = true;
       TwoDHistogramOutOfDate = true;
-    }
-  else if(GradientRangeOutOfDate && customGradientRangeUsed)
-    {
-    updateGradients();
-    HistogramOutOfDate = true;
-    TwoDHistogramOutOfDate = true;
-    this->GradientRangeOutOfDate = true;
     }
   if (HistogramOutOfDate)//
     {
@@ -731,19 +721,12 @@ void vtkImageVolumeRepresentation::UpdateTwoDHistogram()
     {
     this->TwoDAccumulateFilter = vtkSmartPointer<vtkPImageAccumulate>::New();
     }
-  if (GradientRangeOutOfDate && !customGradientRangeUsed)//
+  if (GradientRangeOutOfDate)//
     {
       UpdateGradientRange();
       TwoDHistogramOutOfDate = true;
       HistogramOutOfDate = true;
     }
-  else if(GradientRangeOutOfDate && customGradientRangeUsed)
-      {
-      updateGradients();
-      HistogramOutOfDate = true;
-      TwoDHistogramOutOfDate = true;
-      this->GradientRangeOutOfDate = true;
-      }
   if (TwoDHistogramOutOfDate)//
     {
     createTwoDHistogram();
@@ -767,15 +750,8 @@ void vtkImageVolumeRepresentation::DisableUseAdjustMapperGradientRangeFactor(){
   this->Property->SetUseAdjustMapperGradientRangeFactor(false);
 }
 
-void vtkImageVolumeRepresentation::UseCustomGradientRange(){
-  this->GradientRangeOutOfDate = true;
-  this->HistogramOutOfDate = true;
-  this->TwoDHistogramOutOfDate = true;
-  double range[2];
-  this->Property->GetGradientGaussianOpacity()->GetRange(range);
-  this->GradientRange[0] = range[0];
-  this->GradientRange[1] = range[1];
-  this->customGradientRangeUsed = true;
-}
-
+void vtkImageVolumeRepresentation::getGradientFunctionRange(double* range)
+    {
+    this->Property->GetGradientGaussianOpacity()->GetRange(range);
+    }
 

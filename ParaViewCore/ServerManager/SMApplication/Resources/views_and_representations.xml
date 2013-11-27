@@ -1584,8 +1584,6 @@
                       panel_visibility="never" />
             <Property name="GradientLinearOpacityFunction"
                       panel_visibility="never" />
-            <Property name="UseCustomGradientRange"
-                      panel_visibility="never" />
             <Property name="GradientRange"
                       panel_visibility="never" />
             <Property name="UpdateGradientRange"
@@ -2056,9 +2054,6 @@
          </IntVectorProperty>
          <Property command = "UpdateGradientRange"
                   name = "UpdateGradientRange" >
-                  </Property>
-       <Property command = "UseCustomGradientRange"
-                  name = "UseCustomGradientRange" >
                   </Property>
          <Property command = "UpdateHistogram"
                   name = "UpdateHistogram" >
