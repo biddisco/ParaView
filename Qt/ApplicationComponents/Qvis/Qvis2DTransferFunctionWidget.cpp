@@ -715,8 +715,9 @@ void Qvis2DTransferFunctionWidget::setActiveRegionMaximum(float mx)
 //---------------------------------------------------------------------------
 float Qvis2DTransferFunctionWidget::getActiveRegionMaximum()
 {
-  if (this->activeRegion==-1) return -1;
-  return region[this->activeRegion].maximum;
+  if (this->activeRegion <0 || this->activeRegion > this->transferFunction->GetSize())
+    return -1;
+  return this->transferFunction->getValue(this->activeRegion,vtkTwoDTransferFunction::REGION_MAX);
 }
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::addRegion(
@@ -730,7 +731,8 @@ void
 Qvis2DTransferFunctionWidget::removeRegion(int n)
 {
 	this->transferFunction->RemoveRegionAtIndex(n);
-
+	if (this->transferFunction->GetSize()>0)
+	emit this->activeRegionChanged(0);
 /*
   for (int i=n; i<nregion-1; i++) region[i] = region[i+1];
   nregion--;
