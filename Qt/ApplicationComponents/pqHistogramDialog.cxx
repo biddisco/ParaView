@@ -10,8 +10,8 @@ class pqHistogramDialogUi: public Ui::pqHistogramDialog
   {
   };
 
-pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
-	bool* histogramEn, bool* logScal, float* enabledBarsHeighfrac) :
+pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hist, int size,
+    std::vector<bool>* histogramEn, bool* logScal, float* enabledBarsHeighfrac) :
 	QDialog(widgetParent)
   {
 
@@ -37,17 +37,17 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, int* hist, int size,
 	  SLOT(disableLogScale()));
 
   finalHistogramEnabled = histogramEn;
-  histogramEnabled = new bool[size];
+  histogramEnabled.resize(size);
   for (int i = 0; i < size; i++)
 	{
-	histogramEnabled[i] = finalHistogramEnabled[i];
+	histogramEnabled[i] = finalHistogramEnabled->at(i);
 	}
   this->finallogScale = logScal;
   this->logScale = *logScal;
 
   this->histogramSize = size;
 
-  this->dialogUi->HistogramWidget->SetData(histogramEnabled, histogram,
+  this->dialogUi->HistogramWidget->SetData(&histogramEnabled, histogram,
 	  this->histogramSize, *logScal, *enabledBarsHeightFraction);
 
 
@@ -66,7 +66,7 @@ void pqHistogramDialog::setHistogramBools()
   {
   for (int i = 0; i < histogramSize; i++)
 	{
-	this->finalHistogramEnabled[i] = this->histogramEnabled[i];
+	this->finalHistogramEnabled->at(i) = this->histogramEnabled[i];
 	}
   }
 

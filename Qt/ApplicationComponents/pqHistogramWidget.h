@@ -13,7 +13,7 @@ Q_OBJECT
   typedef QWidget Superclass;
 
 public:
-  void SetData(bool* histogramEnable, int* histogra, int histogramSiz,
+  void SetData(std::vector<bool>* histogramEnable, std::vector<int>* histogra, int histogramSiz,
 	  bool logSc, float enabledBarsFrac);
   pqHistogramWidget();
   pqHistogramWidget(QWidget* parentObject);
@@ -36,8 +36,8 @@ protected:
   void paintEvent(QPaintEvent *e);
   void calculateEnabledBarsHeight();
   int histogramSize;
-  int* histogram;
-  bool* histogramEnabled;
+  std::vector<int>* histogram;
+  std::vector<bool>* histogramEnabled;
   void enableAllBins();
   void createPixmap();
   void updatePixmap(int bin);

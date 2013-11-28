@@ -606,8 +606,8 @@ bool vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
 
   vtkPVImageAccumulateInformation * gradientInfo = NULL;
      if (this->GetProperty("GradientRange")){
-  // 	gradientInfo = this->GetRepresentedGradientDataInformation();
-   //	gradientInfo->GetGradientRange(gofrange);
+   	gradientInfo = this->GetRepresentedGradientDataInformation();
+   	gradientInfo->GetGradientRange(gofrange);
      }
 
 

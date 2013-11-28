@@ -16,11 +16,15 @@
 #include "vtkTwoDTransferFunction.h"
 #include "vtkSmartPointer.h"
 #include "vtkNew.h"
+#include <memory>
+#include <QSharedPointer>
+
 //---------------------------------------------------------------------------
 class QPixmap;
 class vtkScalarsToColors;
 class vtkColorTransferFunction;
 class vtkEventQtSlotConnect;
+class QImage;
 //---------------------------------------------------------------------------
 class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisAbstractOpacityBar
 {
@@ -63,7 +67,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
     void          drawColourBars(QPainter &painter);
     void          drawRegions(QPainter &painter);
 
-    QImage        *histogramBackground;
+    QSharedPointer<QImage>      histogramBackground;
 
 
 

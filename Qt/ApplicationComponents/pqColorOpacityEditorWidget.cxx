@@ -752,9 +752,9 @@ void pqColorOpacityEditorWidget::showOneDHistogram()
 
      float enabledBarsHeight;
      bool logscale = false;
-     pqHistogramDialog dialog(this, ui.GradientGaussianOpacityEditor->histogramValues,
+     pqHistogramDialog dialog(this, &(ui.GradientGaussianOpacityEditor->histogramValues),
          ui.GradientGaussianOpacityEditor->currentHistogramSize,
-         ui.GradientGaussianOpacityEditor->histogramEnabled, &logscale,
+         &(ui.GradientGaussianOpacityEditor->histogramEnabled), &logscale,
          &enabledBarsHeight);
      //dialog.setData();
      dialog.exec();

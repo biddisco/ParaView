@@ -6,7 +6,7 @@
 #include <QDialog>
 #include "vtkType.h"
 #include <qframe.h>
-
+#include <vector>
 class pqHistogramWidget;
 
 class pqHistogramDialogUi;
@@ -18,12 +18,12 @@ class PQAPPLICATIONCOMPONENTS_EXPORT pqHistogramDialog : public QDialog
 
 public :
 
-  pqHistogramDialog(QWidget *widgetParent, int* hist, int size, bool* histogramEn, bool* logScal, float* enabledBarsHeighfrac);
+  pqHistogramDialog(QWidget *widgetParent, std::vector<int> *hist, int size, std::vector<bool> *histogramEn, bool* logScal, float* enabledBarsHeighfrac);
   ~pqHistogramDialog();
 
   //void setData(int* hist, int size, bool* histogramEn, bool* logScale);
 
-  bool* finalHistogramEnabled;
+  std::vector<bool>* finalHistogramEnabled;
 
   bool* temphistogram; //only used so that changes can be undone.
   int histogramSize;
@@ -50,8 +50,8 @@ bool getLogScale();
 
 void resizeImage(int width, int height);
 
-    int* histogram;
-    bool* histogramEnabled;
+    std::vector<int>* histogram;
+    std::vector<bool> histogramEnabled;
     float *enabledBarsHeightFraction;
     void resizeEvent(QResizeEvent* event);
 

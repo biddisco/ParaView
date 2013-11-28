@@ -39,8 +39,8 @@ Qvis2DTransferFunctionWidget::Qvis2DTransferFunctionWidget(QWidget *parentObject
     this->colortransferfunction = 0;
     lasty = 0;
     lastx = 0;
-    this->histogramBackground = NULL;
 
+ //   this->histogramBackground = new QImage;
     // set a default:
    // this->addRegion(0.25f, 0.25f, 0.5f, 0.5f, this->defaultTFMode, 1.0);
 
@@ -482,10 +482,10 @@ void Qvis2DTransferFunctionWidget::createScalarColorBackground()
   QImage image(QSize(this->contentsRect().width(),this->contentsRect().height()), QImage::Format_RGB32);
   image.fill(Qt::white);
 
-  if (this->histogramBackground)
+  if (!this->histogramBackground.isNull())
     {
-  QImage scaledhisto = QImage(this->histogramBackground->scaled(this->contentsRect().width(),this->contentsRect().height(),
-      Qt::IgnoreAspectRatio,Qt::FastTransformation));
+  QImage scaledhisto = this->histogramBackground->scaled(this->contentsRect().width(),this->contentsRect().height(),
+      Qt::IgnoreAspectRatio,Qt::FastTransformation);
 
     for (int i = 0; i< this->contentsRect().width(); i++)
       {
@@ -687,8 +687,17 @@ void Qvis2DTransferFunctionWidget::mouseReleaseEvent(QMouseEvent *)
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::removeHistogram()
 {
-  if(this->histogramBackground)
-    delete this->histogramBackground;
+  this->histogramBackground.clear();
+//  if(!this->histogramBackground.isNull())
+//    {
+//    delete this->histogramBackground.data();
+//    }
+  if (this->histogramBackground.isNull())
+    std::cout << "null"<< std::endl;
+  else
+    std::cout << "not null " << std::endl;
+
+  this->update();
 }
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::getRawOpacities(int n, float *opacity)
@@ -880,9 +889,12 @@ void Qvis2DTransferFunctionWidget::generateHistogramBackground(int width, int he
     }
   float maxf = float(max);
 
-  if (histogramBackground)
-    delete histogramBackground;
-  histogramBackground = new QImage(width, height, QImage::Format_RGB32);
+  if (!histogramBackground.isNull())
+    {
+    delete this->histogramBackground.data();
+    }
+
+  histogramBackground = QSharedPointer<QImage>(new QImage(width, height, QImage::Format_RGB32));
   histogramBackground->fill(qRgb(255,255,255));
   for (int i = 0; i< width; i++)
     {

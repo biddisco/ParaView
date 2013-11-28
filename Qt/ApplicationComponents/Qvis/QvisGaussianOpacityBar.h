@@ -43,6 +43,7 @@
 #include "vtkType.h"
 #include "vtkSmartPointer.h"
 #include "vtkNew.h"
+#include <vector>
 
 class QPixmap;
 class vtkGaussianPiecewiseFunction;
@@ -101,10 +102,10 @@ public:
 	int currentHistogramSize;
 	/// Description:
 	/// size of the currently stored histogram.
-	bool* histogramEnabled;
+	std::vector<bool> histogramEnabled;
 	/// Description:
 	/// The current histogram. array value = bin
-	int* histogramValues;
+	std::vector<int> histogramValues;
 	/// Description:
 	/// range of the current histogram
 	double histogramRange[2];
@@ -132,7 +133,7 @@ protected:
 	void drawControlPoints(QPainter &painter);
 	/// Description:
 	/// get the highest pixel in the background histogram for a histogram bin. Because origin is in top left, the lower the value, the higher the pixel.
-	int getTopBinPixel(int bin, float scale, int* histogram, int currentMax, int currentUnEnabledMax, bool logScale, float enabledBarsHeight, bool* histogramEnabled);
+	int getTopBinPixel(int bin, float scale, int currentMax, int currentUnEnabledMax, bool logScale, float enabledBarsHeight);
 	/// Description:
 	/// Controls whether or not the color background is painted
 	bool paintScalarColorBackground;
