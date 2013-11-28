@@ -724,7 +724,6 @@ void Qvis2DTransferFunctionWidget::addRegion(
   float x,float y,float w,float h,float mo,float mx)
 {
 	addRegion(double(x),double(y),double(w),double(h),(TransferFnMode) int(mo), double(mx));
-    //region[nregion++] = Region(x,y,w,h,mo,mx);
 }
 //---------------------------------------------------------------------------
 void
