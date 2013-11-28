@@ -9,6 +9,7 @@ vtk_module(vtkPVClientServerCoreRendering
   DEPENDS
     vtkDomainsChemistry
     vtkFiltersAMR
+    vtkFiltersParallelImaging
     vtkPVClientServerCoreCore
     vtkPVVTKExtensionsRendering
     vtkWebGLExporter

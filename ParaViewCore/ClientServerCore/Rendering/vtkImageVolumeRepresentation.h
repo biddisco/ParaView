@@ -23,7 +23,7 @@
 #ifndef __vtkImageVolumeRepresentation_h
 #define __vtkImageVolumeRepresentation_h
 
-#include "vtkPVClientServerCoreDefaultModule.h" //needed for exports
+#include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
 #include "vtkSmartPointer.h"                    //needed for cleanup
 
@@ -47,7 +47,7 @@ class vtkIntArray;
 class vtkDoubleArray;
 class vtkVariantArray;
 
-class VTKPVCLIENTSERVERCOREDEFAULT_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
+class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
   {
 public:
   static vtkImageVolumeRepresentation* New();vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation)
@@ -174,6 +174,8 @@ public:
   void UpdateGradientRange();
   void UpdateHistogram();
   void UpdateTwoDHistogram();
+  void SetTwoDHistogramOutOfDate();
+  void SetHistogramOutOfDate();
 
 
   bool GetDisableGradientOpacity();

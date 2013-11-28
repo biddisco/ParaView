@@ -45,6 +45,8 @@ set (Module_SRCS
   vtkGeometryRepresentation.cxx
   vtkGeometryRepresentationWithFaces.cxx
   vtkGlyph3DRepresentation.cxx
+  vtkImageVolumeRepresentation.cxx
+  vtkImageSliceRepresentation.cxx
   vtkMoleculeRepresentation.cxx
   vtkMPIMoveData.cxx
   vtkOutlineRepresentation.cxx
@@ -61,6 +63,7 @@ set (Module_SRCS
   vtkPVDisplayInformation.cxx
   vtkPVHardwareSelector.cxx
   vtkPVImageSliceMapper.cxx
+  vtkPVImageAccumulateInformation.cxx
   vtkPVImplicitPlaneRepresentation.cxx
   vtkPVLastSelectionInformation.cxx
   vtkPVLineChartView.cxx
@@ -78,6 +81,7 @@ set (Module_SRCS
   vtkPVStreamingPiecesInformation.cxx
   vtkPVSynchronizedRenderer.cxx
   vtkPVSynchronizedRenderWindows.cxx
+  vtkPVTwoDHistogramInformation.cxx
   vtkPVView.cxx
   vtkPVXYChartView.cxx
   vtkSelectionDeliveryFilter.cxx

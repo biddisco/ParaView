@@ -168,6 +168,11 @@ void pqTransferFunctionEditor::setCurrentRegion(int index)
   }
 
 
+void pqTransferFunctionEditor::removeHistogram()
+  {
+  this->Internals->TransferFunction->removeHistogram();
+  }
+
 
 //-----------------------------------------------------------------------------
 void pqTransferFunctionEditor::onTFModeChanged(int index)

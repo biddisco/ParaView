@@ -117,6 +117,8 @@ public:
 	/// Gets the currently selected Gaussian
 	int getCurrentGaussian();
 
+	void removeHistogram();
+
 protected:
 	/// Description:
 	/// Used for Histogram only.

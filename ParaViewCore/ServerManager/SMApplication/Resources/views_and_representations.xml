@@ -2061,6 +2061,12 @@
           <Property command = "UpdateTwoDHistogram"
                   name = "UpdateTwoDHistogram" >
                   </Property>
+          <Property command = "SetHistogramOutOfDate"
+                  name = "SetHistogramOutOfDate" >
+                  </Property>
+          <Property command = "SetTwoDHistogramOutOfDate"
+                  name = "SetTwoDHistogramOutOfDate" >
+                  </Property>
          <Property command = "EnableUseAdjustMapperGradientRangeFactor"
         name = "EnableUseAdjustMapperGradientRangeFactor" >
         </Property>

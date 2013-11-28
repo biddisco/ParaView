@@ -48,6 +48,7 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
 
     void          createRGBAData(unsigned char *data);
     void          generateHistogramBackground(int width, int height, int* array);
+    void          removeHistogram();
 
 
     protected slots:

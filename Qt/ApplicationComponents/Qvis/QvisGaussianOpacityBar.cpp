@@ -915,6 +915,16 @@ void QvisGaussianOpacityBar::removeGaussian(int n)
 
   }
 
+void QvisGaussianOpacityBar::removeHistogram()
+  {
+  this->currentHistogramSize = 0;
+  if (this->histogramValues)
+    delete this->histogramValues;
+  if (this->histogramEnabled)
+    delete this->histogramEnabled;
+
+  }
+
 // ****************************************************************************
 //  Method:  QvisGaussianOpacityBar::setMaximumNumberOfGaussians
 //

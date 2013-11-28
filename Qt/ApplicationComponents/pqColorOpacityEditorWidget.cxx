@@ -1359,25 +1359,21 @@ pqColorOpacityEditorWidget::resetRangeToData()
 
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(
       repr->getProxy());
-  vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionToDataRange(
-        repr->getProxy());
+
+  if (repr->getProxy()->GetProperty("SupportHistogramWidget"))
+      {
+      repr->getProxy()->InvokeCommand("SetTwoDHistogramOutOfDate");
+      repr->getProxy()->InvokeCommand("SetHistogramOutOfDate");
+      }
+
+    Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+
+    ui.GradientGaussianOpacityEditor->removeHistogram();
+    ui.TwoDTransferFunctionEditor->removeHistogram();
+
 
   emit this->changeFinished();
- // Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  // std::cout << "width "<<ui.GradientGaussianOpacityEditor->contentsRect().width() << std::endl;
-  // repr->setProperty("HistogramBins",ui.GaussianOpacityEditor->contentsRect().width());
-  /*
-   * if (repr->getProxy()->GetProperty("UpdateGradientRange"))
-   repr->getProxy()->InvokeCommand("UpdateGradientRange");
-   double gofrange[2] = {0, 1};
-   this->UpdatePropertyInformation(this->GetProperty("GradientRange"));
-   vtkSMPropertyHelper(this, "GradientRange").Get(gofrange,2);
-   */
 
-  // vtkSMProperty* temp = repr->getProxy()->GetProperty("HistogramBins");
-  // vtkSMPropertyHelper bins(temp);
-  // bins.Set(ui.GaussianOpacityEditor->contentsRect().width(),1);
-//  repr->getProxy()->UpdateVTKObjects();
   END_UNDO_SET();
 }
 
@@ -1407,6 +1403,18 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
       emit this->changeFinished();
       END_UNDO_SET();
     }
+
+  if (repr->getProxy()->GetProperty("SupportHistogramWidget"))
+      {
+      repr->getProxy()->InvokeCommand("SetTwoDHistogramOutOfDate");
+      repr->getProxy()->InvokeCommand("SetHistogramOutOfDate");
+      }
+
+    Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+
+    ui.GradientGaussianOpacityEditor->removeHistogram();
+    ui.TwoDTransferFunctionEditor->removeHistogram();
+
 }
 
 //-----------------------------------------------------------------------------
@@ -1451,6 +1459,17 @@ pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max,
 
   vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionsToCustomRange(
       repr->getProxy(), min, max, gmin, gmax);
+
+  if (repr->getProxy()->GetProperty("SupportHistogramWidget"))
+    {
+    repr->getProxy()->InvokeCommand("SetTwoDHistogramOutOfDate");
+    repr->getProxy()->InvokeCommand("SetHistogramOutOfDate");
+    }
+
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+
+  ui.GradientGaussianOpacityEditor->removeHistogram();
+  ui.TwoDTransferFunctionEditor->removeHistogram();
 
   emit this->changeFinished();
   END_UNDO_SET();

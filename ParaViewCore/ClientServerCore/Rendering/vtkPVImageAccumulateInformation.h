@@ -1,9 +1,9 @@
 //the more I think about it, the worse the name of this class gets.
 
-#ifndef __vtkPVTwoDHistogramInformation_h
-#define __vtkPVTwoDHistogramInformation_h
+#ifndef __vtkPVImageAccumulateInformation_h
+#define __vtkPVImageAccumulateInformation_h
 
-#include "vtkPVClientServerCoreDefaultModule.h"  //needed for exports
+#include "vtkPVClientServerCoreRenderingModule.h"  //needed for exports
 #include "vtkPVInformation.h"
 #include "vtkIntArray.h"
 #include "vtkStdString.h"
@@ -13,11 +13,11 @@ class vtkMultiProcessStream;
 class vtkImageData;
 
 
-class VTKPVCLIENTSERVERCOREDEFAULT_EXPORT vtkPVTwoDHistogramInformation : public vtkPVInformation
+class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkPVImageAccumulateInformation : public vtkPVInformation
 {
 public:
-  static vtkPVTwoDHistogramInformation* New();
-  vtkTypeMacro(vtkPVTwoDHistogramInformation, vtkPVInformation);
+  static vtkPVImageAccumulateInformation* New();
+  vtkTypeMacro(vtkPVImageAccumulateInformation, vtkPVInformation);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -26,7 +26,7 @@ public:
 
   // Description:
   // Merge another information object.
-  virtual void AddInformation(vtkPVTwoDHistogramInformation*);
+  virtual void AddInformation(vtkPVImageAccumulateInformation*);
 
   //BTX
   // Description:
@@ -49,41 +49,45 @@ public:
 
   // Description:
   // Getters for gathered information about histogram and gradient ranges
-  vtkGetMacro(SizeOfHistogram, int);
+  vtkGetVector2Macro(GradientRange, double);
+  vtkGetVector2Macro(CurrentGradientRange, double);
+  vtkGetMacro(SizeOfHistogramX, int);
   int *GetHistogramValues();
 
   // Description:
   // turn on/off collection of Histogram data
-  vtkSetMacro(CollectTwoDHistogram, int);
-  vtkGetMacro(CollectTwoDHistogram, int);
+  vtkSetMacro(CollectGradientHistogram, int);
+  vtkGetMacro(CollectGradientHistogram, int);
 
-  int getDimensionAtIndex(int index) {return dimensions[index];}
-
-
+  // Description:
+  // turn on/off collection of Gradient range data
+  vtkSetMacro(CollectGradientRange, int);
+  vtkGetMacro(CollectGradientRange, int);
 
   void Initialize();
 
 protected:
-  vtkPVTwoDHistogramInformation();
-  ~vtkPVTwoDHistogramInformation();
+  vtkPVImageAccumulateInformation();
+  ~vtkPVImageAccumulateInformation();
 
 
 
-  int CollectTwoDHistogram;
-  int SizeOfHistogram;
+  int CollectGradientHistogram;
+  int CollectGradientRange;
+  int SizeOfHistogramX;
   vtkStdString arrayName;
-  int dimensions[3];
 
   //BTX
   std::vector<int> values;
   double GradientRange[2];
+  double CurrentGradientRange[2];
   //ETX
   vtkSetMacro(RootOnly, int);
 
 
 
-  vtkPVTwoDHistogramInformation(const vtkPVTwoDHistogramInformation&); // Not implemented
-  void operator=(const vtkPVTwoDHistogramInformation&); // Not implemented
+  vtkPVImageAccumulateInformation(const vtkPVImageAccumulateInformation&); // Not implemented
+  void operator=(const vtkPVImageAccumulateInformation&); // Not implemented
 };
 
 #endif

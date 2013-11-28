@@ -755,3 +755,16 @@ void vtkImageVolumeRepresentation::getGradientFunctionRange(double* range)
     this->Property->GetGradientGaussianOpacity()->GetRange(range);
     }
 
+void vtkImageVolumeRepresentation::SetTwoDHistogramOutOfDate()
+  {
+  this->TwoDHistogramOutOfDate = true;
+  }
+
+
+void vtkImageVolumeRepresentation::SetHistogramOutOfDate()
+  {
+  this->HistogramOutOfDate = true;
+  }
+
+
+

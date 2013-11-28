@@ -29,15 +29,11 @@
 #
 #==========================================================================
 set (Module_SRCS
-  vtkImageVolumeRepresentation.cxx
-  vtkImageSliceRepresentation.cxx
   vtkNetworkImageSource.cxx
   vtkPVEnvironmentInformation.cxx
   vtkPVEnvironmentInformationHelper.cxx
   vtkPVFileInformation.cxx
   vtkPVFileInformationHelper.cxx
-  vtkPVImageAccumulateInformation.cxx
-  vtkPVTwoDHistogramInformation.cxx
   vtkPVSingleOutputExtractSelection.cxx
   vtkXMLPVAnimationWriter.cxx 
 )

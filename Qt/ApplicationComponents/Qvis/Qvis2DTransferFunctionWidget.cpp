@@ -683,6 +683,13 @@ void Qvis2DTransferFunctionWidget::mouseReleaseEvent(QMouseEvent *)
   this->repaint();
   emit mouseReleased();
 }
+
+//---------------------------------------------------------------------------
+void Qvis2DTransferFunctionWidget::removeHistogram()
+{
+  if(this->histogramBackground)
+    delete this->histogramBackground;
+}
 //---------------------------------------------------------------------------
 void Qvis2DTransferFunctionWidget::getRawOpacities(int n, float *opacity)
 {

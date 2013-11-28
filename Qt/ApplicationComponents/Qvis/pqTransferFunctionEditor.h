@@ -52,6 +52,8 @@ public:
   void setCurrentRegion(int index);
 
   void generateHistogramBackground(int width, int height, int* array);
+
+  void removeHistogram();
 protected slots :
 
   void onTFModeChanged(int index);
