@@ -20,6 +20,9 @@ public:
   vtkTypeMacro(vtkPVTwoDHistogramInformation, vtkPVInformation);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  std::vector<int> values;
+  int dimensions[3];
+
   // Description:
   // Transfer information about a single object into this object.
   virtual void CopyFromObject(vtkObject*);
@@ -72,10 +75,10 @@ protected:
   int CollectTwoDHistogram;
   int SizeOfHistogram;
   vtkStdString arrayName;
-  int dimensions[3];
+
 
   //BTX
-  std::vector<int> values;
+
   double GradientRange[2];
   //ETX
   vtkSetMacro(RootOnly, int);

@@ -200,8 +200,8 @@ void pqTransferFunctionEditor::onActiveRegionChanged(int region)
   }
 }
 
-void pqTransferFunctionEditor::generateHistogramBackground(int width, int height, int* array)
+void pqTransferFunctionEditor::generateHistogramBackground(int width, int height, std::vector<int> &array, std::vector<bool> &enabledBins,bool logScale)
   {
-  this->Internals->TransferFunction->generateHistogramBackground(width, height, array);
+  this->Internals->TransferFunction->generateHistogramBackground(width, height, array, enabledBins, logScale);
   }
 

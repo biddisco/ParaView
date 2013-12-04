@@ -225,6 +225,10 @@ set (Module_SRCS
   pqToggleInteractionViewMode.h
   pqTransferFunctionWidgetPropertyWidget.cxx
   pqTransferFunctionWidgetPropertyWidget.h
+  pqTwoDHistogramDialog.cxx
+  pqTwoDHistogramDialog.h
+  pqTwoDHistogramWidget.cxx
+  pqTwoDHistogramWidget.h
   pqUndoRedoBehavior.cxx
   pqUndoRedoBehavior.h
   pqUndoRedoReaction.cxx
@@ -343,6 +347,8 @@ set (Module_MOC_HDRS
   pqTimerLogReaction.h
   pqToggleInteractionViewMode.h
   pqTransferFunctionWidgetPropertyWidget.h
+  pqTwoDHistogramDialog.h
+  pqTwoDHistogramWidget.h
   pqUndoRedoBehavior.h
   pqUndoRedoReaction.h
   pqVCRToolbar.h
@@ -385,6 +391,7 @@ set (Module_UI_FILES
   Resources/UI/pqPipelineBrowserContextMenu.ui
   Resources/UI/pqTransferFunctionWidgetPropertyWidgetDialog.ui
   Resources/UI/pqTransferFunctionEditor.ui
+  Resources/UI/pqTwoDHistogramDialog.ui
   Resources/UI/pqVCRToolbar.ui
 )
 

@@ -508,6 +508,7 @@ void Qvis2DTransferFunctionWidget::createScalarColorBackground()
         b = int (double(255-qBlue(scaledhisto.pixel(i,j)))/255.0*double(b));/* +
             this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(b);*/
 
+
         image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
         }
       }
@@ -878,30 +879,54 @@ void Qvis2DTransferFunctionWidget::setAllRegions(int n, float *regiondata)
   this->update();
 }
 //-----------------------------------------------------------------------------
-void Qvis2DTransferFunctionWidget::generateHistogramBackground(int width, int height, int* array)
+void Qvis2DTransferFunctionWidget::generateHistogramBackground(int width, int height, std::vector<int> &array, std::vector<bool> &enabledBins,
+    bool logScale)
 {
   //find max
-  int size = width * height;
+  int size = array.size();
   int max = 0;
   for (int i = 0; i< size; i++)
     {
-    max = array[i]>max ? array[i] : max;
+    if(enabledBins[i])
+      {
+      max = array[i]>max ? array[i] : max;
+      }
+
     }
   float maxf = float(max);
-
+/*
   if (!histogramBackground.isNull())
     {
-    delete this->histogramBackground.data();
+ //   delete this->histogramBackground.data();
     }
-
+*/
   histogramBackground = QSharedPointer<QImage>(new QImage(width, height, QImage::Format_RGB32));
+ // histogramBackground = QSharedPointer<QImage>(new QImage(10000, 10000, QImage::Format_RGB32));
   histogramBackground->fill(qRgb(255,255,255));
+
   for (int i = 0; i< width; i++)
     {
     for (int j = 0; j<height; j++)
       {
-      int v = int(255.0f*float(array[i*height+j])/maxf);
-      histogramBackground->setPixel(i,j,qRgb(v,v,v));
+      if(enabledBins[i*height+j])
+        {
+        int v = int(255.0f*float(array[i*height+j])/maxf);
+        if (logScale&& v >= 1)
+          v = log10(v);
+        histogramBackground->setPixel(i,j,qRgb(v,v,v));
+        }
+      else
+        {
+        int v = array[i*height+j];//int(255.0f*float(array[i*height+j])/maxunenf);
+        if (v>max)
+          histogramBackground->setPixel(i,j,qRgb(255,255,255));
+        else
+          {
+          v = 255.0f*v/maxf;
+          histogramBackground->setPixel(i,j,qRgb(v,v,v));
+          }
+
+        }
       }
     }
 

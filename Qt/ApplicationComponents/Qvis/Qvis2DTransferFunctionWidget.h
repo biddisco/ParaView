@@ -51,8 +51,9 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
     void 		      initialize(vtkTwoDTransferFunction* function, vtkScalarsToColors* stc);
 
     void          createRGBAData(unsigned char *data);
-    void          generateHistogramBackground(int width, int height, int* array);
+    void          generateHistogramBackground(int width, int height, std::vector<int> &array, std::vector<bool> &enabledBins, bool logScale);
     void          removeHistogram();
+
 
 
     protected slots:

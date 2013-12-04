@@ -58,6 +58,7 @@
 #include "vtkPVImageAccumulateInformation.h"
 #include "vtkPVTwoDHistogramInformation.h"
 #include "pqHistogramDialog.h"
+#include "pqTwoDHistogramDialog.h"
 #include "vtkTwoDTransferFunction.h"
 //#include "QvisGaussianOpacityBar.h"
 
@@ -714,8 +715,21 @@ void pqColorOpacityEditorWidget::showTwoDHistogram()
                vtkPVTwoDHistogramInformation>::New();
            repr->getProxy()->GatherInformation(infotwod.GetPointer(), vtkPVSession::RENDER_SERVER);
 
+           bool logscale = false;
+int siz[2];
+siz[0] = infotwod->dimensions[0];
+siz[1] = infotwod->dimensions[1];
+std::vector<bool> histogramenabled(siz[0]*siz[1], true);
+
+
+           pqTwoDHistogramDialog dialog(this, &(infotwod->values),
+                    siz,
+                    &(histogramenabled), &logscale);
+
+           dialog.exec();
+
           ui.TwoDTransferFunctionEditor->generateHistogramBackground(infotwod->getDimensionAtIndex(0),
-              infotwod->getDimensionAtIndex(1), infotwod->GetHistogramValues());
+              infotwod->getDimensionAtIndex(1), infotwod->values, histogramenabled,logscale);
   }
 
 //-----------------------------------------------------------------------------
