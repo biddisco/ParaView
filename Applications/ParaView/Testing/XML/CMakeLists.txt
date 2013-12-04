@@ -14,6 +14,7 @@ SET (TESTS_WITH_INLINE_COMPARES
   ${CMAKE_CURRENT_SOURCE_DIR}/Contour.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/DisconnectAndSaveAnimation.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/FileSeries.xml
+  ${CMAKE_CURRENT_SOURCE_DIR}/LineChartSelection.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/LoadStateMultiView.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/LogColorMap.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/MemoryInspectorPanel.xml
@@ -137,7 +138,6 @@ SET (TESTS_WITH_BASELINES
   ${CMAKE_CURRENT_SOURCE_DIR}/SPTimeseries.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/SpyPlotHistoryReader.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/StreamTracerUpdates.xml
-  ${CMAKE_CURRENT_SOURCE_DIR}/StructuredGridVolumeRendering.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/TabbedViews.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/TemporalInterpolator.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/TemporalShiftScale.xml
@@ -158,6 +158,7 @@ SET (TESTS_WITH_BASELINES
   ${CMAKE_CURRENT_SOURCE_DIR}/XYChart.xml
   ${CMAKE_CURRENT_SOURCE_DIR}/XYHistogram.xml
   #  ${CMAKE_CURRENT_SOURCE_DIR}/XYBarChart.xml
+  ${CMAKE_CURRENT_SOURCE_DIR}/RandomAttributes.xml
 )
 
 if(PARAVIEW_ENABLE_PYTHON)
@@ -224,7 +225,8 @@ set(ProbePicking_THRESHOLD 40)
 include("TestNumPy")
 
 IF ("1" STREQUAL ${HAS_NUMPY})
-  SET(TESTS_WITH_BASELINES ${TESTS_WITH_BASELINES} ${CMAKE_CURRENT_SOURCE_DIR}/FindDataDialog.xml)
+  SET(TESTS_WITH_INLINE_COMPARES ${TESTS_WITH_INLINE_COMPARES}
+    ${CMAKE_CURRENT_SOURCE_DIR}/FindDataDialog.xml)
 ENDIF ("1" STREQUAL ${HAS_NUMPY})
 
 #------------------------------------------------------------------------------
@@ -278,12 +280,6 @@ set(CTHAMRMaterialInterfaceFilter_DISABLE_CRS TRUE)
 
 set (TestIsoVolume_BREAK TRUE)
 set (TabbedViews_BREAK TRUE)
-
-# Since this test forces remote-rendering, we run it by itself.
-set (StructuredGridVolumeRendering_BREAK TRUE)
-set (StructuredGridVolumeRendering_FORCE_SERIAL TRUE)
-set (StructuredGridVolumeRendering_DISABLE_CRS TRUE)
-  # <-- since volume rendering is not supported in CRS mode.
 
 # Since this test needs selection, disable in CRS mode.
 set (SelectionLabels_BREAK TRUE)
@@ -374,6 +370,11 @@ IF (PARAVIEW_USE_MPI)
   # needed.
   SET (RectilinearFractal_DISABLE_CS TRUE)
   SET (RectilinearFractal_DISABLE_CRS TRUE)
+
+  # Selections end up highlighting different set of ID based points in parallel.
+  # Hence disable them.
+  set (LineChartSelection_DISABLE_CS TRUE)
+  set (LineChartSelection_DISABLE_CRS TRUE)
 ENDIF (PARAVIEW_USE_MPI)
 
 # Composite Surface Selection is currently broken in everything but bultin

@@ -115,6 +115,8 @@ class LookupTableManager:
         self.scalarbars = {}
         self.range = {}
         self.view = None
+        if servermanager.ActiveConnection.GetNumberOfDataPartitions() > 1:
+            self.registerArray('vtkProcessId', 1, [0, servermanager.ActiveConnection.GetNumberOfDataPartitions()-1])
 
     # --------------------------------------------------------------------------
 
@@ -293,6 +295,32 @@ def getProxyAsPipelineNode(id, lutManager = None):
 
     pointData = []
     searchArray = ('POINT_DATA' == rep.ColorAttributeType) and (len(rep.ColorArrayName) > 0)
+
+    if servermanager.ActiveConnection.GetNumberOfDataPartitions() > 1:
+        info = {                  \
+        'lutId': 'vtkProcessId_1', \
+        'name': 'vtkProcessId',     \
+        'size': 1,                   \
+        'range': [0, servermanager.ActiveConnection.GetNumberOfDataPartitions()-1] }
+        pointData.append(info)
+
+    # FIXME seb
+    # dataInfo = rep.GetRepresentedDataInformation()
+    # pointData = dataInfo.GetPointDataInformation()
+    # cellData = dataInfo.GetCellDataInformation()
+    # for idx in pointData.GetNumberOfArrays():
+    #     info = pointData.GetArrayInformation(idx)
+    #     nbComponents = info.GetNumberOfComponents()
+    #     if searchArray and array.Name == rep.ColorArrayName:
+    #         nbActiveComp = nbComponents
+    #     rangeOn = (nbComponents == 3 if -1 else 0)
+    #     info = {                                      \
+    #     'lutId': info.GetName() + '_' + str(nbComponents), \
+    #     'name': info.GetName,                             \
+    #     'size': nbComponents,                            \
+    #     'range': info.GetRange(rangeOn) }
+    #     pointData.append(info)
+
     for array in proxy.GetPointDataInformation():
         nbComponents = array.GetNumberOfComponents()
         if searchArray and array.Name == rep.ColorArrayName:
@@ -420,6 +448,8 @@ def updateProxyProperties(proxy, properties):
                  except:
                     traceback.print_stack()
                     pass
+             elif value == 'vtkProcessId':
+                property.SetElement(0, value)
              else:
                 property.SetData(value)
    except:

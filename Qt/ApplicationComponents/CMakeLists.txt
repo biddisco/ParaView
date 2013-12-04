@@ -201,8 +201,6 @@ set (Module_SRCS
   pqSaveStateReaction.h
   pqScalarBarVisibilityReaction.cxx
   pqScalarBarVisibilityReaction.h
-  pqSelectionInspectorWidget.cxx
-  pqSelectionInspectorWidget.h
   pqServerConnectReaction.cxx
   pqServerConnectReaction.h
   pqServerDisconnectReaction.cxx
@@ -335,7 +333,6 @@ set (Module_MOC_HDRS
   pqSaveScreenshotReaction.h
   pqSaveStateReaction.h
   pqScalarBarVisibilityReaction.h
-  pqSelectionInspectorWidget.h
   pqServerConnectReaction.h
   pqServerDisconnectReaction.h
   pqSourcesMenuReaction.h

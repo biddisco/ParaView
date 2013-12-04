@@ -54,6 +54,7 @@
 #include "vtkSMSessionProxyManager.h"
 #include "vtkSMTransferFunctionProxy.h"
 #include "vtkVector.h"
+#include "vtkWeakPointer.h"
 #include "vtkPVSession.h"
 #include "vtkPVImageAccumulateInformation.h"
 #include "vtkPVTwoDHistogramInformation.h"
@@ -116,12 +117,14 @@ class pqColorOpacityEditorWidget::pqInternals
 public:
   Ui::ColorOpacityEditorWidget Ui;
   QPointer<pqColorOpacityEditorWidgetDecorator> Decorator;
+  vtkWeakPointer<vtkSMPropertyGroup> PropertyGroup;
 
   // We use this pqPropertyLinks instance to simply monitor smproperty changes.
   pqPropertyLinks LinksForMonitoringChanges;
   vtkNew<vtkEventQtSlotConnect> VTKConnector;
 
-  pqInternals(pqColorOpacityEditorWidget* self)
+  pqInternals(pqColorOpacityEditorWidget* self, vtkSMPropertyGroup* group)
+    : PropertyGroup(group)
   {
     this->Ui.setupUi(self);
     this->Ui.CurrentDataValue->setValidator(new QDoubleValidator(self));
@@ -136,7 +139,8 @@ public:
 //-----------------------------------------------------------------------------
 pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
     vtkSMPropertyGroup* smgroup, QWidget* parentObject) :
-    Superclass(smproxy, parentObject), Internals(new pqInternals(this))
+    Superclass(smproxy, parentObject),
+  Internals(new pqInternals(this, smgroup))
 {
 
   this->scalarOpacityAvailable = true;
@@ -1414,6 +1418,10 @@ pqColorOpacityEditorWidget::resetRangeToDataOverTime()
         repr->getProxy()->InvokeCommand("UpdateGradientRange");
       vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRangeOverTime(
           repr->getProxy());
+
+    // disable auto-rescale of transfer function since the user has set on
+    // explicitly (BUG #14371).
+    this->setLockScalarRange(true);
       emit this->changeFinished();
       END_UNDO_SET();
     }
@@ -1470,6 +1478,9 @@ pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max,
 
   pqDataRepresentation* repr =
       pqActiveObjects::instance().activeRepresentation();
+  // disable auto-rescale of transfer function since the user has set on
+  // explicitly (BUG #14371).
+  this->setLockScalarRange(true);
 
   vtkSMPVRepresentationProxy::RescaleGradientTransferFunctionsToCustomRange(
       repr->getProxy(), min, max, gmin, gmax);

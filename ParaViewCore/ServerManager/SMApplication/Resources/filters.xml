@@ -168,13 +168,15 @@
                             default_values="0.5 0.5 0.5"
                             label="Center"
                             name="Center"
-                            number_of_elements="3"></DoubleVectorProperty>
+                            number_of_elements="3"
+                            panel_visibility="never"></DoubleVectorProperty>
       <DoubleVectorProperty animateable="1"
                             command="SetNormal"
                             default_values="0 0 1"
                             label="Normal"
                             name="Normal"
-                            number_of_elements="3"></DoubleVectorProperty>
+                            number_of_elements="3"
+                            panel_visibility="never"></DoubleVectorProperty>
       <Hints>
         <PropertyGroup label="Slice Widget"
                        type="Plane">
@@ -1631,7 +1633,8 @@ found and the point will be rejected.</Documentation>
                             default_values="0 0 0"
                             label="Low Point"
                             name="LowPoint"
-                            number_of_elements="3">
+                            number_of_elements="3"
+                            panel_visibility="never">
         <BoundsDomain default_mode="min"
                       mode="normal"
                       name="range">
@@ -1648,7 +1651,8 @@ found and the point will be rejected.</Documentation>
                             default_values="0 0 1"
                             label="High Point"
                             name="HighPoint"
-                            number_of_elements="3">
+                            number_of_elements="3"
+                            panel_visibility="never">
         <BoundsDomain default_mode="max"
                       mode="normal"
                       name="range">
@@ -1661,7 +1665,7 @@ found and the point will be rejected.</Documentation>
         vector (large scalar values).</Documentation>
       </DoubleVectorProperty>
       <Hints>
-        <PropertyGroup label="Elevation Widget"
+        <PropertyGroup label="Elevation"
                        type="Line">
           <Property function="Point1WorldPosition"
                     name="LowPoint" />
@@ -1710,91 +1714,26 @@ found and the point will be rejected.</Documentation>
                  name="None" />
           <Proxy group="implicit_functions"
                  name="Plane" />
-          <Proxy group="implicit_functions"
-                 name="Box" />
-          <Proxy group="implicit_functions"
-                 name="Sphere" />
         </ProxyListDomain>
         <Documentation>This property specifies whether to clip the dataset, and
         if so, it also specifies the parameters of the plane with which to
         clip.</Documentation>
       </ProxyProperty>
-      <StringVectorProperty clean_command="RemoveDoubleVolumeArrayNames"
-                            command="AddDoubleVolumeArrayName"
-                            label="Double Volume Arrays"
-                            name="AddDoubleVolumeArrayName"
+      <StringVectorProperty clean_command="RemoveVolumeArrayNames"
+                            command="AddVolumeArrayName"
+                            label="Volume Arrays"
+                            name="VolumeArrays"
                             number_of_elements_per_command="1"
                             repeat_command="1">
         <Documentation>This property specifies the name(s) of the volume
         fraction array(s) for generating parts.</Documentation>
         <ArrayListDomain attribute_type="Scalars"
-                         data_type="VTK_DOUBLE"
                          name="array_list">
           <RequiredProperties>
             <Property function="Input"
                       name="Input" />
           </RequiredProperties>
         </ArrayListDomain>
-        <Hints>
-          <!-- This overrides the GUI's default mechanism to
-            not set the default value for this property
-            using the domain when the proxy is created -->
-          <NoDefault />
-          <PropertyWidgetDecorator type="CTHArraySelectionDecorator">
-            <Property name="AddFloatVolumeArrayName" />
-            <Property name="AddUnsignedCharVolumeArrayName" />
-          </PropertyWidgetDecorator>
-        </Hints>
-      </StringVectorProperty>
-      <StringVectorProperty clean_command="RemoveFloatVolumeArrayNames"
-                            command="AddFloatVolumeArrayName"
-                            label="Float Volume Arrays"
-                            name="AddFloatVolumeArrayName"
-                            number_of_elements_per_command="1"
-                            repeat_command="1">
-        <Documentation>This property specifies the name(s) of the volume
-        fraction array(s) for generating parts.</Documentation>
-        <ArrayListDomain attribute_type="Scalars"
-                         data_type="VTK_FLOAT"
-                         name="array_list">
-          <RequiredProperties>
-            <Property function="Input"
-                      name="Input" />
-          </RequiredProperties>
-        </ArrayListDomain>
-        <Hints>
-          <!-- This overrides the GUI's default mechanism to
-            not set the default value for this property
-            using the domain when the proxy is created -->
-          <NoDefault />
-          <PropertyWidgetDecorator type="CTHArraySelectionDecorator">
-            <Property name="AddDoubleVolumeArrayName" />
-            <Property name="AddUnsignedCharVolumeArrayName" />
-          </PropertyWidgetDecorator>
-        </Hints>
-      </StringVectorProperty>
-      <StringVectorProperty clean_command="RemoveUnsignedCharVolumeArrayNames"
-                            command="AddUnsignedCharVolumeArrayName"
-                            label="Unsigned Character Volume Arrays"
-                            name="AddUnsignedCharVolumeArrayName"
-                            number_of_elements_per_command="1"
-                            repeat_command="1">
-        <Documentation>This property specifies the name(s) of the volume
-        fraction array(s) for generating parts.</Documentation>
-        <ArrayListDomain attribute_type="Scalars"
-                         data_type="VTK_UNSIGNED_CHAR"
-                         name="array_list">
-          <RequiredProperties>
-            <Property function="Input"
-                      name="Input" />
-          </RequiredProperties>
-        </ArrayListDomain>
-        <Hints>
-          <PropertyWidgetDecorator type="CTHArraySelectionDecorator">
-            <Property name="AddDoubleVolumeArrayName" />
-            <Property name="AddFloatVolumeArrayName" />
-          </PropertyWidgetDecorator>
-        </Hints>
       </StringVectorProperty>
       <DoubleVectorProperty command="SetVolumeFractionSurfaceValue"
                             default_values="0.1"
@@ -1807,6 +1746,40 @@ found and the point will be rejected.</Documentation>
         <Documentation>The value of this property is the volume fraction value
         for the surface.</Documentation>
       </DoubleVectorProperty>
+      <IntVectorProperty name="CapSurfaces"
+                         command="SetCapping"
+                         number_of_elements="1"
+                         default_values="1"
+                         panel_visibility="advanced" >
+        <BooleanDomain name="bool" />
+        <Documentation>
+          When enabled, volume surfaces are capped to produce visually closed
+          surface.
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty name="RemoveGhostCells"
+                         command="SetRemoveGhostCells"
+                         number_of_elements="1"
+                         default_values="1"
+                         panel_visibility="advanced" >
+        <BooleanDomain name="bool" />
+        <Documentation>
+          When set to false, the output surfaces will not hide contours
+          extracted from ghost cells. This results in overlapping contours but
+          overcomes holes.  Default is set to true.
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty name="GenerateTriangles"
+                         command="SetGenerateTriangles"
+                         number_of_elements="1"
+                         default_values="0"
+                         panel_visibility="advanced" >
+        <BooleanDomain name="bool" />
+        <Documentation>
+          Triangulate results. When set to false, the internal cut and contour filters
+          are told not to triangulate results if possible.
+        </Documentation>
+      </IntVectorProperty>
       <!-- End CTHPart -->
     </SourceProxy>
     <!-- ==================================================================== -->
@@ -3867,6 +3840,116 @@ found and the point will be rejected.</Documentation>
         well-behaved.</Documentation>
       </IntVectorProperty>
       <!-- End QuadricClustering -->
+    </SourceProxy>
+    <!-- ==================================================================== -->
+    <SourceProxy class="vtkRandomAttributeGenerator"
+                 label="Random Attributes"
+                 name="RandomAttributeGenerator">
+      <Documentation long_help=
+                     "This filter creates a new random attribute
+                      array and sets it as the default array."
+                     short_help="Creates random data attributes.">
+        The Random Attributes filter creates random attributes
+        including scalars and vectors. These attributes can be
+        generated as point data or cell data. The generation of each
+        component is normalized between a user-specified minimum and
+        maximum value.
+
+        This filter provides that capability to specify the data type
+        of the attributes and the range for each of the components.
+      </Documentation>
+      <InputProperty command="SetInputConnection"
+                     name="Input">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources" />
+          <Group name="filters" />
+        </ProxyGroupDomain>
+        <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet" />
+        </DataTypeDomain>
+        <Documentation>This property specifies the input to the Random Scalars
+        filter.</Documentation>
+      </InputProperty>
+      <IntVectorProperty
+          name="DataType"
+          command="SetDataType"
+          number_of_elements="1"
+          default_values="3">
+        <EnumerationDomain name="enum">
+          <Entry value="1" text="Bit"/>
+          <Entry value="2" text="Char"/>
+          <Entry value="3" text="UnsignedChar"/>
+          <Entry value="4" text="Short"/>
+          <Entry value="5" text="UnsignedShort"/>
+          <Entry value="6" text="Int"/>
+          <Entry value="7" text="UnsignedInt"/>
+          <Entry value="8" text="Long"/>
+          <Entry value="9" text="UnsignedLong"/>
+          <Entry value="10" text="Float"/>
+          <Entry value="11" text="Double"/>
+        </EnumerationDomain>
+        <Documentation>
+          Specify the type of array to create (all components of this
+          array are of this type). This holds true for all arrays that
+          are created.
+        </Documentation>
+      </IntVectorProperty>
+      <DoubleVectorProperty command="SetComponentRange"
+                            default_values="0 255"
+                            name="ComponentRange"
+                            number_of_elements="2">
+        <Documentation>Set the range values (minimum and maximum) for
+        each component. This applies to all data that is
+        generated.</Documentation>
+      </DoubleVectorProperty>
+
+      <IntVectorProperty
+          name="AttributesConstantPerBlock"
+          command="SetAttributesConstantPerBlock"
+          number_of_elements="1"
+          default_values="0">
+        <BooleanDomain name="bool"/>
+        <Documentation>Indicate that the generated attributes are
+        constant within a block. This can be used to highlight
+        blocks in a composite dataset.</Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty
+          name="GeneratePointScalars"
+          command="SetGeneratePointScalars"
+          number_of_elements="1"
+          default_values="0">
+        <BooleanDomain name="bool"/>
+        <Documentation>Indicate that point scalars are to be
+        generated.</Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty
+          name="GeneratePointVectors"
+          command="SetGeneratePointVectors"
+          number_of_elements="1"
+          default_values="0">
+        <BooleanDomain name="bool"/>
+        <Documentation>Indicate that point vectors are to be
+        generated.</Documentation>
+      </IntVectorProperty>
+
+      <IntVectorProperty
+          name="GenerateCellScalars"
+          command="SetGenerateCellScalars"
+          number_of_elements="1"
+          default_values="0">
+        <BooleanDomain name="bool"/>
+        <Documentation>Indicate that point scalars are to be
+        generated.</Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty
+          name="GenerateCellVectors"
+          command="SetGenerateCellVectors"
+          number_of_elements="1"
+          default_values="1">
+        <BooleanDomain name="bool"/>
+        <Documentation>Indicate that point vectors are to be
+        generated.</Documentation>
+      </IntVectorProperty>
     </SourceProxy>
     <!-- ==================================================================== -->
     <SourceProxy class="vtkBrownianPoints"

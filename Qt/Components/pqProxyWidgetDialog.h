@@ -47,6 +47,7 @@ class PQCOMPONENTS_EXPORT pqProxyWidgetDialog : public QDialog
   typedef QDialog Superclass;
 public:
   pqProxyWidgetDialog(vtkSMProxy* proxy, QWidget* parent=0);
+  pqProxyWidgetDialog(vtkSMProxy* proxy, const QStringList& properties, QWidget* parent=0);
   virtual ~pqProxyWidgetDialog();
 
 protected slots:
