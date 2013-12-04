@@ -56,6 +56,8 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
 
 
 
+
+
     protected slots:
     void updateImage();
 
@@ -147,6 +149,8 @@ class PQAPPLICATIONCOMPONENTS_EXPORT Qvis2DTransferFunctionWidget : public QvisA
            //TBD convert space
    	void setRegionValue(int index, double value, vtkTwoDTransferFunction::regionvalue v);
    	void setRegionMode(int index, TransferFnMode mo);
+
+
 
 
    	void setFunctionRange(double range[2]);

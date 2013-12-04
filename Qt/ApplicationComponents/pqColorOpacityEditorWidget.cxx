@@ -723,17 +723,22 @@ void pqColorOpacityEditorWidget::showTwoDHistogram()
 int siz[2];
 siz[0] = infotwod->dimensions[0];
 siz[1] = infotwod->dimensions[1];
-std::vector<bool> histogramenabled(siz[0]*siz[1], true);
+if (ui.TwoDTransferFunctionEditor->histogramEnabled.size() != siz[0]*siz[1])
+  {
+  ui.TwoDTransferFunctionEditor->histogramEnabled.clear();
+  ui.TwoDTransferFunctionEditor->histogramEnabled.resize(siz[0]*siz[1],true);
+  }
+
 
 
            pqTwoDHistogramDialog dialog(this, &(infotwod->values),
                     siz,
-                    &(histogramenabled), &logscale);
+                    &(ui.TwoDTransferFunctionEditor->histogramEnabled), &logscale);
 
            dialog.exec();
 
           ui.TwoDTransferFunctionEditor->generateHistogramBackground(infotwod->getDimensionAtIndex(0),
-              infotwod->getDimensionAtIndex(1), infotwod->values, histogramenabled,logscale);
+              infotwod->getDimensionAtIndex(1), infotwod->values, ui.TwoDTransferFunctionEditor->histogramEnabled,logscale);
   }
 
 //-----------------------------------------------------------------------------

@@ -54,6 +54,12 @@ public:
   void generateHistogramBackground(int width, int height, std::vector<int> &array, std::vector<bool> &enabledBins, bool logScale);
 
   void removeHistogram();
+
+
+
+  std::vector<bool> histogramEnabled;
+
+
 protected slots :
 
   void onTFModeChanged(int index);
