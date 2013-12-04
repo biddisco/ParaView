@@ -111,12 +111,9 @@ Qvis2DTransferFunctionWidget::Region Qvis2DTransferFunctionWidget::getRegion(int
 }
 
 
-/*
- *   ((p-r1Min)/(r1Max-r1Min))*(r2Max-r2Min)+r2Min
-      ((p-0)/(1))*(r2Max-r2Min)+r2Min
- */
 
-//TBD convert space
+
+
 double Qvis2DTransferFunctionWidget::getRegionValue(int index, vtkTwoDTransferFunction::regionvalue value){
   double xshift = this->transferFunction->GetRangeAtIndex(0);
       double yshift = this->transferFunction->GetRangeAtIndex(2);
@@ -493,20 +490,16 @@ void Qvis2DTransferFunctionWidget::createScalarColorBackground()
         {
         int r = (int)c[i*3]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
             255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-        r = int (double(255-qRed(scaledhisto.pixel(i,j)))/255.0*double(r));/* +
-            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(r);*/
-        /*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j])*double(qRed(scaledhisto.pixel(i,j)));/* +
-            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(r);*/
+        r = int (double(255-qRed(scaledhisto.pixel(i,j)))/255.0*double(r));
+
 
         int g = (int)c[i*3+1]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
             255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-        g = int (double(255-qGreen(scaledhisto.pixel(i,j)))/255.0*double(g));/* +
-            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(g);*/
+        g = int (double(255-qGreen(scaledhisto.pixel(i,j)))/255.0*double(g));
 
         int b = (int)c[i*3+2]*this->backgroundOpacityValues[i*this->contentsRect().height()+j]+
             255*(1-this->backgroundOpacityValues[i*this->contentsRect().height()+j]);
-        b = int (double(255-qBlue(scaledhisto.pixel(i,j)))/255.0*double(b));/* +
-            this->backgroundOpacityValues[i*this->contentsRect().height()+j]*double(b);*/
+        b = int (double(255-qBlue(scaledhisto.pixel(i,j)))/255.0*double(b));
 
 
         image.setPixel(i,this->contentsRect().height()-j-1,qRgb(r,g,b));
