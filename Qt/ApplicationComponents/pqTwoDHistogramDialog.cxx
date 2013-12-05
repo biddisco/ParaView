@@ -16,10 +16,10 @@ pqTwoDHistogramDialog::pqTwoDHistogramDialog(QWidget *widgetParent, std::vector<
 	QDialog(widgetParent)
   {
 
-  temphistogram = 0;
-  histogramSize[0] = size[0];
-  histogramSize[1] = size[1];
-  finalHistogramEnabled = 0;
+  this->temphistogram = 0;
+  this->histogramSize[0] = size[0];
+  this->histogramSize[1] = size[1];
+  this->finalHistogramEnabled = 0;
   this->histogram = hist;
 
 
@@ -39,17 +39,17 @@ pqTwoDHistogramDialog::pqTwoDHistogramDialog(QWidget *widgetParent, std::vector<
   this->connect(this->dialogUi->Reset, SIGNAL(clicked()), this,
       SLOT(reset()));
 
-  finalHistogramEnabled = histogramEn;
-  histogramEnabled.resize(size[0]*size[1]);
+  this->finalHistogramEnabled = histogramEn;
+  this->histogramEnabled.resize(size[0]*size[1]);
   for (int i = 0; i < size[0]*size[1]; i++)
 	{
-	histogramEnabled[i] = finalHistogramEnabled->at(i);
+    this->histogramEnabled[i] = this->finalHistogramEnabled->at(i);
 	}
   this->finallogScale = logScal;
   this->logScale = *logScal;
 
 
-  this->dialogUi->TwoDHistogramWidget->SetData(&histogramEnabled, histogram,
+  this->dialogUi->TwoDHistogramWidget->SetData(&this->histogramEnabled, this->histogram,
 	  this->histogramSize[0],this->histogramSize[1], *logScal);
 
 
@@ -66,7 +66,7 @@ void pqTwoDHistogramDialog::resizeEvent(QResizeEvent* event)
 
 void pqTwoDHistogramDialog::setHistogramBools()
   {
-  int tempsize = histogramSize[0]*histogramSize[1];
+  int tempsize = this->histogramSize[0]*this->histogramSize[1];
   for (int i = 0; i < tempsize; i++)
 	{
 	this->finalHistogramEnabled->at(i) = this->histogramEnabled[i];
@@ -92,7 +92,7 @@ void pqTwoDHistogramDialog::reject()
 void pqTwoDHistogramDialog::accept()
   {
   acceptChanges();
-  *(this->finallogScale) = logScale;
+  *(this->finallogScale) = this->logScale;
   QDialog::accept();
   }
 
@@ -112,14 +112,14 @@ pqTwoDHistogramDialog::~pqTwoDHistogramDialog()
 
 void pqTwoDHistogramDialog::useLogScale()
   {
-  logScale = true;
+  this->logScale = true;
   this->dialogUi->TwoDHistogramWidget->useLogScale();
   this->dialogUi->stackedWidget->setCurrentIndex(1);
   }
 
 void pqTwoDHistogramDialog::disableLogScale()
   {
-  logScale = false;
+  this->logScale = false;
   this->dialogUi->TwoDHistogramWidget->disableLogScale();
   this->dialogUi->stackedWidget->setCurrentIndex(0);
   }

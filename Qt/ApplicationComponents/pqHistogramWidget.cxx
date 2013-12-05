@@ -10,12 +10,12 @@ pqHistogramWidget::pqHistogramWidget()
   this->histogramEnabled = 0;
   this->histogram = 0;
   this->histogramSize = 0;
-  logScale = false;
-  currentHistogramImage = 0;
-  currentMax = 0;
-  enabledBarsHeight = 0;
-  currentUnEnabledMax = 0;
-  enabledBarsHeightFraction = 0;
+  this->logScale = false;
+  this->currentHistogramImage = 0;
+  this->currentMax = 0;
+  this->enabledBarsHeight = 0;
+  this->currentUnEnabledMax = 0;
+  this->enabledBarsHeightFraction = 0;
   }
 
 pqHistogramWidget::pqHistogramWidget(QWidget* parentObject)
@@ -23,12 +23,12 @@ pqHistogramWidget::pqHistogramWidget(QWidget* parentObject)
   this->histogramEnabled = 0;
   this->histogram = 0;
   this->histogramSize = 0;
-  logScale = false;
-  currentHistogramImage = 0;
-  currentMax = 0;
-  enabledBarsHeight = 0;
-  currentUnEnabledMax = 0;
-  enabledBarsHeightFraction = 0;
+  this->logScale = false;
+  this->currentHistogramImage = 0;
+  this->currentMax = 0;
+  this->enabledBarsHeight = 0;
+  this->currentUnEnabledMax = 0;
+  this->enabledBarsHeightFraction = 0;
   }
 
 void pqHistogramWidget::SetData(std::vector<bool>* histogramEnable, std::vector<int>* histogra,
@@ -58,14 +58,14 @@ void pqHistogramWidget::useLogScale()
 
 void pqHistogramWidget::disableLogScale()
   {
-  logScale = false;
+  this->logScale = false;
   createPixmap();
   this->update();
   }
 
 bool pqHistogramWidget::getEnabled(int index)
   {
-  return histogramEnabled->at(index);
+  return this->histogramEnabled->at(index);
   }
 
 bool pqHistogramWidget::getLogScale()
@@ -103,21 +103,21 @@ void pqHistogramWidget::createPixmap()
 
   //get max value
   int max = 0;
-  currentUnEnabledMax = 0;
+  this->currentUnEnabledMax = 0;
   for (int i = 0; i < width; i++)
 	{
-	if (histogram->at(i) > max && histogramEnabled->at(i))
-	  max = histogram->at(i);
-	if (histogram->at(i) > this->currentUnEnabledMax && !histogramEnabled->at(i))
-	  this->currentUnEnabledMax = histogram->at(i);
+	if (this->histogram->at(i) > max && this->histogramEnabled->at(i))
+	  max = this->histogram->at(i);
+	if (this->histogram->at(i) > this->currentUnEnabledMax && !this->histogramEnabled->at(i))
+	  this->currentUnEnabledMax = this->histogram->at(i);
 	}
   currentMax = max;
 
   float scale;
-  if (logScale)
-	scale = float(height - enabledBarsHeight) / float(log10((double) (max)));
+  if (this->logScale)
+	scale = float(height - this->enabledBarsHeight) / float(log10((double) (max)));
   else
-	scale = float(height - enabledBarsHeight) / float((double) (max));
+	scale = float(height - this->enabledBarsHeight) / float((double) (max));
 
   QImage* image = new QImage(QSize(width, height), QImage::Format_RGB32);
 
@@ -126,8 +126,8 @@ void pqHistogramWidget::createPixmap()
   for (int i = 0; i < width; i++)
 	{
 	int end = getTopBinPixel(i, scale);
-	QRgb color = histogramEnabled->at(i) ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
-	int value = histogram->at(i);
+	QRgb color = this->histogramEnabled->at(i) ? qRgb(200, 0, 0) : qRgb(100, 0, 0);
+	int value = this->histogram->at(i);
 	for (int j = height - 1; j >= end; j--)
 	  {
 	  image->setPixel(i, j, color);
@@ -136,10 +136,10 @@ void pqHistogramWidget::createPixmap()
 
   for (int i = 0; i < width; i++)
 	{
-	image->setPixel(i, enabledBarsHeight, qRgb(0, 0, 255));
+	image->setPixel(i, this->enabledBarsHeight, qRgb(0, 0, 255));
 	}
 
-  unscaledImage = *image;
+  this->unscaledImage = *image;
 
   *image = image->scaled(this->contentsRect().width(), height,
 	  Qt::IgnoreAspectRatio, Qt::FastTransformation);
@@ -162,7 +162,7 @@ void pqHistogramWidget::drawBin(QRgb color, int bin, int endCoord)
 	}
 
   //make sure the blue line doesn't disappear
-  this->unscaledImage.setPixel(bin, enabledBarsHeight, qRgb(0, 0, 255));
+  this->unscaledImage.setPixel(bin, this->enabledBarsHeight, qRgb(0, 0, 255));
 
   scaleAndDraw();
 
@@ -171,7 +171,7 @@ void pqHistogramWidget::drawBin(QRgb color, int bin, int endCoord)
 void pqHistogramWidget::scaleAndDraw()
   {
   QImage* image = new QImage(
-	  unscaledImage.scaled(this->contentsRect().width(), this->contentsRect().height(),
+      this->unscaledImage.scaled(this->contentsRect().width(), this->contentsRect().height(),
 		  Qt::IgnoreAspectRatio, Qt::FastTransformation));
   this->setPixmap(image);
   }
@@ -179,18 +179,18 @@ void pqHistogramWidget::scaleAndDraw()
 void pqHistogramWidget::updatePixmap(int bin)
   {
   QRgb color;
-  if (histogramEnabled->at(bin))
+  if (this->histogramEnabled->at(bin))
 	color = qRgb(200, 0, 0);
   else
 	color = qRgb(100, 0, 0);
 
   float scale;
-  if (logScale)
-	scale = float(this->contentsRect().height() - enabledBarsHeight)
-		/ float(log10((double) (currentMax)));
+  if (this->logScale)
+	scale = float(this->contentsRect().height() - this->enabledBarsHeight)
+		/ float(log10((double) (this->currentMax)));
   else
-	scale = float(this->contentsRect().height() - enabledBarsHeight)
-		/ float(currentMax);
+	scale = float(this->contentsRect().height() - this->enabledBarsHeight)
+		/ float(this->currentMax);
 
   int endCoord = getTopBinPixel(bin, scale);
 
@@ -203,32 +203,32 @@ int pqHistogramWidget::getTopBinPixel(int bin, float scale)
 
   int finalheight = 0;
 
-  if (histogram->at(bin) == 0)
+  if (this->histogram->at(bin) == 0)
 	{
 	return this->contentsRect().height();
 	}
 
-  if (!histogramEnabled->at(bin) && histogram->at(bin) > currentMax)
+  if (!this->histogramEnabled->at(bin) && this->histogram->at(bin) > this->currentMax)
 	{
-	if (logScale)
-	  finalheight = float(enabledBarsHeight)
-		  - float(enabledBarsHeight)
+	if (this->logScale)
+	  finalheight = float(this->enabledBarsHeight)
+		  - float(this->enabledBarsHeight)
 			  * std::max(
-				  (double) (log10(float(histogram->at(bin) - currentMax))
-					  / log10(float(currentUnEnabledMax - currentMax))), 0.0);
+				  (double) (log10(float(this->histogram->at(bin) - this->currentMax))
+					  / log10(float(this->currentUnEnabledMax - this->currentMax))), 0.0);
 	else
-	  finalheight = float(enabledBarsHeight)
-		  - float(enabledBarsHeight)
-			  * (float(histogram->at(bin) - currentMax)
-				  / float(currentUnEnabledMax - currentMax));
+	  finalheight = float(this->enabledBarsHeight)
+		  - float(this->enabledBarsHeight)
+			  * (float(this->histogram->at(bin) - this->currentMax)
+				  / float(this->currentUnEnabledMax - this->currentMax));
 	}
   else
 	{
-	if (logScale)
+	if (this->logScale)
 	  finalheight = int(
-		  scale * std::max((double) log10(float(histogram->at(bin))), 0.0));
+		  scale * std::max((double) log10(float(this->histogram->at(bin))), 0.0));
 	else
-	  finalheight = int(scale * float(histogram->at(bin)));
+	  finalheight = int(scale * float(this->histogram->at(bin)));
 
 	finalheight = this->contentsRect().height() - finalheight;
 
@@ -244,9 +244,9 @@ void pqHistogramWidget::updateAllBinColumns()
 
 void pqHistogramWidget::reset()
   {
-  for (int i = 0; i< histogramSize; i++)
+  for (int i = 0; i< this->histogramSize; i++)
     {
-    histogramEnabled->at(i) = true;
+    this->histogramEnabled->at(i) = true;
     }
   createPixmap();
   this->update();
@@ -259,14 +259,14 @@ void pqHistogramWidget::mousePressEvent(QMouseEvent *e)
   int selectedBin = int(
 	  float(e->x()) * (float(this->histogramSize) / float(width)));
 
-  if (histogramSize > selectedBin)
+  if (this->histogramSize > selectedBin)
 	{
-	histogramEnabled->at(selectedBin) = !histogramEnabled->at(selectedBin);
+    this->histogramEnabled->at(selectedBin) = !this->histogramEnabled->at(selectedBin);
 	}
-  if (selectedBin >= histogramSize || selectedBin < 0)
+  if (selectedBin >= this->histogramSize || selectedBin < 0)
 	{
 	std::cout << "selectedbin error" << std::endl;
-	if (selectedBin > histogramSize)
+	if (selectedBin > this->histogramSize)
 	  {
 	  selectedBin = histogramSize - 1;
 	  std::cout << "selected bin too high. Bin set to histogramSize-1"
@@ -279,8 +279,8 @@ void pqHistogramWidget::mousePressEvent(QMouseEvent *e)
 	  }
 	}
 
-  if ((histogramEnabled->at(selectedBin) && histogram->at(selectedBin) > currentMax)
-	  || (!histogramEnabled->at(selectedBin) && histogram->at(selectedBin) == currentMax)) //TBD fix bug (what if 2 histograms the same
+  if ((this->histogramEnabled->at(selectedBin) && this->histogram->at(selectedBin) > this->currentMax)
+	  || (!this->histogramEnabled->at(selectedBin) && this->histogram->at(selectedBin) == this->currentMax)) //TBD fix bug (what if 2 histograms the same
 	updateAllBinColumns();
   else
 	updatePixmap(selectedBin);
@@ -296,9 +296,9 @@ void pqHistogramWidget::mouseDoubleClickEvent(QMouseEvent *e)
 
   int y = e->y();
 
-  float scale = float(this->contentsRect().height() - enabledBarsHeight)
-	  / float(currentMax);
-  for (int i = 0; i < histogramSize; i++)
+  float scale = float(this->contentsRect().height() - this->enabledBarsHeight)
+	  / float(this->currentMax);
+  for (int i = 0; i < this->histogramSize; i++)
 	{
 	int top = getTopBinPixel(i, scale);
 	if (top < y)
@@ -335,7 +335,7 @@ void pqHistogramWidget::paintEvent(QPaintEvent *e)
   QRect dirtyRect(QPoint(0, 0),
 	  QPoint(this->contentsRect().width() - 1, this->contentsRect().height() - 1));
 
-  painter.drawImage(dirtyRect, *currentHistogramImage, dirtyRect);
+  painter.drawImage(dirtyRect, *this->currentHistogramImage, dirtyRect);
   }
 
 void pqHistogramWidget::resizeEvent(QResizeEvent* event)

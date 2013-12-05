@@ -15,9 +15,9 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hi
 	QDialog(widgetParent)
   {
 
-  temphistogram = 0;
-  histogramSize = size;
-  finalHistogramEnabled = 0;
+  this->temphistogram = 0;
+  this->histogramSize = size;
+  this->finalHistogramEnabled = 0;
   this->histogram = hist;
 
   this->enabledBarsHeightFraction = enabledBarsHeighfrac;
@@ -38,19 +38,19 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hi
   this->connect(this->dialogUi->Reset, SIGNAL(clicked()), this,
       SLOT(reset()));
 
-  finalHistogramEnabled = histogramEn;
-  histogramEnabled.resize(size);
+  this->finalHistogramEnabled = histogramEn;
+  this->histogramEnabled.resize(size);
   for (int i = 0; i < size; i++)
 	{
-	histogramEnabled[i] = finalHistogramEnabled->at(i);
+    this->histogramEnabled[i] = this->finalHistogramEnabled->at(i);
 	}
   this->finallogScale = logScal;
   this->logScale = *logScal;
 
   this->histogramSize = size;
 
-  this->dialogUi->HistogramWidget->SetData(&histogramEnabled, histogram,
-	  this->histogramSize, *logScal, *enabledBarsHeightFraction);
+  this->dialogUi->HistogramWidget->SetData(&this->histogramEnabled, this->histogram,
+	  this->histogramSize, *logScal, *this->enabledBarsHeightFraction);
 
 
   this->dialogUi->stackedWidget->setCurrentIndex(0);
@@ -66,7 +66,7 @@ void pqHistogramDialog::resizeEvent(QResizeEvent* event)
 
 void pqHistogramDialog::setHistogramBools()
   {
-  for (int i = 0; i < histogramSize; i++)
+  for (int i = 0; i < this->histogramSize; i++)
 	{
 	this->finalHistogramEnabled->at(i) = this->histogramEnabled[i];
 	}
@@ -91,7 +91,7 @@ void pqHistogramDialog::reject()
 void pqHistogramDialog::accept()
   {
   acceptChanges();
-  *(this->finallogScale) = logScale;
+  *(this->finallogScale) = this->logScale;
   QDialog::accept();
   }
 
@@ -111,14 +111,14 @@ pqHistogramDialog::~pqHistogramDialog()
 
 void pqHistogramDialog::useLogScale()
   {
-  logScale = true;
+  this->logScale = true;
   this->dialogUi->HistogramWidget->useLogScale();
   this->dialogUi->stackedWidget->setCurrentIndex(1);
   }
 
 void pqHistogramDialog::disableLogScale()
   {
-  logScale = false;
+  this->logScale = false;
   this->dialogUi->HistogramWidget->disableLogScale();
   this->dialogUi->stackedWidget->setCurrentIndex(0);
   }
