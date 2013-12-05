@@ -1584,6 +1584,27 @@ void pqColorOpacityEditorWidget::hideTwoDTransferFunction()
   ui.TwoDTransferFunctionEditor->hide();
   ui.DisableTwoDTransferFunction->setChecked(false);
   ui.HistogramDialog->hide();
+  ui.OpacityEditor->hide();
+
+  pqDataRepresentation* repr =
+      pqActiveObjects::instance().activeRepresentation();
+
+  if (repr->getProxy()->GetProperty("IsScalarGaussianFunction"))
+    {
+    repr->getProxy()->UpdatePropertyInformation(
+        repr->getProxy()->GetProperty("IsScalarGaussianFunction"));
+    int isGaussian;
+    vtkSMPropertyHelper(repr->getProxy(), "IsScalarGaussianFunction").Get(
+        &isGaussian, 1);
+    if (isGaussian)
+      {
+      ui.ScalarGaussianOpacityEditor->show();
+      }
+    else
+      {
+      ui.OpacityEditor->show();
+      }
+    }
   }
 
 void pqColorOpacityEditorWidget::showTwoDTransferFunction()
@@ -1604,6 +1625,8 @@ void pqColorOpacityEditorWidget::showTwoDTransferFunction()
     }
   ui.TwoDTransferFunctionEditor->show();
   ui.HistogramDialog->show();
+  ui.OpacityEditor->hide();
+  ui.ScalarGaussianOpacityEditor->hide();
 
   }
 
