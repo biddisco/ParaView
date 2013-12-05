@@ -84,20 +84,20 @@ vtkImageVolumeRepresentation::vtkImageVolumeRepresentation()
   //this->GradientRange->SetNumberOfComponents(2);
   // GradientRange[0] = 0.0;
   // GradientRange[1] = 1.0;
-  GradientRange[0] = 0;
-  GradientRange[1] = 1;
+  this->GradientRange[0] = 0;
+  this->GradientRange[1] = 1;
 
-  numbinsX = 100;
-  HistogramBins = 100;
+  this->numbinsX = 100;
+  this->HistogramBins = 100;
 
-  connected = false;
-  HistogramOutOfDate = true;
-  GradientRangeOutOfDate = true;
+  this->connected = false;
+  this->HistogramOutOfDate = true;
+  this->GradientRangeOutOfDate = true;
 
-  GradientRangeFirstTimeStartup = true;
-  GradientHistogramFirstTimeStartup = true;
-  TwoDHistogramFirstTimeStartup = true;
-  TwoDHistogramOutOfDate = true;
+  this->GradientRangeFirstTimeStartup = true;
+  this->GradientHistogramFirstTimeStartup = true;
+  this->TwoDHistogramFirstTimeStartup = true;
+  this->TwoDHistogramOutOfDate = true;
   this->ExecuteOnClient = true;
 }
 
@@ -474,14 +474,7 @@ vtkImageVolumeRepresentation::SetShade(bool val)
   this->Property->SetShade(val);
 }
 
-/*
- void vtkImageVolumeRepresentation::SetHistogramBins(int nbins)
- {
- this->HistogramBins =  nbins;
- if (connected)
- AccumulateFilter->UpdateWholeExtent();
- }
- */
+
 
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SetIndependantComponents(bool val)
@@ -546,11 +539,11 @@ void vtkImageVolumeRepresentation::updateGradientHistogram()
     this->AccumulateFilter->SetInputArrayToProcess(0, 0, 0,
            vtkDataObject::FIELD_ASSOCIATION_POINTS, newname.str().c_str());
 
-    AccumulateFilter->Update();
+    this->AccumulateFilter->Update();
 
 
 
-    GradientHistogram = AccumulateFilter->GetOutput();
+    this->GradientHistogram = this->AccumulateFilter->GetOutput();
   }
 
 }
@@ -624,7 +617,7 @@ void vtkImageVolumeRepresentation::updateGradRange()
     // Get the gradient output
     vtkImageData *gradient = this->GradientFilter->GetOutput();
     // Get the gradient array
-    vtkDataArray *grads = gradient->GetPointData()->GetArray(ColorArrayName); // this->GradientArrayName);
+    vtkDataArray *grads = gradient->GetPointData()->GetArray(this->ColorArrayName); // this->GradientArrayName);
     if (!grads)
       {
       grads = gradient->GetPointData()->GetScalars();
@@ -649,41 +642,41 @@ void vtkImageVolumeRepresentation::updateGradRange()
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::SaveScalarData()
   {
-  GradientAndScalarData->GetPointData()->AddArray(this->CacheKeeper->GetOutput()->GetFieldData()->GetArray(ColorArrayName));
+  this->GradientAndScalarData->GetPointData()->AddArray(this->CacheKeeper->GetOutput()->GetFieldData()->GetArray(this->ColorArrayName));
   }
 
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateGradientRange()
 {
-  if (GradientRangeFirstTimeStartup)
+  if (this->GradientRangeFirstTimeStartup)
     {
-      GradientRangeFirstTimeStartup = false;
+    this->GradientRangeFirstTimeStartup = false;
       return;
     }
-  if (this->ExecuteOnClient && !GradientFilter)
+  if (this->ExecuteOnClient && !this->GradientFilter)
     {
     this->GradientFilter = vtkSmartPointer<vtkImageGradientMagnitude>::New();
     }
-  if (!GradientRangeOutOfDate)//
+  if (!this->GradientRangeOutOfDate)//
     {
     return;
     }
   updateGradRange();
 
-  GradientRangeOutOfDate = false;
-  HistogramOutOfDate = true;
+  this->GradientRangeOutOfDate = false;
+  this->HistogramOutOfDate = true;
 
 
 }
 //----------------------------------------------------------------------------
 void vtkImageVolumeRepresentation::UpdateHistogram()
 {
-  if (GradientHistogramFirstTimeStartup)
+  if (this->GradientHistogramFirstTimeStartup)
     {
-      GradientHistogramFirstTimeStartup = false;
+    this->GradientHistogramFirstTimeStartup = false;
       return;
     }
-  if (!HistogramOutOfDate)//
+  if (!this->HistogramOutOfDate)//
     {
     return;
     }
@@ -691,17 +684,17 @@ void vtkImageVolumeRepresentation::UpdateHistogram()
     {
     this->AccumulateFilter = vtkSmartPointer<vtkPImageAccumulate>::New();
     }
-  if (GradientRangeOutOfDate )//
+  if (this->GradientRangeOutOfDate )//
     {
       UpdateGradientRange();
-      HistogramOutOfDate = true;
-      TwoDHistogramOutOfDate = true;
+      this->HistogramOutOfDate = true;
+      this->TwoDHistogramOutOfDate = true;
     }
-  if (HistogramOutOfDate)//
+  if (this->HistogramOutOfDate)//
     {
     updateGradientHistogram();
     }
-  HistogramOutOfDate = false;
+  this->HistogramOutOfDate = false;
 }
 
 
@@ -713,21 +706,21 @@ void vtkImageVolumeRepresentation::UpdateTwoDHistogram()
     this->TwoDHistogramFirstTimeStartup = false;
       return;
     }
-  if (!TwoDHistogramOutOfDate)//
+  if (!this->TwoDHistogramOutOfDate)//
     {
     return;
     }
-  if (this->ExecuteOnClient && !TwoDAccumulateFilter)
+  if (this->ExecuteOnClient && !this->TwoDAccumulateFilter)
     {
     this->TwoDAccumulateFilter = vtkSmartPointer<vtkPImageAccumulate>::New();
     }
-  if (GradientRangeOutOfDate)//
+  if (this->GradientRangeOutOfDate)//
     {
       UpdateGradientRange();
-      TwoDHistogramOutOfDate = true;
-      HistogramOutOfDate = true;
+      this->TwoDHistogramOutOfDate = true;
+      this->HistogramOutOfDate = true;
     }
-  if (TwoDHistogramOutOfDate)//
+  if (this->TwoDHistogramOutOfDate)//
     {
     createTwoDHistogram();
     }
