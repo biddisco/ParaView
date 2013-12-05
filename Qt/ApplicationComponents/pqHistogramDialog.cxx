@@ -10,9 +10,10 @@ class pqHistogramDialogUi: public Ui::pqHistogramDialog
   {
   };
 
-pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hist, int size,
-    std::vector<bool>* histogramEn, bool* logScal, float* enabledBarsHeighfrac) :
-	QDialog(widgetParent)
+pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent,
+    std::vector<int>* hist, int size, std::vector<bool>* histogramEn,
+    bool* logScal, float* enabledBarsHeighfrac) :
+    QDialog(widgetParent)
   {
 
   this->temphistogram = 0;
@@ -26,32 +27,31 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hi
   this->dialogUi = new pqHistogramDialogUi;
   this->dialogUi->setupUi(this);
   QPushButton* applyButton = this->dialogUi->Confirmation->button(
-	  QDialogButtonBox::Ok);
+      QDialogButtonBox::Ok);
   this->connect(applyButton, SIGNAL(clicked()), this, SLOT(accept()));
   QPushButton* cancelButton = this->dialogUi->Confirmation->button(
-	  QDialogButtonBox::Cancel);
+      QDialogButtonBox::Cancel);
   this->connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
   this->connect(this->dialogUi->UseLogScale, SIGNAL(clicked()), this,
-	  SLOT(useLogScale()));
+      SLOT(useLogScale()));
   this->connect(this->dialogUi->DisableLogScale, SIGNAL(clicked()), this,
-	  SLOT(disableLogScale()));
-  this->connect(this->dialogUi->Reset, SIGNAL(clicked()), this,
-      SLOT(reset()));
+      SLOT(disableLogScale()));
+  this->connect(this->dialogUi->Reset, SIGNAL(clicked()), this, SLOT(reset()));
 
   this->finalHistogramEnabled = histogramEn;
   this->histogramEnabled.resize(size);
   for (int i = 0; i < size; i++)
-	{
+    {
     this->histogramEnabled[i] = this->finalHistogramEnabled->at(i);
-	}
+    }
   this->finallogScale = logScal;
   this->logScale = *logScal;
 
   this->histogramSize = size;
 
-  this->dialogUi->HistogramWidget->SetData(&this->histogramEnabled, this->histogram,
-	  this->histogramSize, *logScal, *this->enabledBarsHeightFraction);
-
+  this->dialogUi->HistogramWidget->SetData(&this->histogramEnabled,
+      this->histogram, this->histogramSize, *logScal,
+      *this->enabledBarsHeightFraction);
 
   this->dialogUi->stackedWidget->setCurrentIndex(0);
 
@@ -67,9 +67,9 @@ void pqHistogramDialog::resizeEvent(QResizeEvent* event)
 void pqHistogramDialog::setHistogramBools()
   {
   for (int i = 0; i < this->histogramSize; i++)
-	{
-	this->finalHistogramEnabled->at(i) = this->histogramEnabled[i];
-	}
+    {
+    this->finalHistogramEnabled->at(i) = this->histogramEnabled[i];
+    }
   }
 
 void pqHistogramDialog::rejectChanges()
