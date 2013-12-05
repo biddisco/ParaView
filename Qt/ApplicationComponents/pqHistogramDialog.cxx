@@ -104,7 +104,6 @@ pqHistogramDialog::~pqHistogramDialog()
   {
   delete temphistogram;
   delete dialogUi;
-
   }
 
 //drawing related stuff

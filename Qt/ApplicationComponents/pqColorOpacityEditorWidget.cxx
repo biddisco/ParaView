@@ -236,8 +236,8 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(vtkSMProxy* smproxy,
   //----
 
 
-  disableGradientOpac = false;
-  disableTwoDTransferFunc = false;
+  this->disableGradientOpac = false;
+  this->disableTwoDTransferFunc = false;
 
 //  ui.DisableOpacityGradient->setCheckable(true);
   pqDataRepresentation* repr =
