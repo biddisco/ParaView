@@ -60,6 +60,7 @@ void resizeImage(int width, int height);
 protected slots:
 void reject();
 void accept();
+void reset();
 
 void useLogScale();
 void disableLogScale();

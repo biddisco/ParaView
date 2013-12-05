@@ -224,6 +224,16 @@ void pqTwoDHistogramWidget::updatePixmap(int binx, int biny)
 
   }
 
+void pqTwoDHistogramWidget::reset()
+  {
+  int size = histogramEnabled->size();
+  for (int i = 0; i< size; i++)
+    {
+    histogramEnabled->at(i) = true;
+    }
+  createPixmap();
+  this->update();
+  }
 
 
 void pqTwoDHistogramWidget::mousePressEvent(QMouseEvent *e)

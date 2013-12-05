@@ -29,6 +29,7 @@ public:
   void resizeImage(int width, int height);
 
   void paintPixMap();
+  void reset();
 
 protected:
   void mousePressEvent(QMouseEvent*);

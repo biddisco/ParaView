@@ -53,7 +53,6 @@ void resizeImage(int width, int height);
 
     std::vector<int>* histogram;
     std::vector<bool> histogramEnabled;
-    float *enabledBarsHeightFraction;
     void resizeEvent(QResizeEvent* event);
 
 
@@ -61,6 +60,7 @@ void resizeImage(int width, int height);
 protected slots:
 void reject();
 void accept();
+void reset();
 
 void useLogScale();
 void disableLogScale();

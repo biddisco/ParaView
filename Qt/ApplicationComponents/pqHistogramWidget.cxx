@@ -242,6 +242,16 @@ void pqHistogramWidget::updateAllBinColumns()
   createPixmap();
   }
 
+void pqHistogramWidget::reset()
+  {
+  for (int i = 0; i< histogramSize; i++)
+    {
+    histogramEnabled->at(i) = true;
+    }
+  createPixmap();
+  this->update();
+  }
+
 void pqHistogramWidget::mousePressEvent(QMouseEvent *e)
   {
   //switch enabled disabled

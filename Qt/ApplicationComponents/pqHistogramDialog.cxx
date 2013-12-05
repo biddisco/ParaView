@@ -35,6 +35,8 @@ pqHistogramDialog::pqHistogramDialog(QWidget *widgetParent, std::vector<int>* hi
 	  SLOT(useLogScale()));
   this->connect(this->dialogUi->DisableLogScale, SIGNAL(clicked()), this,
 	  SLOT(disableLogScale()));
+  this->connect(this->dialogUi->Reset, SIGNAL(clicked()), this,
+      SLOT(reset()));
 
   finalHistogramEnabled = histogramEn;
   histogramEnabled.resize(size);
@@ -91,6 +93,11 @@ void pqHistogramDialog::accept()
   acceptChanges();
   *(this->finallogScale) = logScale;
   QDialog::accept();
+  }
+
+void pqHistogramDialog::reset()
+  {
+  this->dialogUi->HistogramWidget->reset();
   }
 
 pqHistogramDialog::~pqHistogramDialog()
