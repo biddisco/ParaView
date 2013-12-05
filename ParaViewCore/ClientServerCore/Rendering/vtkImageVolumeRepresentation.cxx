@@ -35,7 +35,6 @@
 #include "vtkPointData.h"
 #include "vtkImageGradientMagnitude.h"
 #include "vtkPImageAccumulate.h"
-//#include "vtkPExtractHistogram.h"
 #include "vtkGaussianPiecewiseFunction.h"
 #include "vtkTwoDTransferFunction.h"
 #include "vtkTable.h"
