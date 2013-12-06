@@ -2,33 +2,39 @@
 ### Add tests for the python web services
 ###
 
+find_package(PythonInterp 2.7)
+if(NOT ${PythonInterp_FOUND})
+  message(STATUS "Sufficient Python version not found, disabling pvweb tests")
+  return()
+endif()
+
 include(ParaViewTestingMacros)
 include(FindPythonModules)
 
 set (pv_pymodule_build_dir ${VTK_BUILD_PYTHON_MODULE_DIR})
 
 # Make sure we can start the DataProber server
-add_test(NAME pvweb-DataProber-StartTest
+add_test(NAME pvweb-nobrowser.DataProber-StartTest
   COMMAND $<TARGET_FILE:pvpython>
   ${pv_pymodule_build_dir}/paraview/web/pv_web_data_prober.py
   #--data-dir ${VTK_TEST_DATA_DIR}
   --data-dir ${PARAVIEW_DATA_ROOT}
   --timeout 1)
-set_tests_properties(pvweb-DataProber-StartTest PROPERTIES LABELS "PARAVIEW")
+set_tests_properties(pvweb-nobrowser.DataProber-StartTest PROPERTIES LABELS "PARAVIEW")
 
 # Make sure we can start the Visualizer server
-add_test(NAME pvweb-Visualizer-StartTest
+add_test(NAME pvweb-nobrowser.Visualizer-StartTest
   COMMAND $<TARGET_FILE:pvpython>
   ${pv_pymodule_build_dir}/paraview/web/pv_web_visualizer.py
   --timeout 1)
-set_tests_properties(pvweb-Visualizer-StartTest PROPERTIES LABELS "PARAVIEW")
+set_tests_properties(pvweb-nobrowser.Visualizer-StartTest PROPERTIES LABELS "PARAVIEW")
 
 # Make sure we can start the FileLoader server
-add_test(NAME pvweb-FileViewer-StartTest
+add_test(NAME pvweb-nobrowser.FileViewer-StartTest
   COMMAND $<TARGET_FILE:pvpython>
   ${pv_pymodule_build_dir}/paraview/web/pv_web_file_loader.py
   --timeout 1)
-set_tests_properties(pvweb-FileViewer-StartTest PROPERTIES LABELS "PARAVIEW")
+set_tests_properties(pvweb-nobrowser.FileViewer-StartTest PROPERTIES LABELS "PARAVIEW")
 
 ###
 ### Add some tests which interact with the WebVisualizer
@@ -47,7 +53,7 @@ add_pvweb_tests("pvweb"
                selenium
   BROWSER      chrome
                firefox
-               ie
+               internet_explorer
                safari
   BASELINE_DIR ${PARAVIEW_DATA_ROOT}/Baseline/WebTesting/ParaView
   TEST_SCRIPTS ${WEB_TESTS_WITH_CHROME}
@@ -81,7 +87,7 @@ add_pvweb_tests("pvweb"
   DEPEND_MODS  selenium
   BROWSER      chrome
                firefox
-               ie
+               internet_explorer
                safari
   TEST_SCRIPTS ${TESTAPP_WEB_TESTS_WITH_CHROME}
   )

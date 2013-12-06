@@ -172,8 +172,11 @@ void pqViewStreamingBehavior::onEndInteractionEvent()
     }
   else
     {
-    this->Timer.start(PQ_STREAMING_INTERVAL);
-    vtkStreamingStatusMacro("View interaction changed. Restart streaming loop.");
+    if (vtkPVView::GetEnableStreaming())
+      {
+      this->Timer.start(PQ_STREAMING_INTERVAL);
+      vtkStreamingStatusMacro("View interaction changed. Restart streaming loop.");
+      }
     }
 }
 
@@ -185,6 +188,11 @@ void pqViewStreamingBehavior::onTimeout()
     {
     vtkSMRenderViewProxy* rvProxy = vtkSMRenderViewProxy::SafeDownCast(
       view->getProxy());
+    if(rvProxy == NULL)
+      {
+      // Not the valid active view. Then do nothing
+      return;
+      }
 
     if (rvProxy->GetSession()->GetPendingProgress() ||
       view->getServer()->isProcessingPending() || this->DelayUpdate)
