@@ -24,6 +24,7 @@
 #include "vtkSMProxyInternals.h"
 #include "vtkSMSession.h"
 #include "vtkTimerLog.h"
+#include "vtkPVImageAccumulateInformation.h"
 
 #include <assert.h>
 
@@ -35,7 +36,9 @@ vtkSMRepresentationProxy::vtkSMRepresentationProxy()
 {
   this->SetExecutiveName("vtkPVDataRepresentationPipeline");
   this->RepresentedDataInformationValid = false;
+  this->RepresentedGradientDataInformationValid = false;
   this->RepresentedDataInformation = vtkPVRepresentedDataInformation::New();
+  this->RepresentedGradientDataInformation = vtkPVImageAccumulateInformation::New();
   this->ProminentValuesInformation = vtkPVProminentValuesInformation::New();
   this->ProminentValuesFraction = -1;
   this->ProminentValuesUncertainty = -1;
@@ -47,6 +50,7 @@ vtkSMRepresentationProxy::~vtkSMRepresentationProxy()
 {
   this->RepresentedDataInformation->Delete();
   this->ProminentValuesInformation->Delete();
+  this->RepresentedGradientDataInformation->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -281,6 +285,7 @@ void vtkSMRepresentationProxy::InvalidateDataInformation()
 {
   this->Superclass::InvalidateDataInformation();
   this->RepresentedDataInformationValid = false;
+  this->RepresentedGradientDataInformationValid = false;
 }
 
 //----------------------------------------------------------------------------
@@ -298,6 +303,23 @@ vtkPVDataInformation* vtkSMRepresentationProxy::GetRepresentedDataInformation()
     }
 
   return this->RepresentedDataInformation;
+}
+
+//----------------------------------------------------------------------------
+vtkPVImageAccumulateInformation* vtkSMRepresentationProxy::GetRepresentedGradientDataInformation()
+{
+ // if (true)
+ //   {
+ //   vtkTimerLog::MarkStartEvent(
+  //    "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
+   // this->RepresentedGradientDataInformation->Initialize();
+    this->GatherInformation(this->RepresentedGradientDataInformation, vtkPVSession::RENDER_SERVER);
+ //   vtkTimerLog::MarkEndEvent(
+  //    "vtkSMRepresentationProxy::GetRepresentedGradientDataInformation");
+    this->RepresentedGradientDataInformationValid = false;
+ //   }
+
+  return this->RepresentedGradientDataInformation;
 }
 
 //----------------------------------------------------------------------------

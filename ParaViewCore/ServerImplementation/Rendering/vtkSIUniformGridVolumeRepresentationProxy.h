@@ -24,6 +24,7 @@
 
 #include "vtkPVServerImplementationRenderingModule.h" //needed for exports
 #include "vtkSIProxy.h"
+#include "vtkVector.h"
 
 class VTKPVSERVERIMPLEMENTATIONRENDERING_EXPORT vtkSIUniformGridVolumeRepresentationProxy : public vtkSIProxy
 {
@@ -33,6 +34,9 @@ public:
     vtkSIProxy);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+
+  vtkGetMacro(GradientRange,vtkVector2d);
+  vtkVector2d GradientRange;
 //BTX
 protected:
   vtkSIUniformGridVolumeRepresentationProxy();

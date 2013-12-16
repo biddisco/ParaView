@@ -1,35 +1,34 @@
 /*=========================================================================
 
-  Program:   ParaView
-  Module:    $RCSfile$
+ Program:   ParaView
+ Module:    $RCSfile$
 
-  Copyright (c) Kitware, Inc.
-  All rights reserved.
-  See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
+ Copyright (c) Kitware, Inc.
+ All rights reserved.
+ See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 // .NAME vtkSMTransferFunctionProxy
 // .SECTION Description
 // vtkSMTransferFunctionProxy is the proxy used for "PVLookupTable",
 // "ColorTransferFunction" and "PiecewiseFunction".
 // It provides utility API to update lookup-table ranges, invert transfer
 // function, etc. that can be used from C++ as well as Python layers.
-
 #ifndef __vtkSMTransferFunctionProxy_h
 #define __vtkSMTransferFunctionProxy_h
 
 #include "vtkSMProxy.h"
 #include "vtkPVServerManagerRenderingModule.h" // needed for export macro
 
-class VTKPVSERVERMANAGERRENDERING_EXPORT vtkSMTransferFunctionProxy : public vtkSMProxy
-{
+class VTKPVSERVERMANAGERRENDERING_EXPORT vtkSMTransferFunctionProxy: public vtkSMProxy
+  {
 public:
-  static vtkSMTransferFunctionProxy* New();
-  vtkTypeMacro(vtkSMTransferFunctionProxy, vtkSMProxy);
+  static vtkSMTransferFunctionProxy* New();vtkTypeMacro(vtkSMTransferFunctionProxy, vtkSMProxy)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
@@ -37,20 +36,62 @@ public:
   // Returns true if rescale was successful.
   // If \c extend is true (false by default), the transfer function range will
   // only be extended as needed to fit the data range.
-  virtual bool RescaleTransferFunction(const double range[2], bool extend=false)
-    { return this->RescaleTransferFunction(range[0], range[1], extend); }
-  virtual bool RescaleTransferFunction(double rangeMin, double rangeMax, bool extend=false);
+  virtual bool RescaleTransferFunction(const double range[2], bool extend =
+      false)
+    {
+    return this->RescaleTransferFunction(range[0], range[1], extend);
+    }
+  virtual bool RescaleTransferFunction(double rangeMin, double rangeMax,
+      bool extend = false);
+
+  virtual bool RescaleGaussianTransferFunction(const double range[2],
+      bool extend = false)
+    {
+    return this->RescaleGaussianTransferFunction(range[0], range[1], extend);
+    }
+  virtual bool RescaleGaussianTransferFunction(double rangeMin, double rangeMax,
+      bool extend = false);
+
+  virtual bool RescaleTwoDTransferFunction(const double srange[2],
+      const double grange[2], bool extend = false)
+    {
+    return this->RescaleTwoDTransferFunction(srange[0], srange[1], grange[0],
+        grange[1], extend);
+    }
+  virtual bool RescaleTwoDTransferFunction(double scalarRangeMin,
+      double scalarRangeMax, double gradientRangeMin, double gradientRangeMax,
+      bool extend);
 
   // Description:
   // Safely call RescaleTransferFunction() after casting the proxy to
   // appropriate type.
-  static bool RescaleTransferFunction(vtkSMProxy* proxy,
-    double rangeMin, double rangeMax, bool extend=false);
-  static bool RescaleTransferFunction(vtkSMProxy* proxy,
-    const double range[2], bool extend=false)
+  static bool RescaleTransferFunction(vtkSMProxy* proxy, double rangeMin,
+      double rangeMax, bool extend = false);
+  static bool RescaleTransferFunction(vtkSMProxy* proxy, const double range[2],
+      bool extend = false)
     {
-    return vtkSMTransferFunctionProxy::RescaleTransferFunction(
-      proxy, range[0], range[1], extend);
+    return vtkSMTransferFunctionProxy::RescaleTransferFunction(proxy, range[0],
+        range[1], extend);
+    }
+  static bool RescaleGaussianTransferFunction(vtkSMProxy* proxy,
+      double rangeMin, double rangeMax, bool extend = false);
+  static bool RescaleGaussianTransferFunction(vtkSMProxy* proxy,
+      const double range[2], bool extend = false)
+    {
+    return vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(proxy,
+        range[0], range[1], extend);
+
+    }
+
+  static bool RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+      double scalarRangeMin, double scalarRangeMax, double gradientRangeMin,
+      double gradientRangeMax, bool extend = false);
+  static bool RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+      const double srange[2], const double grange[2], bool extend = false)
+    {
+    return vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(proxy,
+        srange[0], srange[1], grange[0], grange[1], extend);
+
     }
 
   // Description:
@@ -68,18 +109,21 @@ public:
   // linear- to log-mode. If \c inverse is true, the operation is reversed i.e.
   // the control points are normalized in log-space and interpolated in
   // linear-space, useful when converting from log- to linear-mode.
-  virtual bool MapControlPointsToLogSpace(bool inverse=false);
+  virtual bool MapControlPointsToLogSpace(bool inverse = false);
   virtual bool MapControlPointsToLinearSpace()
-    { return this->MapControlPointsToLogSpace(true); }
+    {
+    return this->MapControlPointsToLogSpace(true);
+    }
 
   // Description:
   // Safely call MapControlPointsToLogSpace() after casting the proxy to the
   // appropriate type.
-  static bool MapControlPointsToLogSpace(vtkSMProxy* proxy, bool inverse=false)
+  static bool MapControlPointsToLogSpace(vtkSMProxy* proxy,
+      bool inverse = false)
     {
-    vtkSMTransferFunctionProxy* self =
-      vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-    return self? self->MapControlPointsToLogSpace(inverse) : false;
+    vtkSMTransferFunctionProxy* self = vtkSMTransferFunctionProxy::SafeDownCast(
+        proxy);
+    return self ? self->MapControlPointsToLogSpace(inverse) : false;
     }
 
   // Description:
@@ -102,9 +146,9 @@ public:
   // type.
   static bool ApplyColorMap(vtkSMProxy* proxy, const char* text)
     {
-    vtkSMTransferFunctionProxy* self =
-      vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-    return self? self->ApplyColorMap(text) : false;
+    vtkSMTransferFunctionProxy* self = vtkSMTransferFunctionProxy::SafeDownCast(
+        proxy);
+    return self ? self->ApplyColorMap(text) : false;
     }
 
   // Description:
@@ -112,9 +156,9 @@ public:
   // type.
   static bool ApplyColorMap(vtkSMProxy* proxy, vtkPVXMLElement* xml)
     {
-    vtkSMTransferFunctionProxy* self =
-      vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-    return self? self->ApplyColorMap(xml) : false;
+    vtkSMTransferFunctionProxy* self = vtkSMTransferFunctionProxy::SafeDownCast(
+        proxy);
+    return self ? self->ApplyColorMap(xml) : false;
     }
 
   // Description:
@@ -127,9 +171,9 @@ public:
   // type.
   static bool SaveColorMap(vtkSMProxy* proxy, vtkPVXMLElement* xml)
     {
-    vtkSMTransferFunctionProxy* self =
-      vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-    return self? self->SaveColorMap(xml) : false;
+    vtkSMTransferFunctionProxy* self = vtkSMTransferFunctionProxy::SafeDownCast(
+        proxy);
+    return self ? self->SaveColorMap(xml) : false;
     }
 
   // Description:
@@ -141,12 +185,12 @@ public:
   // Description:
   // Safely call FindScalarBarRepresentation(..) after casting the proxy to the
   // appropriate type.
-  static vtkSMProxy* FindScalarBarRepresentation(
-    vtkSMProxy* proxy, vtkSMProxy* view)
+  static vtkSMProxy* FindScalarBarRepresentation(vtkSMProxy* proxy,
+      vtkSMProxy* view)
     {
-    vtkSMTransferFunctionProxy* self =
-      vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-    return self? self->FindScalarBarRepresentation(view) : NULL;
+    vtkSMTransferFunctionProxy* self = vtkSMTransferFunctionProxy::SafeDownCast(
+        proxy);
+    return self ? self->FindScalarBarRepresentation(view) : NULL;
     }
 
 //BTX
@@ -158,6 +202,6 @@ private:
   vtkSMTransferFunctionProxy(const vtkSMTransferFunctionProxy&); // Not implemented
   void operator=(const vtkSMTransferFunctionProxy&); // Not implemented
 //ETX
-};
+  };
 
 #endif

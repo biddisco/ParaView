@@ -4,6 +4,7 @@ vtk_module(vtkPVServerManagerRendering
   DEPENDS
     vtkPVServerManagerCore
     vtkPVServerImplementationRendering
+    vtkPVClientServerCoreDefault
   PRIVATE_DEPENDS
     vtksys
   TEST_LABELS

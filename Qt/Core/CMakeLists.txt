@@ -91,6 +91,10 @@ set(Module_SRCS
   pqFlatTreeViewEventTranslator.h
   pqFormBuilder.cxx
   pqFormBuilder.h
+  pqGaussianOpacityFunction.cxx
+  pqGaussianOpacityFunction.h
+  pqGradientOpacityFunction.cxx
+  pqGradientOpacityFunction.h
   pqGraphLayoutStrategyInterface.cxx
   pqGraphLayoutStrategyInterface.h
   pqHelperProxyRegisterUndoElement.cxx
@@ -219,6 +223,8 @@ set(Module_SRCS
   pqTimeKeeper.h
   pqTreeLayoutStrategyInterface.cxx
   pqTreeLayoutStrategyInterface.h
+  pqTwoDTransferFunction.cxx
+  pqTwoDTransferFunction.h
   pqUndoStack.cxx
   pqUndoStack.h
   pqView.cxx
@@ -267,6 +273,8 @@ set (Module_MOC_HDRS
   pqFileDialogRecentDirsModel.h
   pqFlatTreeViewEventTranslator.h
   pqFormBuilder.h
+  pqGaussianOpacityFunction.h
+  pqGradientOpacityFunction.h
   pqHelperProxyStateLoader.h
   pqHistogramTableModel.h
   pqInterfaceTracker.h
@@ -318,6 +326,7 @@ set (Module_MOC_HDRS
   pqStandardViewModules.h
   pqTextRepresentation.h
   pqTimeKeeper.h
+  pqTwoDTransferFunction.h
   pqUndoStack.h
   pqViewExporterManager.h
   pqView.h

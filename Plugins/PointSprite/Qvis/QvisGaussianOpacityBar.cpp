@@ -246,6 +246,7 @@ QvisGaussianOpacityBar::paintToPixmap(int w,int h)
   QPen   whitepen(Qt::white, 2);
 
   QPainter painter(pix);
+  std::cout <<"pix width " << pix->width() << std::endl;
   this->paintBackground(painter,w,h);
 
   float dy = 1.0/float(h-1);

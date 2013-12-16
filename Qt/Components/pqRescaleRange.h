@@ -52,7 +52,10 @@ public:
 
   double getMinimum() const;
   double getMaximum() const;
+  double getMinimumGradient() const;
+  double getMaximumGradient() const;
   void setRange(double min, double max);
+  void setGradientRange(double min, double max);
 
 protected slots:
   void validate();

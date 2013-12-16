@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   ParaView
-  Module:    vtkImageVolumeRepresentation.h
+ Program:   ParaView
+ Module:    vtkImageVolumeRepresentation.h
 
-  Copyright (c) Kitware, Inc.
-  All rights reserved.
-  See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
+ Copyright (c) Kitware, Inc.
+ All rights reserved.
+ See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 // .NAME vtkImageVolumeRepresentation - representation for showing image
 // datasets as a volume.
 // .SECTION Description
@@ -20,49 +20,103 @@
 // representation does not support delivery to client (or render server) nodes.
 // In those configurations, it merely delivers a outline for the image to the
 // client and render-server and those nodes simply render the outline.
-
 #ifndef __vtkImageVolumeRepresentation_h
 #define __vtkImageVolumeRepresentation_h
 
 #include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkPVDataRepresentation.h"
+#include "vtkSmartPointer.h"                    //needed for cleanup
 
 class vtkColorTransferFunction;
 class vtkFixedPointVolumeRayCastMapper;
 class vtkImageData;
 class vtkOutlineSource;
 class vtkPiecewiseFunction;
+class vtkGaussianPiecewiseFunction;
+class vtkTwoDTransferFunction;
 class vtkPolyDataMapper;
 class vtkPVCacheKeeper;
 class vtkPVLODVolume;
 class vtkSmartVolumeMapper;
 class vtkVolumeProperty;
+class vtkPImageAccumulate;
+//class vtkImageAccumulate;
+//class vtkPExtractHistogram;
+class vtkImageGradientMagnitude;
+class vtkIntArray;
+class vtkDoubleArray;
+class vtkVariantArray;
 
-class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation : public vtkPVDataRepresentation
-{
+class VTKPVCLIENTSERVERCORERENDERING_EXPORT vtkImageVolumeRepresentation: public vtkPVDataRepresentation
+  {
 public:
-  static vtkImageVolumeRepresentation* New();
-  vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation);
+  static vtkImageVolumeRepresentation* New();vtkTypeMacro(vtkImageVolumeRepresentation, vtkPVDataRepresentation)
+  ;
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // This is same a vtkDataObject::FieldAssociation types so you can use those
   // as well.
   enum AttributeTypes
     {
-    POINT_DATA=0,
-    CELL_DATA=1
+    POINT_DATA = 0,
+    CELL_DATA = 1
     };
 
   // Description:
   // Methods to control scalar coloring. ColorAttributeType defines the
   // attribute type.
-  vtkSetMacro(ColorAttributeType, int);
-  vtkGetMacro(ColorAttributeType, int);
+  vtkSetMacro(ColorAttributeType, int)
+  ;vtkGetMacro(ColorAttributeType, int)
+  ;
 
+  vtkGetMacro(SupportHistogramWidget,bool)
+  ;
   // Description:
   // Pick the array to color with.
-  vtkSetStringMacro(ColorArrayName);
-  vtkGetStringMacro(ColorArrayName);
+  vtkSetStringMacro(ColorArrayName)
+  ;vtkGetStringMacro(ColorArrayName)
+  ;
+
+  vtkGetMacro(GradientRangeOutOfDate,bool)
+  ;vtkGetMacro(HistogramOutOfDate,bool)
+  ;vtkGetMacro(TwoDHistogramOutOfDate,bool)
+  ;
+
+  vtkGetVector2Macro(GradientRange, double)
+  ;
+
+  void getGradientFunctionRange(double* range);
+
+  bool GetIsScalarGaussianFunction();
+  bool GetIsGradientGaussianFunction();
+
+  /*
+   virtual double *GetGradientRange ()
+   {
+   return this->GradientRange;
+   }
+   virtual void GetGradientRange (double &_arg1, double &_arg2)
+   {
+   _arg1 = this->GradientRange[0];
+   _arg2 = this->GradientRange[1];
+   };
+   virtual void GetGradientRange (double _arg[2])
+   {
+   this->GetGradientRange (_arg[0], _arg[1]);
+   }
+   */
+
+  vtkSmartPointer<vtkPImageAccumulate> getHistogram()
+    {
+    //UpdateHistogram();
+    return AccumulateFilter;
+    }
+
+  vtkSmartPointer<vtkPImageAccumulate> getTwoDHistogram()
+    {
+    //UpdateHistogram();
+    return this->TwoDAccumulateFilter;
+    }
 
   // Description:
   // vtkAlgorithm::ProcessRequest() equivalent for rendering passes. This is
@@ -70,7 +124,7 @@ public:
   // representations or ask them to perform certain tasks e.g.
   // PrepareForRendering.
   virtual int ProcessViewRequest(vtkInformationRequestKey* request_type,
-    vtkInformation* inInfo, vtkInformation* outInfo);
+      vtkInformation* inInfo, vtkInformation* outInfo);
 
   // Description:
   // This needs to be called on all instances of vtkGeometryRepresentation when
@@ -97,6 +151,12 @@ public:
   void SetInterpolationType(int val);
   void SetColor(vtkColorTransferFunction* lut);
   void SetScalarOpacity(vtkPiecewiseFunction* pwf);
+  void SetGradientLinearOpacity(vtkPiecewiseFunction* pwf);
+  void SetScalarGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
+  void SetGradientGaussianOpacity(vtkGaussianPiecewiseFunction* pwf);
+  void SetTwoDTransferFunction(vtkTwoDTransferFunction* pwf);
+  void SetSwitchGradientOpacity(bool GaussOrPwf);
+  void SetSwitchScalarOpacity(bool GaussOrPwf);
   void SetScalarOpacityUnitDistance(double val);
   void SetAmbient(double);
   void SetDiffuse(double);
@@ -104,33 +164,90 @@ public:
   void SetSpecularPower(double);
   void SetShade(bool);
   void SetIndependantComponents(bool);
-  
+
+  void SetDisableGradientOpacity(bool disable);
+  void SetDisableTwoDTransferFunction(bool disable);
+  void EnableUseAdjustMapperGradientRangeFactor();
+  void DisableUseAdjustMapperGradientRangeFactor();
+
   //***************************************************************************
   // Forwarded to vtkSmartVolumeMapper.
   void SetRequestedRenderMode(int);
 
+  void UpdateGradientRange();
+  void UpdateHistogram();
+  void UpdateTwoDHistogram();
+  void SetTwoDHistogramOutOfDate();
+  void SetHistogramOutOfDate();
+
+  bool GetDisableGradientOpacity();
+  bool GetDisableTwoDTransferFunction();
+
   // Description:
   // Provides access to the actor used by this representation.
-  vtkPVLODVolume* GetActor() { return this->Actor; }
+  vtkPVLODVolume* GetActor()
+    {
+    return this->Actor;
+    }
+  //vtkDoubleArray* GetGradientRange() { return this->GradientRange;}
 
   // Description:
   // Helper method to pass input image extent information to the view to use in
   // determining the cuts for ordered compositing.
-  static void PassOrderedCompositingInformation(
-    vtkPVDataRepresentation* self, vtkInformation* inInfo);
+  static void PassOrderedCompositingInformation(vtkPVDataRepresentation* self,
+      vtkInformation* inInfo);
+
+  // Description:
+  // Set/Get the name of the array which will be used for gradient opacity mapping
+  vtkSetStringMacro(GradientArrayName)
+  ;vtkGetStringMacro(GradientArrayName)
+  ;
+
+  // Description:
+  // If gradient is a vector filed, then specify the component (0=magnitude)
+  vtkSetMacro(GradientVectorComponent, int)
+  ;vtkGetMacro(GradientVectorComponent, int)
+  ;
 
 //BTX
+  void updateGradRange();
+  void updateGradientHistogram();
+  void createTwoDHistogram();
+
 protected:
   vtkImageVolumeRepresentation();
   ~vtkImageVolumeRepresentation();
+
+  // Description:
+  // Used to determine if the histogram has not been created or belongs to a different data set.
+  bool HistogramOutOfDate;
+  // Description:
+  // Used to determine if the gradient range has not been determined or belongs to a different data set.
+  bool GradientRangeOutOfDate;
+
+  bool TwoDHistogramOutOfDate;
 
   // Description:
   // Fill input port information.
   virtual int FillInputPortInformation(int port, vtkInformation* info);
 
   // Description:
-  virtual int RequestData(vtkInformation*,
-    vtkInformationVector**, vtkInformationVector*);
+  virtual int RequestData(vtkInformation*, vtkInformationVector**,
+      vtkInformationVector*);
+
+  void SaveScalarData();
+
+  void updateGradients();
+
+  int numbinsX;
+  int histogramsize;
+  vtkImageData* GradientHistogram;
+  int* histogram;
+
+  //used to set up the imageaccumulateinformation to send the histogram data to the client.
+  void setInformation();
+
+  //vtkDataArray* grads;
 
   // Description:
   // Adds the representation to the view.  This is called from
@@ -159,17 +276,35 @@ protected:
   vtkPVLODVolume* Actor;
 
   vtkOutlineSource* OutlineSource;
-  vtkPolyDataMapper* OutlineMapper;;
+  vtkPolyDataMapper* OutlineMapper;
+//BTX
+  vtkSmartPointer<vtkImageGradientMagnitude> GradientFilter;
+  vtkSmartPointer<vtkPImageAccumulate> AccumulateFilter;
+  vtkSmartPointer<vtkPImageAccumulate> TwoDAccumulateFilter;
+  vtkSmartPointer<vtkImageData> GradientAndScalarData;
+//ETX
 
   int ColorAttributeType;
   char* ColorArrayName;
+  char *GradientArrayName;
+  int GradientVectorComponent;
   double DataBounds[6];
+  double GradientRange[2];
+  double HistogramGradientRange[2];
+  int HistogramBins;
+  int UseGradientFunction;
+  bool connected;
+  bool SupportHistogramWidget;
+  bool GradientRangeFirstTimeStartup;
+  bool GradientHistogramFirstTimeStartup;
+  bool TwoDHistogramFirstTimeStartup;
+  int ExecuteOnClient;
 
 private:
   vtkImageVolumeRepresentation(const vtkImageVolumeRepresentation&); // Not implemented
   void operator=(const vtkImageVolumeRepresentation&); // Not implemented
 
 //ETX
-};
+  };
 
 #endif

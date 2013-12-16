@@ -1630,6 +1630,44 @@
                       panel_visibility="never" />
             <Property name="ScalarOpacityFunction"
                       panel_visibility="never" />
+            <Property name="GradientLinearOpacityFunction"
+                      panel_visibility="never" />
+            <Property name="GradientRange"
+                      panel_visibility="never" />
+            <Property name="UpdateGradientRange"
+                      panel_visibility="never" />
+            <Property name="UpdateHistogram"
+                      panel_visibility="never" />
+            <Property name="UpdateTwoDHistogram"
+                      panel_visibility="never" />
+            <Property name="EnableUseAdjustMapperGradientRangeFactor"
+                      panel_visibility="never" />
+            <Property name="DisableUseAdjustMapperGradientRangeFactor"
+                      panel_visibility="never" />
+            <Property name="SupportHistogramWidget"
+                      panel_visibility="never" />
+            <Property name="IsScalarGaussianFunction"
+                      panel_visibility="never" />
+            <Property name="IsGradientGaussianFunction"
+                      panel_visibility="never" />
+            <Property name="DisableGradientOpacity"
+                      panel_visibility="never" />
+            <Property name="InfoDisableGradientOpacity"
+                      panel_visibility="never" />
+            <Property name="DisableTwoDTransferFunction"
+                      panel_visibility="never" />
+            <Property name="InfoDisableTwoDTransferFunction"
+                      panel_visibility="never" />
+            <Property name="SwitchGradientOpacity"
+                      panel_visibility="never" />
+            <Property name="SwitchScalarOpacity"
+                      panel_visibility="never" />
+            <Property name="ScalarGaussianOpacityFunction"
+                      panel_visibility="never" />
+            <Property name="GradientGaussianOpacityFunction"
+                      panel_visibility="never" />
+            <Property name="TwoDTransferFunction"
+                      panel_visibility="never" />
             <Property name="VolumeRenderingMode"
                       panel_visibility="advanced"
                       panel_visibility_default_for_representation="volume" />
@@ -2037,11 +2075,63 @@
                          default_values="1"
                          name="Pickable"
                          number_of_elements="1">
+         </IntVectorProperty>
+          <IntVectorProperty command="GetSupportHistogramWidget"
+                         default_values="0"
+                         information_only="1"
+                         name="SupportHistogramWidget"
+                         number_of_elements="1">
+             <BooleanDomain name="bool" />
+             <SimpleIntInformationHelper />
+         </IntVectorProperty>
+          <IntVectorProperty command="GetIsScalarGaussianFunction"
+                         default_values="0"
+                         information_only="1"
+                         name="IsScalarGaussianFunction"
+                         number_of_elements="1">
+             <BooleanDomain name="bool" />
+             <SimpleIntInformationHelper />
+         </IntVectorProperty>
+         <IntVectorProperty command="GetIsGradientGaussianFunction"
+                         default_values="0"
+                         information_only="1"
+                         name="IsGradientGaussianFunction"
+                         number_of_elements="1">
+             <BooleanDomain name="bool" />
+             <SimpleIntInformationHelper />
+         </IntVectorProperty>
+         <Property command = "UpdateGradientRange"
+                  name = "UpdateGradientRange" >
+                  </Property>
+         <Property command = "UpdateHistogram"
+                  name = "UpdateHistogram" >
+                  </Property>
+          <Property command = "UpdateTwoDHistogram"
+                  name = "UpdateTwoDHistogram" >
+                  </Property>
+          <Property command = "SetHistogramOutOfDate"
+                  name = "SetHistogramOutOfDate" >
+                  </Property>
+          <Property command = "SetTwoDHistogramOutOfDate"
+                  name = "SetTwoDHistogramOutOfDate" >
+                  </Property>
+         <Property command = "EnableUseAdjustMapperGradientRangeFactor"
+        name = "EnableUseAdjustMapperGradientRangeFactor" >
+        </Property>
+        <Property command = "DisableUseAdjustMapperGradientRangeFactor"
+        name = "DisableUseAdjustMapperGradientRangeFactor" >
+        </Property>
+         <DoubleVectorProperty command="GetGradientRange"
+                            default_values="0 1"
+                            information_only="1"
+                            name="GradientRange"
+                             number_of_elements="2">
+        <SimpleDoubleInformationHelper />
+      </DoubleVectorProperty>
         <Hints>
           <NoDefault />
         </Hints>
         <BooleanDomain name="bool" />
-      </IntVectorProperty>
       <IntVectorProperty command="SetInterpolationType"
                          default_values="2"
                          name="InterpolationType"
@@ -2112,6 +2202,82 @@
                      name="ScalarOpacityFunction" >
         <ProxyGroupDomain name="groups">
           <Group name="piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+      <ProxyProperty command="SetGradientLinearOpacity"
+                     name="GradientLinearOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+      <IntVectorProperty command="SetDisableGradientOpacity"
+                         default_values="1"
+                         name="DisableGradientOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Enable/Disable the use of the gradient opacity function
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty command="GetDisableGradientOpacity"
+                         default_values="0"
+                         information_only="1"
+                         name="InfoDisableGradientOpacity"
+                         number_of_elements="1">
+             <BooleanDomain name="bool" />
+             <SimpleIntInformationHelper />
+         </IntVectorProperty>
+     <IntVectorProperty command="GetDisableTwoDTransferFunction"
+                     default_values="0"
+                     information_only="1"
+                     name="InfoDisableTwoDTransferFunction"
+                     number_of_elements="1">
+         <BooleanDomain name="bool" />
+         <SimpleIntInformationHelper />
+     </IntVectorProperty>
+     <IntVectorProperty command="SetDisableTwoDTransferFunction"
+                         default_values="1"
+                         name="DisableTwoDTransferFunction"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Enable/Disable the use of the gradient opacity function
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty command="SetSwitchGradientOpacity"
+                         default_values="1"
+                         name="SwitchGradientOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Switch between gaussian and linear gradient function
+        </Documentation>
+      </IntVectorProperty>
+      <IntVectorProperty command="SetSwitchScalarOpacity"
+                         default_values="0"
+                         name="SwitchScalarOpacity"
+                         number_of_elements="1">
+        <BooleanDomain name="bool" />
+        <Documentation>Switch between gaussian and linear gradient function
+        </Documentation>
+      </IntVectorProperty>
+      <ProxyProperty command="SetScalarGaussianOpacity"
+                     name="ScalarGaussianOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="gaussian_piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+       <ProxyProperty command="SetGradientGaussianOpacity"
+                     name="GradientGaussianOpacityFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="gaussian_piecewise_functions" />
+        </ProxyGroupDomain>
+      </ProxyProperty>
+      <ProxyProperty command="SetTwoDTransferFunction"
+                     name="TwoDTransferFunction"
+                     skip_dependency="1">
+        <ProxyGroupDomain name="groups">
+          <Group name="two_dimenisonal_piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>
       <IntVectorProperty command="SetRequestedRenderMode"
@@ -5220,7 +5386,7 @@
       </IntVectorProperty>
       <ProxyProperty command="SetScalarOpacity"
                      name="ScalarOpacityFunction">
-        <ProxyGroupDomain name="groups">
+         <ProxyGroupDomain name="groups">
           <Group name="piecewise_functions" />
         </ProxyGroupDomain>
       </ProxyProperty>

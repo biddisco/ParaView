@@ -1,34 +1,34 @@
 /*=========================================================================
 
-   Program: ParaView
-   Module:    $RCSfile$
+ Program: ParaView
+ Module:    $RCSfile$
 
-   Copyright (c) 2005,2006 Sandia Corporation, Kitware Inc.
-   All rights reserved.
+ Copyright (c) 2005,2006 Sandia Corporation, Kitware Inc.
+ All rights reserved.
 
-   ParaView is a free software; you can redistribute it and/or modify it
-   under the terms of the ParaView license version 1.2.
+ ParaView is a free software; you can redistribute it and/or modify it
+ under the terms of the ParaView license version 1.2.
 
-   See License_v1.2.txt for the full ParaView license.
-   A copy of this license can be obtained by contacting
-   Kitware Inc.
-   28 Corporate Drive
-   Clifton Park, NY 12065
-   USA
+ See License_v1.2.txt for the full ParaView license.
+ A copy of this license can be obtained by contacting
+ Kitware Inc.
+ 28 Corporate Drive
+ Clifton Park, NY 12065
+ USA
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-========================================================================*/
+ ========================================================================*/
 #ifndef __pqColorOpacityEditorWidget_h
 #define __pqColorOpacityEditorWidget_h
 
@@ -65,17 +65,21 @@ class pqColorMapModel;
 /// Typically, opacity function is optional and used only when
 /// "EnableOpacityMapping" is property is ON. However, in cases of Volume
 /// rendering, the EnableOpacityMapping has no effect.
-class PQAPPLICATIONCOMPONENTS_EXPORT pqColorOpacityEditorWidget :
-  public pqPropertyWidget
-{
-  Q_OBJECT
-  Q_PROPERTY(QList<QVariant> xrgbPoints READ xrgbPoints WRITE setXrgbPoints)
+class PQAPPLICATIONCOMPONENTS_EXPORT pqColorOpacityEditorWidget: public pqPropertyWidget
+  {
+Q_OBJECT
+Q_PROPERTY(QList<QVariant> xrgbPoints READ xrgbPoints WRITE setXrgbPoints)
   Q_PROPERTY(QList<QVariant> xvmsPoints READ xvmsPoints WRITE setXvmsPoints)
+  Q_PROPERTY(QList<QVariant> gvmsPoints READ gvmsPoints WRITE setGvmsPoints)
+  Q_PROPERTY(QList<QVariant> ScalarxhwbbPoints READ ScalarxhwbbPoints WRITE setScalarXhwbbPoints)
+  Q_PROPERTY(QList<QVariant> xhwbbPoints READ xhwbbPoints WRITE setXhwbbPoints)
+  Q_PROPERTY(QList<QVariant> twoDTransferPoints READ twoDTransferPoints WRITE settwoDTransferPoints)
   Q_PROPERTY(bool useLogScale READ useLogScale WRITE setUseLogScale)
   Q_PROPERTY(bool lockScalarRange READ lockScalarRange WRITE setLockScalarRange)
   typedef pqPropertyWidget Superclass;
 public:
-  pqColorOpacityEditorWidget(vtkSMProxy* proxy, vtkSMPropertyGroup* smgroup, QWidget* parent=0);
+  pqColorOpacityEditorWidget(vtkSMProxy* proxy, vtkSMPropertyGroup* smgroup,
+      QWidget* parent = 0);
   virtual ~pqColorOpacityEditorWidget();
 
   /// Returns the current list of control points for the color transfer
@@ -85,6 +89,15 @@ public:
   /// Returns the current list of control points for the opacity
   /// function. This a list of 4-tuples.
   QList<QVariant> xvmsPoints() const;
+
+  /// Returns the current list of control points for the opacity
+  /// function. This a list of 4-tuples.
+  QList<QVariant> gvmsPoints() const;
+
+  QList<QVariant> ScalarxhwbbPoints() const;
+  QList<QVariant> xhwbbPoints() const;
+
+  QList<QVariant> twoDTransferPoints() const;
 
   /// Returns the value for use-log-scale.
   bool useLogScale() const;
@@ -96,8 +109,20 @@ public slots:
   /// Sets the xvmsPoints that control the opacity transfer function.
   void setXvmsPoints(const QList<QVariant>&);
 
+  /// Sets the gvmsPoints that control the gradient linear opacity transfer function.
+  void setGvmsPoints(const QList<QVariant>&);
+
   /// Sets the xrgbPoints that control the color transfer function.
   void setXrgbPoints(const QList<QVariant>&);
+
+  /// Sets the XhwbbPoints that control the scalar gaussian opacity transfer function.
+  void setScalarXhwbbPoints(const QList<QVariant>& values);
+
+  /// Sets the XhwbbPoints that control the scalar gaussian opacity transfer function.
+  void setXhwbbPoints(const QList<QVariant>& values);
+
+  /// Sets the XhwbbPoints that control the 2D transfer function.
+  void settwoDTransferPoints(const QList<QVariant>& values);
 
   /// Set whether to use-log scale.
   void setUseLogScale(bool value);
@@ -110,7 +135,7 @@ public slots:
 
   /// Reset the transfer function ranges to custom values.
   void resetRangeToCustom();
-  void resetRangeToCustom(double min, double max);
+  void resetRangeToCustom(double min, double max, double gmin, double gmax);
 
   /// Reset the transfer function ranges to temporal range for active data
   /// source.
@@ -120,10 +145,24 @@ public slots:
   void invertTransferFunctions();
 
   /// pick a preset.
-  void choosePreset(const pqColorMapModel* add_new=NULL);
+  void choosePreset(const pqColorMapModel* add_new = NULL);
 
   /// save current transfer function as preset.
   void saveAsPreset();
+
+  /// switch between the linear and gaussian scalar functions.
+  void switchScalarOpacity();
+
+  /// switch between the linear and gaussian gradient functions.
+  void switchGradientOpacity();
+
+  /// show the gradient functions and respective buttons in the gui
+  void showGradientFunctions();
+  /// hide the gradient functions and respective buttons in the gui
+  void hideGradientFunctions();
+
+  void showTwoDTransferFunction();
+  void hideTwoDTransferFunction();
 
 signals:
   /// Signal fired when the xrgbPoints change.
@@ -132,17 +171,42 @@ signals:
   /// Signal fired when the xvmsPoints change.
   void xvmsPointsChanged();
 
+  /// Signal fired when the gradient points change.
+  void gvmsPointsChanged();
+
+  /// Signal fired when the gradient points change.
+  void ScalarxhwbbPointsChanged();
+
+  /// Signal fired when the gradient points change.
+  void xhwbbPointsChanged();
+
+  /// Signal fired when the gradient points change.
+  void twoDTransferPointsChanged();
+
   /// Signal fired when useLogScale changes.
   void useLogScaleChanged();
 
   /// Signal fired when lockScalarRange changes.
   void lockScalarRangeChanged();
 
+protected:
+  void showEvent(QShowEvent * event);
+
+  bool scalarOpacityAvailable, scalarGaussianAvailable, gradientLinearAvailable,
+      gradientGaussianAvailable, twoDTransferFunctionAvailable;
+  void showTwoDHistogram();
+  void showOneDHistogram();
+
 protected slots:
   /// slots called when the current point changes on the two internal
   /// pqTransferFunctionWidget widgets.
   void opacityCurrentChanged(vtkIdType);
+  void gradientLinearCurrentChanged(vtkIdType);
   void colorCurrentChanged(vtkIdType);
+  void scalarGaussianCurrentChanged(int index);
+  void gradientGaussianCurrentChanged(int index);
+  void TwoDTransferCurrentChanged(int index);
+  void showHistogramWidget();
 
   /// updates the text shown in the "current data" input.
   void updateCurrentData();
@@ -161,11 +225,18 @@ protected slots:
   /// extra logic to valid ranges convert the color map to log/linear space.
   void useLogScaleClicked(bool);
 
+  void disableGradientOpacity();
+  void disableTwoDTransferFunction();
+
 private:
-  Q_DISABLE_COPY(pqColorOpacityEditorWidget);
+  Q_DISABLE_COPY(pqColorOpacityEditorWidget)
+  ;
+
+  bool disableGradientOpac;
+  bool disableTwoDTransferFunc;
 
   class pqInternals;
   pqInternals* Internals;
-};
+  };
 
 #endif

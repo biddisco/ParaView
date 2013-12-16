@@ -85,6 +85,20 @@ void pqRescaleRange::setRange(double min, double max)
   this->Form->MaximumScalar->setText(QString::number(max, 'g', 6));
 }
 
+void pqRescaleRange::setGradientRange(double min, double max)
+{
+  if(min > max)
+    {
+    double tmp = min;
+    min = max;
+    max = tmp;
+    }
+
+  // Update the displayed range.
+  this->Form->MinimumGradient->setText(QString::number(min, 'g', 6));
+  this->Form->MaximumGradient->setText(QString::number(max, 'g', 6));
+}
+
 double pqRescaleRange::getMinimum() const
 {
   return this->Form->MinimumScalar->text().toDouble();
@@ -93,6 +107,17 @@ double pqRescaleRange::getMinimum() const
 double pqRescaleRange::getMaximum() const
 {
   return this->Form->MaximumScalar->text().toDouble();
+}
+
+
+double pqRescaleRange::getMinimumGradient() const
+{
+  return this->Form->MinimumGradient->text().toDouble();
+}
+
+double pqRescaleRange::getMaximumGradient() const
+{
+  return this->Form->MaximumGradient->text().toDouble();
 }
 
 void pqRescaleRange::validate()

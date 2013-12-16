@@ -1,34 +1,34 @@
 /*=========================================================================
 
-   Program: ParaView
-   Module:    pqPQLookupTableManager.cxx
+ Program: ParaView
+ Module:    pqPQLookupTableManager.cxx
 
-   Copyright (c) 2005-2008 Sandia Corporation, Kitware Inc.
-   All rights reserved.
+ Copyright (c) 2005-2008 Sandia Corporation, Kitware Inc.
+ All rights reserved.
 
-   ParaView is a free software; you can redistribute it and/or modify it
-   under the terms of the ParaView license version 1.2.
+ ParaView is a free software; you can redistribute it and/or modify it
+ under the terms of the ParaView license version 1.2.
 
-   See License_v1.2.txt for the full ParaView license.
-   A copy of this license can be obtained by contacting
-   Kitware Inc.
-   28 Corporate Drive
-   Clifton Park, NY 12065
-   USA
+ See License_v1.2.txt for the full ParaView license.
+ A copy of this license can be obtained by contacting
+ Kitware Inc.
+ 28 Corporate Drive
+ Clifton Park, NY 12065
+ USA
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-=========================================================================*/
+ =========================================================================*/
 #include "pqPQLookupTableManager.h"
 
 #include "vtkNew.h"
@@ -56,6 +56,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "pqPipelineRepresentation.h"
 #include "pqScalarBarRepresentation.h"
 #include "pqScalarOpacityFunction.h"
+#include "pqGradientOpacityFunction.h"
+#include "pqGaussianOpacityFunction.h"
+#include "pqTwoDTransferFunction.h"
 #include "pqScalarsToColors.h"
 #include "pqServer.h"
 #include "pqServerManagerModel.h"
@@ -66,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //-----------------------------------------------------------------------------
 class pqPQLookupTableManager::pqInternal
-{
+  {
 public:
   class Key
     {
@@ -107,20 +110,24 @@ public:
   vtkSmartPointer<vtkPVXMLElement> DefaultLUTElement;
   typedef QMap<Key, QPointer<pqScalarOpacityFunction> > MapOfOpactiyFunc;
   MapOfOpactiyFunc OpacityFuncs;
+  typedef QMap<Key, QPointer<pqGaussianOpacityFunction> > MapOfGaussianOpactiyFunc;
+  MapOfGaussianOpactiyFunc GaussianOpacityFuncs;
+  typedef QMap<Key, QPointer<pqTwoDTransferFunction> > MapOfTwoDTransferFunc;
+  MapOfTwoDTransferFunc TwoDTransferFuncs;
   vtkSmartPointer<vtkPVXMLElement> DefaultOpacityElement;
-  
+
   vtkSmartPointer<vtkPVXMLElement> DefaultScalarBarElement;
 
-  QString getRegistrationName(
-    const QString& xmlname, const QString& arrayname,
-    int number_of_components, int vtkNotUsed(component)) const
+  QString getRegistrationName(const QString& xmlname, const QString& arrayname,
+      int number_of_components, int vtkNotUsed(component)) const
     {
-    return QString::number(number_of_components) + "." + arrayname + "." + xmlname;
+    return QString::number(number_of_components) + "." + arrayname + "."
+        + xmlname;
     }
 
   Key getKey(vtkIdType cid, const QString& registration_name)
     {
-    QRegExp rex ("(\\d+)\\.(.+)\\.(.+)");
+    QRegExp rex("(\\d+)\\.(.+)\\.(.+)");
     if (rex.exactMatch(registration_name))
       {
       int number_of_components = QVariant(rex.cap(1)).toInt();
@@ -129,19 +136,19 @@ public:
       }
     return Key();
     }
-};
+  };
 
 //-----------------------------------------------------------------------------
-pqPQLookupTableManager::pqPQLookupTableManager(QObject* _p)
-  : pqLookupTableManager(_p)
-{
+pqPQLookupTableManager::pqPQLookupTableManager(QObject* _p) :
+    pqLookupTableManager(_p)
+  {
   this->Internal = new pqInternal;
 
   pqApplicationCore* core = pqApplicationCore::instance();
   pqSettings* settings = core->settings();
   if (settings)
     {
-    if(settings->contains(DEFAULT_LOOKUPTABLE_SETTING_KEY()))
+    if (settings->contains(DEFAULT_LOOKUPTABLE_SETTING_KEY()))
       {
       vtkNew<vtkPVXMLParser> parser;
       if (parser->Parse(
@@ -150,8 +157,8 @@ pqPQLookupTableManager::pqPQLookupTableManager(QObject* _p)
         this->Internal->DefaultLUTElement = parser->GetRootElement();
         }
       }
-    
-    if(settings->contains(DEFAULT_OPACITYFUNCTION_SETTING_KEY()))
+
+    if (settings->contains(DEFAULT_OPACITYFUNCTION_SETTING_KEY()))
       {
       vtkNew<vtkPVXMLParser> parser;
       if (parser->Parse(
@@ -170,33 +177,31 @@ pqPQLookupTableManager::pqPQLookupTableManager(QObject* _p)
         }
       }
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 pqPQLookupTableManager::~pqPQLookupTableManager()
-{
+  {
   delete this->Internal;
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::onAddLookupTable(pqScalarsToColors* lut)
-{
+  {
   QString registration_name = lut->getSMName();
-  pqInternal::Key key =
-    this->Internal->getKey(lut->getServer()->GetConnectionID(),
-      registration_name);
+  pqInternal::Key key = this->Internal->getKey(
+      lut->getServer()->GetConnectionID(), registration_name);
   if (!this->Internal->LookupTables.contains(key))
     {
     this->Internal->LookupTables[key] = lut;
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::onRemoveLookupTable(pqScalarsToColors* lut)
-{
-  pqInternal::MapOfLUT::iterator iter =
-    this->Internal->LookupTables.begin();
-  for (; iter != this->Internal->LookupTables.end(); )
+  {
+  pqInternal::MapOfLUT::iterator iter = this->Internal->LookupTables.begin();
+  for (; iter != this->Internal->LookupTables.end();)
     {
     if (iter.value() == lut)
       {
@@ -207,14 +212,14 @@ void pqPQLookupTableManager::onRemoveLookupTable(pqScalarsToColors* lut)
       ++iter;
       }
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 pqScalarsToColors* pqPQLookupTableManager::getLookupTable(pqServer* server,
-  const QString& arrayname,  int number_of_components, int component)
-{
-  pqInternal::Key key(
-    server->GetConnectionID(), arrayname, number_of_components);
+    const QString& arrayname, int number_of_components, int component)
+  {
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
 
   if (this->Internal->LookupTables.contains(key))
     {
@@ -222,31 +227,31 @@ pqScalarsToColors* pqPQLookupTableManager::getLookupTable(pqServer* server,
     }
 
   // Create a new lookuptable.
-  return this->createLookupTable(
-    server, arrayname, number_of_components, component);
-}
+  return this->createLookupTable(server, arrayname, number_of_components,
+      component);
+  }
 
 //-----------------------------------------------------------------------------
-bool pqPQLookupTableManager::getLookupTableProperties(
-  pqScalarsToColors* lut,
-  QString& arrayname, int &numComponents, int &component)
-{
+bool pqPQLookupTableManager::getLookupTableProperties(pqScalarsToColors* lut,
+    QString& arrayname, int &numComponents, int &component)
+  {
   pqInternal::Key key = this->Internal->LookupTables.key(lut);
   if (!key.Arrayname.isEmpty())
     {
     arrayname = key.Arrayname;
     numComponents = key.NumberOfComponents;
-    component = lut->getVectorMode() == pqScalarsToColors::MAGNITUDE? -1:
-      lut->getVectorComponent();
+    component =
+        lut->getVectorMode() == pqScalarsToColors::MAGNITUDE ?
+            -1 : lut->getVectorComponent();
     return true;
     }
   return false;
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::saveScalarBarAsDefault(
-  pqScalarBarRepresentation* scalar_bar)
-{
+    pqScalarBarRepresentation* scalar_bar)
+  {
   if (!scalar_bar)
     {
     return;
@@ -254,32 +259,34 @@ void pqPQLookupTableManager::saveScalarBarAsDefault(
 
   vtkSMProxy* proxy = scalar_bar->getProxy();
 
-  const char* properties_to_save[] = {
-    "Position",
-    "Position2",
-    "Orientation",
-    "AutomaticLabelFormat",
-    "LabelFormat",
-    "NumberOfLabels",
-    "AspectRatio",
-    "LabelColor",
-    "LabelOpacity",
-    "LabelFontFamily",
-    "LabelBold",
-    "LabelItalic",
-    "LabelShadow",
-    "LabelFontSize",
-    "TitleColor",
-    "TitleOpacity",
-    "TitleFontFamily",
-    "TitleBold",
-    "TitleItalic",
-    "TitleShadow",
-    "TitleFontSize",
-    NULL};
+  const char* properties_to_save[] =
+    {
+        "Position",
+        "Position2",
+        "Orientation",
+        "AutomaticLabelFormat",
+        "LabelFormat",
+        "NumberOfLabels",
+        "AspectRatio",
+        "LabelColor",
+        "LabelOpacity",
+        "LabelFontFamily",
+        "LabelBold",
+        "LabelItalic",
+        "LabelShadow",
+        "LabelFontSize",
+        "TitleColor",
+        "TitleOpacity",
+        "TitleFontFamily",
+        "TitleBold",
+        "TitleItalic",
+        "TitleShadow",
+        "TitleFontSize",
+        NULL
+    };
 
   vtkNew<vtkStringList> properties;
-  for (int cc=0; properties_to_save[cc] != NULL; cc++)
+  for (int cc = 0; properties_to_save[cc] != NULL; cc++)
     {
     properties->AddString(properties_to_save[cc]);
     }
@@ -288,32 +295,31 @@ void pqPQLookupTableManager::saveScalarBarAsDefault(
   iter->SetProxy(proxy);
   iter->SetPropertyNames(properties.GetPointer());
   this->Internal->DefaultScalarBarElement.TakeReference(
-    proxy->SaveXMLState(NULL, iter.GetPointer()));
+      proxy->SaveXMLState(NULL, iter.GetPointer()));
 
   vtksys_ios::ostringstream stream;
   this->Internal->DefaultScalarBarElement->PrintXML(stream, vtkIndent());
-  
+
   pqApplicationCore* core = pqApplicationCore::instance();
   pqSettings* settings = core->settings();
-  settings->setValue(
-    pqPQLookupTableManager::DEFAULT_SCALARBAR_SETTING_KEY(),
-    stream.str().c_str());
-}
+  settings->setValue(pqPQLookupTableManager::DEFAULT_SCALARBAR_SETTING_KEY(),
+      stream.str().c_str());
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::initialize(pqScalarBarRepresentation* scalar_bar)
-{
+  {
   if (this->Internal->DefaultScalarBarElement && scalar_bar)
     {
     scalar_bar->getProxy()->LoadXMLState(
-      this->Internal->DefaultScalarBarElement, NULL);
+        this->Internal->DefaultScalarBarElement, NULL);
     scalar_bar->getProxy()->UpdateVTKObjects();
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::saveLUTAsDefault(pqScalarsToColors* lut)
-{
+  {
   if (!lut)
     {
     qCritical() << "Cannot save empty lookup table as default.";
@@ -325,12 +331,12 @@ void pqPQLookupTableManager::saveLUTAsDefault(pqScalarsToColors* lut)
   // Remove "ScalarRangeInitialized" property, since we want the lookup table to
   // rescale when it is associated with a new array.
   bool old_value = pqSMAdaptor::getElementProperty(
-    lutProxy->GetProperty("ScalarRangeInitialized")).toBool();
+      lutProxy->GetProperty("ScalarRangeInitialized")).toBool();
   pqSMAdaptor::setElementProperty(
-    lutProxy->GetProperty("ScalarRangeInitialized"), false);
+      lutProxy->GetProperty("ScalarRangeInitialized"), false);
   this->Internal->DefaultLUTElement.TakeReference(lutProxy->SaveXMLState(0));
   pqSMAdaptor::setElementProperty(
-    lutProxy->GetProperty("ScalarRangeInitialized"), old_value);
+      lutProxy->GetProperty("ScalarRangeInitialized"), old_value);
 
   pqApplicationCore* core = pqApplicationCore::instance();
   pqSettings* settings = core->settings();
@@ -338,16 +344,17 @@ void pqPQLookupTableManager::saveLUTAsDefault(pqScalarsToColors* lut)
     {
     vtksys_ios::ostringstream stream;
     this->Internal->DefaultLUTElement->PrintXML(stream, vtkIndent());
-    settings->setValue(pqPQLookupTableManager::DEFAULT_LOOKUPTABLE_SETTING_KEY(),
-      stream.str().c_str());
-    
+    settings->setValue(
+        pqPQLookupTableManager::DEFAULT_LOOKUPTABLE_SETTING_KEY(),
+        stream.str().c_str());
+
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::saveOpacityFunctionAsDefault(
-  pqScalarOpacityFunction* opf)
-{
+    pqScalarOpacityFunction* opf)
+  {
   if (!opf)
     {
     qCritical() << "Cannot save empty opacity function as default.";
@@ -355,37 +362,37 @@ void pqPQLookupTableManager::saveOpacityFunctionAsDefault(
     }
 
   this->Internal->DefaultOpacityElement.TakeReference(
-    opf->getProxy()->SaveXMLState(0));
+      opf->getProxy()->SaveXMLState(0));
 
   pqApplicationCore* core = pqApplicationCore::instance();
   pqSettings* settings = core->settings();
   if (settings)
-    {   
+    {
     vtksys_ios::ostringstream opacitystream;
     this->Internal->DefaultOpacityElement->PrintXML(opacitystream, vtkIndent());
-    settings->setValue(pqPQLookupTableManager::DEFAULT_OPACITYFUNCTION_SETTING_KEY(),
-      opacitystream.str().c_str());   
+    settings->setValue(
+        pqPQLookupTableManager::DEFAULT_OPACITYFUNCTION_SETTING_KEY(),
+        opacitystream.str().c_str());
     }
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::setLUTDefaultState(vtkSMProxy* lutProxy)
-{
+  {
   // Setup default LUT to go from Cool to Warm.
   QList<QVariant> values;
-  values << 0.0 << 0.230 << 0.299 << 0.754
-         << 0.5 << 0.865 << 0.865 << 0.865
-         << 1.0 << 0.706 << 0.016 << 0.150;
-  pqSMAdaptor::setMultipleElementProperty(
-    lutProxy->GetProperty("RGBPoints"), values);
-  pqSMAdaptor::setEnumerationProperty(
-    lutProxy->GetProperty("ColorSpace"), "Diverging");
+  values << 0.0 << 0.230 << 0.299 << 0.754 << 0.5 << 0.865 << 0.865 << 0.865
+      << 1.0 << 0.706 << 0.016 << 0.150;
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("RGBPoints"),
+      values);
+  pqSMAdaptor::setEnumerationProperty(lutProxy->GetProperty("ColorSpace"),
+      "Diverging");
   values.clear();
   values << 0.25 << 0.0 << 0.0;
-  pqSMAdaptor::setMultipleElementProperty(
-    lutProxy->GetProperty("NanColor"), values);
-  pqSMAdaptor::setEnumerationProperty(
-    lutProxy->GetProperty("VectorMode"), "Magnitude");
+  pqSMAdaptor::setMultipleElementProperty(lutProxy->GetProperty("NanColor"),
+      values);
+  pqSMAdaptor::setEnumerationProperty(lutProxy->GetProperty("VectorMode"),
+      "Magnitude");
 
   if (this->Internal->DefaultLUTElement)
     {
@@ -394,18 +401,18 @@ void pqPQLookupTableManager::setLUTDefaultState(vtkSMProxy* lutProxy)
 
   lutProxy->UpdateVTKObjects();
   lutProxy->InvokeCommand("Build");
-}
+  }
 
 //-----------------------------------------------------------------------------
 pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
-  const QString& arrayname, int number_of_components, int component)
-{
+    const QString& arrayname, int number_of_components, int component)
+  {
+
   vtkSMSessionProxyManager* pxm = server->proxyManager();
-  vtkSMProxy* lutProxy =
-    pxm->NewProxy("lookup_tables", "PVLookupTable");
+  vtkSMProxy* lutProxy = pxm->NewProxy("lookup_tables", "PVLookupTable");
   QString name = this->Internal->getRegistrationName(
-    QString(lutProxy->GetXMLName()),
-    arrayname, number_of_components, component);
+      QString(lutProxy->GetXMLName()), arrayname, number_of_components,
+      component);
   // This will lead to the creation of pqScalarsToColors object
   // which this class will be intimated of (onAddLookupTable)
   // and our internal DS will be updated.
@@ -420,44 +427,117 @@ pqScalarsToColors* pqPQLookupTableManager::createLookupTable(pqServer* server,
   //      lutProxy->GetProperty("VectorComponent")->GetDomain("range"));
   //  componentsDomain->AddMaximum(0, (number_of_components-1));
   //  }
-  pqInternal::Key key(
-    server->GetConnectionID(), arrayname, number_of_components);
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
   if (!this->Internal->LookupTables.contains(key))
     {
-    qDebug() << "Creation of LUT failed!" ;
+    qDebug() << "Creation of LUT failed!";
     return 0;
     }
-  
+
   // An opacity function is created as a "slave" to this lookup table
-  pqScalarOpacityFunction* sof =
-    this->createOpacityFunction(server, arrayname, number_of_components, component);
+  pqScalarOpacityFunction* sof = this->createOpacityFunction(server, arrayname,
+      number_of_components, component);
   vtkSMPropertyHelper(lutProxy, "ScalarOpacityFunction").Set(sof->getProxy());
+
+  QString alterableArrayName = arrayname;
+  // gradLinearArrayName.append(")
+  // An opacity function is created as a "slave" to this lookup table
+  pqScalarOpacityFunction* gof = this->createOpacityFunction(server,
+      alterableArrayName.append("GradientLinear"), 1, 0);
+  vtkSMPropertyHelper(lutProxy, "GradientLinearOpacityFunction").Set(
+      gof->getProxy());
+  alterableArrayName = arrayname;
+  pqGaussianOpacityFunction* gaof = this->createGaussianOpacityFunction(server,
+      alterableArrayName.append("GradientGaussian"), 1, 0);
+  vtkSMPropertyHelper(lutProxy, "GradientGaussianOpacityFunction").Set(
+      gaof->getProxy());
+  alterableArrayName = arrayname;
+  pqGaussianOpacityFunction* sgaof = this->createGaussianOpacityFunction(server,
+      alterableArrayName.append("ScalarGaussian"), 1, 0);
+  vtkSMPropertyHelper(lutProxy, "ScalarGaussianOpacityFunction").Set(
+      sgaof->getProxy());
+  alterableArrayName = arrayname;
+  pqTwoDTransferFunction* tdtf = this->createTwoDTransferFunction(server,
+      alterableArrayName.append("TwoDTransferFunction"), 1, 0);
+  vtkSMPropertyHelper(lutProxy, "TwoDTransferFunction").Set(tdtf->getProxy());
   lutProxy->UpdateVTKObjects();
-  
+
   return this->Internal->LookupTables[key];
-}
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::updateLookupTableScalarRanges()
-{
+  {
   pqApplicationCore* core = pqApplicationCore::instance();
   pqServerManagerModel* smmodel = core->getServerManagerModel();
 
-  QList<pqPipelineRepresentation*> reprs =
-    smmodel->findItems<pqPipelineRepresentation*>();
-  foreach(pqPipelineRepresentation* repr, reprs)
-    {
-    repr->updateLookupTableScalarRange();
-    }
+  QList<pqPipelineRepresentation*> reprs = smmodel->findItems<
+      pqPipelineRepresentation*>();
+  foreach(pqPipelineRepresentation* repr, reprs){
+  repr->updateLookupTableScalarRange();
+  }
 }
 
 //-----------------------------------------------------------------------------
+pqGaussianOpacityFunction* pqPQLookupTableManager::getGaussianOpacityFunction(
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
+  if (this->Internal->GaussianOpacityFuncs.contains(key))
+    {
+    return this->Internal->GaussianOpacityFuncs[key].data();
+    }
+  return this->createGaussianOpacityFunction(server, arrayname,
+      number_of_components, component);
+  //TBD
+  return NULL;
+  }
+
+//-----------------------------------------------------------------------------
+pqTwoDTransferFunction* pqPQLookupTableManager::getTwoDTransferFunction(
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
+  if (this->Internal->TwoDTransferFuncs.contains(key))
+    {
+    return this->Internal->TwoDTransferFuncs[key];
+    }
+
+  // Create a new opactiy function.
+  return this->createTwoDTransferFunction(server, arrayname,
+      number_of_components, component);
+  }
+
+//-----------------------------------------------------------------------------
+pqGradientOpacityFunction* pqPQLookupTableManager::getGradientOpacityFunction(
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
+
+  if (this->Internal->OpacityFuncs.contains(key))
+    {
+    return static_cast<pqGradientOpacityFunction*>(this->Internal->OpacityFuncs[key].data());
+    }
+
+  // Create a new opactiy function.
+  return static_cast<pqGradientOpacityFunction*>(this->createOpacityFunction(
+      server, arrayname, number_of_components, component));
+  }
+
+//-----------------------------------------------------------------------------
 pqScalarOpacityFunction* pqPQLookupTableManager::getScalarOpacityFunction(
-  pqServer* server, const QString& arrayname, 
-  int number_of_components, int component)
-{
-  pqInternal::Key key(
-    server->GetConnectionID(), arrayname, number_of_components);
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
 
   if (this->Internal->OpacityFuncs.contains(key))
     {
@@ -465,62 +545,149 @@ pqScalarOpacityFunction* pqPQLookupTableManager::getScalarOpacityFunction(
     }
 
   // Create a new opactiy function.
-  return this->createOpacityFunction(
-    server, arrayname, number_of_components, component);
-}
+  return this->createOpacityFunction(server, arrayname, number_of_components,
+      component);
+  }
 
 //-----------------------------------------------------------------------------
 pqScalarOpacityFunction* pqPQLookupTableManager::createOpacityFunction(
-  pqServer* server, const QString& arrayname, 
-  int number_of_components, int component)
-{
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
   vtkSMSessionProxyManager* pxm = server->proxyManager();
-  vtkSMProxy* opacityFunction = 
-    pxm->NewProxy("piecewise_functions", "PiecewiseFunction");
+  vtkSMProxy* opacityFunction = pxm->NewProxy("piecewise_functions",
+      "PiecewiseFunction");
   //opacityFunction->UpdateVTKObjects();
 
   QString name = this->Internal->getRegistrationName(
-    QString(opacityFunction->GetXMLName()),
-    arrayname, number_of_components, component);
+      QString(opacityFunction->GetXMLName()), arrayname, number_of_components,
+      component);
   // This will lead to the creation of pqScalarOpacityFunction object
   // which this class will be intimated of (onAddOpacityFunction)
   // and our internal DS will be updated.
-  pxm->RegisterProxy("piecewise_functions", name.toAscii().data(), opacityFunction);
+  pxm->RegisterProxy("piecewise_functions", name.toAscii().data(),
+      opacityFunction);
   opacityFunction->Delete();
   this->setOpacityFunctionDefaultState(opacityFunction);
 
-  pqInternal::Key key(
-    server->GetConnectionID(), arrayname, number_of_components);
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
   if (!this->Internal->OpacityFuncs.contains(key))
     {
-    qDebug() << "Creation of opacityFunction failed!" ;
+    qDebug() << "Creation of opacityFunction failed!";
     return 0;
     }
 
   return this->Internal->OpacityFuncs[key];
-}
+  }
+
+pqGaussianOpacityFunction* pqPQLookupTableManager::createGaussianOpacityFunction(
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  vtkSMSessionProxyManager* pxm = server->proxyManager();
+  vtkSMProxy* GaussianopacityFunction = pxm->NewProxy(
+      "gaussian_piecewise_functions", "GaussianPiecewiseFunction");
+  //opacityFunction->UpdateVTKObjects();
+  QString name = this->Internal->getRegistrationName(
+      QString(GaussianopacityFunction->GetXMLName()), arrayname,
+      number_of_components, component);
+  // This will lead to the creation of pqScalarOpacityFunction object
+  // which this class will be intimated of (onAddOpacityFunction)
+  // and our internal DS will be updated.
+  pxm->RegisterProxy("gaussian_piecewise_functions", name.toAscii().data(),
+      GaussianopacityFunction);
+  GaussianopacityFunction->Delete();
+  this->setGaussianOpacityFunctionDefaultState(GaussianopacityFunction);
+
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
+  if (!this->Internal->GaussianOpacityFuncs.contains(key))
+    {
+    qDebug() << "Creation of gaussianopacityFunction failed!";
+    return 0;
+    }
+
+  return this->Internal->GaussianOpacityFuncs[key];
+  }
+
+pqTwoDTransferFunction* pqPQLookupTableManager::createTwoDTransferFunction(
+    pqServer* server, const QString& arrayname, int number_of_components,
+    int component)
+  {
+  vtkSMSessionProxyManager* pxm = server->proxyManager();
+  vtkSMProxy* TwoDTransferfunc = pxm->NewProxy(
+      "two_dimenisonal_piecewise_functions", "TwoDTransferFunction");
+  //opacityFunction->UpdateVTKObjects();
+  QString name = this->Internal->getRegistrationName(
+      QString(TwoDTransferfunc->GetXMLName()), arrayname, number_of_components,
+      component);
+  // This will lead to the creation of pqScalarOpacityFunction object
+  // which this class will be intimated of (onAddOpacityFunction)
+  // and our internal DS will be updated.
+  pxm->RegisterProxy("two_dimenisonal_piecewise_functions",
+      name.toAscii().data(), TwoDTransferfunc);
+  TwoDTransferfunc->Delete();
+  this->setTwoDTransferFunctionDefaultState(TwoDTransferfunc);
+
+  pqInternal::Key key(server->GetConnectionID(), arrayname,
+      number_of_components);
+  if (!this->Internal->TwoDTransferFuncs.contains(key))
+    {
+    qDebug() << "Creation of TwoDTransferFunction failed!";
+    return 0;
+    }
+
+  return this->Internal->TwoDTransferFuncs[key];
+  }
+
+void pqPQLookupTableManager::onAddTwoDTransferFunction(
+    pqTwoDTransferFunction* opFunc)
+  {
+  QString registration_name = opFunc->getSMName();
+  pqInternal::Key key = this->Internal->getKey(
+      opFunc->getServer()->GetConnectionID(), registration_name);
+  if (!this->Internal->TwoDTransferFuncs.contains(key))
+    {
+    this->Internal->TwoDTransferFuncs[key] = opFunc;
+    }
+
+  }
+
+//-----------------------------------------------------------------------------
+void pqPQLookupTableManager::onAddGaussianOpacityFunction(
+    pqGaussianOpacityFunction* opFunc)
+  {
+  //if this is ever registered as callback, remove the direct call from "creategaussianopacityfunction just above)
+  QString registration_name = opFunc->getSMName();
+  pqInternal::Key key = this->Internal->getKey(
+      opFunc->getServer()->GetConnectionID(), registration_name);
+  if (!this->Internal->GaussianOpacityFuncs.contains(key))
+    {
+    this->Internal->GaussianOpacityFuncs[key] = opFunc;
+    }
+  }
 
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::onAddOpacityFunction(
-  pqScalarOpacityFunction* opFunc)
-{
+    pqScalarOpacityFunction* opFunc)
+  {
   QString registration_name = opFunc->getSMName();
-  pqInternal::Key key =
-    this->Internal->getKey(opFunc->getServer()->GetConnectionID(),
-      registration_name);
+  pqInternal::Key key = this->Internal->getKey(
+      opFunc->getServer()->GetConnectionID(), registration_name);
   if (!this->Internal->OpacityFuncs.contains(key))
     {
     this->Internal->OpacityFuncs[key] = opFunc;
     }
-}
-  
+  }
+
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::onRemoveOpacityFunction(
-  pqScalarOpacityFunction* opFunc)
-{
+    pqScalarOpacityFunction* opFunc)
+  {
   pqInternal::MapOfOpactiyFunc::iterator iter =
-    this->Internal->OpacityFuncs.begin();
-  for (; iter != this->Internal->OpacityFuncs.end(); )
+      this->Internal->OpacityFuncs.begin();
+  for (; iter != this->Internal->OpacityFuncs.end();)
     {
     if (iter.value() == opFunc)
       {
@@ -531,19 +698,59 @@ void pqPQLookupTableManager::onRemoveOpacityFunction(
       ++iter;
       }
     }
-}
-  
+  }
+
+//-----------------------------------------------------------------------------
+void pqPQLookupTableManager::setGaussianOpacityFunctionDefaultState(
+    vtkSMProxy* opFuncProxy)
+  {
+  /*// Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).
+   // We are new setting defaults for midPoint (0.5) and sharpness(0.0)
+   QList<QVariant> values;
+   values << 0.0 << 0.0 << 0.5 << 0.0 << 0.0;
+   values << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
+   pqSMAdaptor::setMultipleElementProperty(
+   opFuncProxy->GetProperty("Points"), values);
+
+   if (this->Internal->DefaultOpacityElement)
+   {
+   opFuncProxy->LoadXMLState(this->Internal->DefaultOpacityElement, NULL);
+   }
+
+   opFuncProxy->UpdateVTKObjects();*/
+  }
+
+//-----------------------------------------------------------------------------
+void pqPQLookupTableManager::setTwoDTransferFunctionDefaultState(
+    vtkSMProxy* opFuncProxy)
+  {
+  /*// Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).
+   // We are new setting defaults for midPoint (0.5) and sharpness(0.0)
+   QList<QVariant> values;
+   values << 0.0 << 0.0 << 0.5 << 0.0 << 0.0;
+   values << 1.0 << 1.0 << 0.5 << 0.0 << 0.0;
+   pqSMAdaptor::setMultipleElementProperty(
+   opFuncProxy->GetProperty("Points"), values);
+
+   if (this->Internal->DefaultOpacityElement)
+   {
+   opFuncProxy->LoadXMLState(this->Internal->DefaultOpacityElement, NULL);
+   }
+
+   opFuncProxy->UpdateVTKObjects();*/
+  }
+
 //-----------------------------------------------------------------------------
 void pqPQLookupTableManager::setOpacityFunctionDefaultState(
- vtkSMProxy* opFuncProxy)
-{
+    vtkSMProxy* opFuncProxy)
+  {
   // Setup default opacity function to go from (0.0,0.0) to (1.0,1.0).
   // We are new setting defaults for midPoint (0.5) and sharpness(0.0) 
   QList<QVariant> values;
-  values << 0.0 << 0.0 << 0.5 << 0.0 ;
-  values << 1.0 << 1.0 << 0.5 << 0.0 ;
-  pqSMAdaptor::setMultipleElementProperty(
-    opFuncProxy->GetProperty("Points"), values);
+  values << 0.0 << 0.0 << 0.5 << 0.0;
+  values << 1.0 << 1.0 << 0.5 << 0.0;
+  pqSMAdaptor::setMultipleElementProperty(opFuncProxy->GetProperty("Points"),
+      values);
 
   if (this->Internal->DefaultOpacityElement)
     {
@@ -551,4 +758,4 @@ void pqPQLookupTableManager::setOpacityFunctionDefaultState(
     }
 
   opFuncProxy->UpdateVTKObjects();
-}
+  }

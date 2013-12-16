@@ -1,17 +1,17 @@
 /*=========================================================================
 
-  Program:   ParaView
-  Module:    $RCSfile$
+ Program:   ParaView
+ Module:    $RCSfile$
 
-  Copyright (c) Kitware, Inc.
-  All rights reserved.
-  See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
+ Copyright (c) Kitware, Inc.
+ All rights reserved.
+ See Copyright.txt or http://www.paraview.org/HTML/Copyright.html for details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+ This software is distributed WITHOUT ANY WARRANTY; without even
+ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ PURPOSE.  See the above copyright notice for more information.
 
-=========================================================================*/
+ =========================================================================*/
 #include "vtkSMTransferFunctionProxy.h"
 
 #include "vtkNew.h"
@@ -29,35 +29,63 @@
 vtkStandardNewMacro(vtkSMTransferFunctionProxy);
 //----------------------------------------------------------------------------
 vtkSMTransferFunctionProxy::vtkSMTransferFunctionProxy()
-{
-}
+  {
+  }
 
 //----------------------------------------------------------------------------
 vtkSMTransferFunctionProxy::~vtkSMTransferFunctionProxy()
-{
-}
+  {
+  }
 
 //----------------------------------------------------------------------------
-bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
-  vtkSMProxy* proxy, double rangeMin, double rangeMax, bool extend)
-{
-  vtkSMTransferFunctionProxy* tfp =
-    vtkSMTransferFunctionProxy::SafeDownCast(proxy);
+bool vtkSMTransferFunctionProxy::RescaleTransferFunction(vtkSMProxy* proxy,
+    double rangeMin, double rangeMax, bool extend)
+  {
+  vtkSMTransferFunctionProxy* tfp = vtkSMTransferFunctionProxy::SafeDownCast(
+      proxy);
   if (tfp)
     {
     return tfp->RescaleTransferFunction(rangeMin, rangeMax, extend);
     }
   return false;
-}
+  }
+
+bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+    vtkSMProxy* proxy, double rangeMin, double rangeMax, bool extend)
+  {
+
+  vtkSMTransferFunctionProxy* tfp = vtkSMTransferFunctionProxy::SafeDownCast(
+      proxy);
+  if (tfp)
+    {
+    return tfp->RescaleGaussianTransferFunction(rangeMin, rangeMax, extend);
+    }
+  return false;
+  }
+
+bool vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(vtkSMProxy* proxy,
+    double scalarRangeMin, double scalarRangeMax, double gradientRangeMin,
+    double gradientRangeMax, bool extend)
+  {
+
+  vtkSMTransferFunctionProxy* tfp = vtkSMTransferFunctionProxy::SafeDownCast(
+      proxy);
+  if (tfp)
+    {
+    return tfp->RescaleTwoDTransferFunction(scalarRangeMin, scalarRangeMax,
+        gradientRangeMin, gradientRangeMax, extend);
+    }
+  return false;
+  }
 
 //----------------------------------------------------------------------------
 namespace
-{
+  {
   class StrictWeakOrdering
     {
   public:
-    bool operator()(
-      const vtkTuple<double, 4>& x, const vtkTuple<double, 4>& y) const
+    bool operator()(const vtkTuple<double, 4>& x,
+        const vtkTuple<double, 4>& y) const
       {
       return (x.GetData()[0] < y.GetData()[0]);
       }
@@ -82,17 +110,103 @@ namespace
     if (num_elements % 4 != 0)
       {
       vtkGenericWarningMacro("Property must have 4-tuples. Resizing.");
-      cntrlPoints.SetNumberOfElements((num_elements/4)*4);
+      cntrlPoints.SetNumberOfElements((num_elements / 4) * 4);
       }
 
     return controlPointsProperty;
     }
-}
+
+  inline vtkSMProperty* GetGaussianControlPointsProperty(vtkSMProxy* self)
+    {
+    vtkSMProperty* controlPointsProperty = self->GetProperty("Range");
+    if (!controlPointsProperty)
+      {
+      vtkGenericWarningMacro("Range' property is required.");
+      return NULL;
+      }
+    vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+    unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+    if (num_elements % 2 != 0)
+      {
+      vtkGenericWarningMacro("Property must have 2-tuples. Resizing.");
+      cntrlPoints.SetNumberOfElements((num_elements / 2) * 2);
+      }
+
+    return controlPointsProperty;
+    }
+
+  inline vtkSMProperty* GetTwoDTransferFunctionControlPointsProperty(
+      vtkSMProxy* self)
+    {
+    vtkSMProperty* controlPointsProperty = self->GetProperty("Range");
+    if (!controlPointsProperty)
+      {
+      vtkGenericWarningMacro("Range' property is required.");
+      return NULL;
+      }
+    vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+    unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+    if (num_elements % 4 != 0)
+      {
+      vtkGenericWarningMacro("Property must have 4-tuples. Resizing.");
+      cntrlPoints.SetNumberOfElements((num_elements / 4) * 4);
+      }
+
+    return controlPointsProperty;
+    }
+
+  }
+
+bool vtkSMTransferFunctionProxy::RescaleGaussianTransferFunction(
+    double rangeMin, double rangeMax, bool extend)
+  {
+
+  vtkSMProperty* controlPointsProperty = GetGaussianControlPointsProperty(this);
+
+  vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+  unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+  std::vector<double> points;
+  points.resize(2);
+
+  points[0] = rangeMin;
+  points[1] = rangeMax;
+
+  cntrlPoints.Set(&(points[0]), num_elements);
+
+  this->UpdateVTKObjects();
+  return true;
+
+  return false;
+  }
+
+bool vtkSMTransferFunctionProxy::RescaleTwoDTransferFunction(
+    double scalarRangeMin, double scalarRangeMax, double gradientRangeMin,
+    double gradientRangeMax, bool extend)
+  {
+  vtkSMProperty* controlPointsProperty =
+      GetTwoDTransferFunctionControlPointsProperty(this);
+
+  vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
+  unsigned int num_elements = cntrlPoints.GetNumberOfElements();
+  std::vector<double> points;
+  points.resize(4);
+
+  points[0] = scalarRangeMin;
+  points[1] = scalarRangeMax;
+  points[2] = gradientRangeMin;
+  points[3] = gradientRangeMax;
+
+  cntrlPoints.Set(&(points[0]), num_elements);
+
+  this->UpdateVTKObjects();
+  return true;
+
+  }
 
 //----------------------------------------------------------------------------
-bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
-  double rangeMin, double rangeMax, bool extend)
-{
+bool vtkSMTransferFunctionProxy::RescaleTransferFunction(double rangeMin,
+    double rangeMax, bool extend)
+  {
   vtkSMProperty* controlPointsProperty = GetControlPointsProperty(this);
   if (!controlPointsProperty)
     {
@@ -124,21 +238,23 @@ bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
     else
       {
       // trivial case with only 1 point. Set it to the center of the range.
-      cntrlPoints.Set(0, (rangeMin + rangeMax)/2.0);
+      cntrlPoints.Set(0, (rangeMin + rangeMax) / 2.0);
       }
     this->UpdateVTKObjects();
     return true;
     }
 
   std::vector<vtkTuple<double, 4> > points;
-  points.resize(num_elements/4);
+  points.resize(num_elements / 4);
   cntrlPoints.Get(points[0].GetData(), num_elements);
 
   // sort the points by x, just in case user didn't add them correctly.
   std::sort(points.begin(), points.end(), StrictWeakOrdering());
 
-  double old_range[2] = {points.front().GetData()[0],
-                         points.back().GetData()[0]};
+  double old_range[2] =
+    {
+    points.front().GetData()[0], points.back().GetData()[0]
+    };
 
   if (extend)
     {
@@ -153,54 +269,54 @@ bool vtkSMTransferFunctionProxy::RescaleTransferFunction(
     }
 
   // determine if the interpolation has to happen in log-space.
-  bool log_space =
-    (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt() != 0);
+  bool log_space = (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt()
+      != 0);
   // ensure that log_space is valid for the ranges (before and after).
-  if (rangeMin <= 0.0 || rangeMax <= 0.0 ||
-      old_range[0] <= 0.0 || old_range[1] <= 0.0)
+  if (rangeMin <= 0.0 || rangeMax <= 0.0 || old_range[0] <= 0.0
+      || old_range[1] <= 0.0)
     {
     log_space = false;
     }
 
-  double dnew = log_space? log10(rangeMax/rangeMin) :
-                           (rangeMax - rangeMin);
+  double dnew = log_space ? log10(rangeMax / rangeMin) : (rangeMax - rangeMin);
   // don't set empty ranges. Tweak it a bit.
-  dnew = (dnew > 0)? dnew : 1.0;
+  dnew = (dnew > 0) ? dnew : 1.0;
 
-  double dold = log_space?  log10(old_range[1]/old_range[0]) :
-                            (old_range[1] - old_range[0]);
-  dold = (dold > 0)? dold : 1.0;
+  double dold =
+      log_space ?
+          log10(old_range[1] / old_range[0]) : (old_range[1] - old_range[0]);
+  dold = (dold > 0) ? dold : 1.0;
 
   double scale = dnew / dold;
-  for (size_t cc=0; cc < points.size(); cc++)
+  for (size_t cc = 0; cc < points.size(); cc++)
     {
     double &x = points[cc].GetData()[0];
     if (log_space)
       {
-      double logx = log10(x/old_range[0]) * scale + log10(rangeMin);
+      double logx = log10(x / old_range[0]) * scale + log10(rangeMin);
       x = pow(10.0, logx);
       }
     else
       {
-      x = (x - old_range[0])*scale + rangeMin;
+      x = (x - old_range[0]) * scale + rangeMin;
       }
     }
   cntrlPoints.Set(points[0].GetData(), num_elements);
   this->UpdateVTKObjects();
   return true;
-}
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::InvertTransferFunction(vtkSMProxy* proxy)
-{
-  vtkSMTransferFunctionProxy* ctf =
-    vtkSMTransferFunctionProxy::SafeDownCast(proxy);
-  return ctf? ctf->InvertTransferFunction() : false;
-}
+  {
+  vtkSMTransferFunctionProxy* ctf = vtkSMTransferFunctionProxy::SafeDownCast(
+      proxy);
+  return ctf ? ctf->InvertTransferFunction() : false;
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::InvertTransferFunction()
-{
+  {
   vtkSMProperty* controlPointsProperty = GetControlPointsProperty(this);
   if (!controlPointsProperty)
     {
@@ -216,32 +332,34 @@ bool vtkSMTransferFunctionProxy::InvertTransferFunction()
     }
 
   // determine if the interpolation has to happen in log-space.
-  bool log_space =
-    (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt() != 0);
+  bool log_space = (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt()
+      != 0);
 
   std::vector<vtkTuple<double, 4> > points;
-  points.resize(num_elements/4);
+  points.resize(num_elements / 4);
   cntrlPoints.Get(points[0].GetData(), num_elements);
 
   // sort the points by x, just in case user didn't add them correctly.
   std::sort(points.begin(), points.end(), StrictWeakOrdering());
 
-  double range[2] = {points.front().GetData()[0],
-                     points.back().GetData()[0]};
+  double range[2] =
+    {
+    points.front().GetData()[0], points.back().GetData()[0]
+    };
   if (range[0] <= 0.0 || range[1] <= 0.0)
     {
     // ranges not valid for log-space. Switch to linear space.
     log_space = false;
     }
 
-  for (size_t cc=0; cc < points.size(); cc++)
+  for (size_t cc = 0; cc < points.size(); cc++)
     {
     double &x = points[cc].GetData()[0];
     if (log_space)
       {
       // inverting needs to happen in log-space
-      double logxprime = log10(range[0]*range[1] / x);
-                       /* ^-- == log10(range[1]) - (log10(x) - log10(range[0])) */
+      double logxprime = log10(range[0] * range[1] / x);
+      /* ^-- == log10(range[1]) - (log10(x) - log10(range[0])) */
       x = pow(10.0, logxprime);
       }
     else
@@ -252,12 +370,12 @@ bool vtkSMTransferFunctionProxy::InvertTransferFunction()
   cntrlPoints.Set(points[0].GetData(), num_elements);
   this->UpdateVTKObjects();
   return true;
-}
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
-  bool inverse/*=false*/)
-{
+    bool inverse/*=false*/)
+  {
   vtkSMProperty* controlPointsProperty = GetControlPointsProperty(this);
   if (!controlPointsProperty)
     {
@@ -273,20 +391,22 @@ bool vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
     }
 
   std::vector<vtkTuple<double, 4> > points;
-  points.resize(num_elements/4);
+  points.resize(num_elements / 4);
   cntrlPoints.Get(points[0].GetData(), num_elements);
 
   // sort the points by x, just in case user didn't add them correctly.
   std::sort(points.begin(), points.end(), StrictWeakOrdering());
 
-  double range[2] = {points.front().GetData()[0],
-                     points.back().GetData()[0]};
+  double range[2] =
+    {
+    points.front().GetData()[0], points.back().GetData()[0]
+    };
 
   if (inverse == false && (range[0] <= 0.0 || range[1] <= 0.0))
     {
     // ranges not valid for log-space. Cannot convert.
-    vtkWarningMacro("Ranges not valid for log-space. "
-      "Cannot map control points to log-space.");
+    vtkWarningMacro(
+        "Ranges not valid for log-space. " "Cannot map control points to log-space.");
     return false;
     }
   if (range[0] >= range[1])
@@ -295,31 +415,31 @@ bool vtkSMTransferFunctionProxy::MapControlPointsToLogSpace(
     return false;
     }
 
-  for (size_t cc=0; cc < points.size(); cc++)
+  for (size_t cc = 0; cc < points.size(); cc++)
     {
     double &x = points[cc].GetData()[0];
     if (inverse)
       {
       // log-to-linear
-      double norm = log10(x/range[0]) / log10(range[1]/range[0]);
-      x = range[0] + norm * (range[1] - range[0]);  
+      double norm = log10(x / range[0]) / log10(range[1] / range[0]);
+      x = range[0] + norm * (range[1] - range[0]);
       }
     else
       {
       // linear-to-log
-      double norm = (x - range[0])/(range[1] - range[0]);
-      double logx = log10(range[0]) + norm * (log10(range[1]/range[0]));
+      double norm = (x - range[0]) / (range[1] - range[0]);
+      double logx = log10(range[0]) + norm * (log10(range[1] / range[0]));
       x = pow(10.0, logx);
       }
     }
   cntrlPoints.Set(points[0].GetData(), num_elements);
   this->UpdateVTKObjects();
   return true;
-}
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::ApplyColorMap(const char* text)
-{
+  {
   vtkNew<vtkPVXMLParser> parser;
   if (parser->Parse(text))
     {
@@ -327,20 +447,20 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(const char* text)
     }
 
   return this->ApplyColorMap(parser->GetRootElement());
-}
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
-{
+  {
   if (!xml || !xml->GetName() || strcmp(xml->GetName(), "ColorMap") != 0)
     {
     vtkWarningMacro("'ColorMap' XML expected.");
     return false;
     }
 
-  bool indexedLookup = 
-    (strcmp(xml->GetAttributeOrDefault("indexedLookup", "false"), "true") == 0);
-  vtkSMPropertyHelper(this, "IndexedLookup").Set(indexedLookup? 1 : 0);
+  bool indexedLookup = (strcmp(
+      xml->GetAttributeOrDefault("indexedLookup", "false"), "true") == 0);
+  vtkSMPropertyHelper(this, "IndexedLookup").Set(indexedLookup ? 1 : 0);
 
   if (!indexedLookup)
     {
@@ -356,11 +476,11 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
       vtkSMPropertyHelper(this, "HSVWrap").Set(0);
       vtkSMPropertyHelper(this, "ColorSpace").Set(colorSpace.c_str());
       }
-    } 
+    }
 
   vtkPVXMLElement* nanElement = xml->FindNestedElementByName("NaN");
-  if (nanElement && nanElement->GetAttribute("r") &&
-    nanElement->GetAttribute("g") && nanElement->GetAttribute("b"))
+  if (nanElement && nanElement->GetAttribute("r")
+      && nanElement->GetAttribute("g") && nanElement->GetAttribute("b"))
     {
     double rgb[3];
     nanElement->GetScalarAttribute("r", &rgb[0]);
@@ -373,18 +493,17 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
   std::vector<vtkTuple<double, 4> > new_points;
   std::vector<vtkTuple<const char*, 2> > new_annotations;
 
-  for (unsigned int cc=0; cc < xml->GetNumberOfNestedElements(); cc++)
+  for (unsigned int cc = 0; cc < xml->GetNumberOfNestedElements(); cc++)
     {
     vtkPVXMLElement* pointElement = xml->GetNestedElement(cc);
     double xrgb[4];
-    if (pointElement && pointElement->GetName() &&
-      strcmp(pointElement->GetName(), "Point") == 0 &&
-      pointElement->GetScalarAttribute("r", &xrgb[1]) &&
-      pointElement->GetScalarAttribute("g", &xrgb[2]) &&
-      pointElement->GetScalarAttribute("b", &xrgb[3]))
+    if (pointElement && pointElement->GetName()
+        && strcmp(pointElement->GetName(), "Point") == 0
+        && pointElement->GetScalarAttribute("r", &xrgb[1])
+        && pointElement->GetScalarAttribute("g", &xrgb[2])
+        && pointElement->GetScalarAttribute("b", &xrgb[3]))
       {
-      if (!indexedLookup &&
-        pointElement->GetScalarAttribute("x", &xrgb[0]))
+      if (!indexedLookup && pointElement->GetScalarAttribute("x", &xrgb[0]))
         {
         // "x" attribute is only needed for non-categorical color maps.
         new_points.push_back(vtkTuple<double, 4>(xrgb));
@@ -398,14 +517,14 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
         new_points.push_back(vtkTuple<double, 4>(xrgb));
         }
       }
-    else if (pointElement && pointElement->GetName() &&
-      strcmp(pointElement->GetName()," Annotation") &&
-      pointElement->GetAttribute("v") &&
-      pointElement->GetAttribute("t"))
+    else if (pointElement && pointElement->GetName()
+        && strcmp(pointElement->GetName(), " Annotation")
+        && pointElement->GetAttribute("v") && pointElement->GetAttribute("t"))
       {
-      const char* value[2] = {
-          pointElement->GetAttribute("v"),
-          pointElement->GetAttribute("t")};
+      const char* value[2] =
+        {
+        pointElement->GetAttribute("v"), pointElement->GetAttribute("t")
+        };
       new_annotations.push_back(vtkTuple<const char*, 2>(value));
       }
     }
@@ -413,11 +532,11 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
   if (new_annotations.size() > 0)
     {
     vtkSMStringVectorProperty* svp = vtkSMStringVectorProperty::SafeDownCast(
-      this->GetProperty("Annotations"));
+        this->GetProperty("Annotations"));
     if (svp)
       {
       svp->SetElements(new_annotations[0].GetData(),
-        static_cast<unsigned int>(new_annotations.size()*2));
+          static_cast<unsigned int>(new_annotations.size() * 2));
       }
     }
 
@@ -425,7 +544,7 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
     {
     std::vector<vtkTuple<double, 3> > rgbColors;
     rgbColors.resize(new_points.size());
-    for (size_t cc=0; cc < new_points.size(); cc++)
+    for (size_t cc = 0; cc < new_points.size(); cc++)
       {
       rgbColors[cc].GetData()[0] = new_points[cc].GetData()[1];
       rgbColors[cc].GetData()[1] = new_points[cc].GetData()[2];
@@ -434,7 +553,7 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
 
     vtkSMPropertyHelper indexedColors(this->GetProperty("IndexedColors"));
     indexedColors.Set(rgbColors[0].GetData(),
-      static_cast<unsigned int>(rgbColors.size() * 3));
+        static_cast<unsigned int>(rgbColors.size() * 3));
     }
   else if (new_points.size() > 0 && !indexedLookup)
     {
@@ -449,35 +568,38 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
     // sort the points by x, just in case user didn't add them correctly.
     std::sort(new_points.begin(), new_points.end(), StrictWeakOrdering());
 
-    if (new_points.front().GetData()[0] == 0.0 &&
-      new_points.back().GetData()[0] == 1.0)
+    if (new_points.front().GetData()[0] == 0.0
+        && new_points.back().GetData()[0] == 1.0)
       {
       // normalized LUT, we will rescale it using the current range.
       unsigned int num_elements = cntrlPoints.GetNumberOfElements();
       if (num_elements != 0 || num_elements == 4)
         {
         std::vector<vtkTuple<double, 4> > points;
-        points.resize(num_elements/4);
+        points.resize(num_elements / 4);
         cntrlPoints.Get(points[0].GetData(), num_elements);
         std::sort(points.begin(), points.end(), StrictWeakOrdering());
-        double range[2] = {points.front().GetData()[0], points.back().GetData()[0]};
+        double range[2] =
+          {
+          points.front().GetData()[0], points.back().GetData()[0]
+          };
 
         // determine if the interpolation has to happen in log-space.
         bool log_space =
-          (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt() != 0);
+            (vtkSMPropertyHelper(this, "UseLogScale", true).GetAsInt() != 0);
         if (range[0] <= 0.0 || range[1] <= 0.0)
           {
           // ranges not valid for log-space. Switch to linear space.
           log_space = false;
           }
 
-        for (size_t cc=0; cc < new_points.size(); cc++)
+        for (size_t cc = 0; cc < new_points.size(); cc++)
           {
           double &x = new_points[cc].GetData()[0];
           if (log_space)
             {
-            double logx = log10(range[0]) + x*log10(range[1]/range[0]);
-              /// ==== log10(range[0]) + (log10(range[1] - log10(range[0])) * x;
+            double logx = log10(range[0]) + x * log10(range[1] / range[0]);
+            /// ==== log10(range[0]) + (log10(range[1] - log10(range[0])) * x;
             x = pow(10.0, logx);
             }
           else
@@ -491,15 +613,15 @@ bool vtkSMTransferFunctionProxy::ApplyColorMap(vtkPVXMLElement* xml)
     // TODO: we may need to handle normalized/non-normalized color-map more
     // elegantly.
     cntrlPoints.Set(new_points[0].GetData(),
-      static_cast<unsigned int>(new_points.size() * 4));
+        static_cast<unsigned int>(new_points.size() * 4));
     }
   this->UpdateVTKObjects();
   return true;
-}
+  }
 
 //----------------------------------------------------------------------------
 bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
-{
+  {
   if (!xml)
     {
     vtkWarningMacro("'xml' cannot be NULL");
@@ -508,7 +630,8 @@ bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
 
   xml->SetName("ColorMap");
 
-  bool indexedLookup = vtkSMPropertyHelper(this, "IndexedLookup").GetAsInt() != 0;
+  bool indexedLookup = vtkSMPropertyHelper(this, "IndexedLookup").GetAsInt()
+      != 0;
   xml->AddAttribute("indexedLookup", indexedLookup ? "1" : "0");
 
   if (!indexedLookup)
@@ -525,8 +648,9 @@ bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
     }
 
   // Add the control points.
-  vtkSMProperty* controlPointsProperty = indexedLookup?
-    this->GetProperty("IndexedColors") : GetControlPointsProperty(this);
+  vtkSMProperty* controlPointsProperty =
+      indexedLookup ?
+          this->GetProperty("IndexedColors") : GetControlPointsProperty(this);
   if (!controlPointsProperty)
     {
     return false;
@@ -534,16 +658,16 @@ bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
 
   vtkSMPropertyHelper cntrlPoints(controlPointsProperty);
   unsigned int num_elements = cntrlPoints.GetNumberOfElements();
-  if (num_elements  > 0)
+  if (num_elements > 0)
     {
     if (indexedLookup)
       {
       // Save (r,g,b) tuples for categorical colors.
       std::vector<vtkTuple<double, 3> > points;
-      points.resize(num_elements/3);
+      points.resize(num_elements / 3);
       cntrlPoints.Get(points[0].GetData(), num_elements);
 
-      for (size_t cc=0; cc < points.size(); cc++)
+      for (size_t cc = 0; cc < points.size(); cc++)
         {
         vtkNew<vtkPVXMLElement> child;
         child->SetName("Point");
@@ -558,13 +682,13 @@ bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
       {
       // Save (x, r, g, b) tuples for non-categorical colors.
       std::vector<vtkTuple<double, 4> > points;
-      points.resize(num_elements/4);
+      points.resize(num_elements / 4);
       cntrlPoints.Get(points[0].GetData(), num_elements);
 
       // sort the points by x, just in case user didn't add them correctly.
       std::sort(points.begin(), points.end(), StrictWeakOrdering());
 
-      for (size_t cc=0; cc < points.size(); cc++)
+      for (size_t cc = 0; cc < points.size(); cc++)
         {
         vtkNew<vtkPVXMLElement> child;
         child->SetName("Point");
@@ -588,23 +712,24 @@ bool vtkSMTransferFunctionProxy::SaveColorMap(vtkPVXMLElement* xml)
   xml->AddNestedElement(nan.GetPointer());
 
   return true;
-}
+  }
 
 //----------------------------------------------------------------------------
-vtkSMProxy* vtkSMTransferFunctionProxy::FindScalarBarRepresentation(vtkSMProxy* view)
-{
+vtkSMProxy* vtkSMTransferFunctionProxy::FindScalarBarRepresentation(
+    vtkSMProxy* view)
+  {
   if (!view || !view->GetProperty("Representations"))
     {
     return NULL;
     }
 
   vtkSMPropertyHelper reprHelper(view, "Representations");
-  for (unsigned int cc=0; cc < reprHelper.GetNumberOfElements(); cc++)
+  for (unsigned int cc = 0; cc < reprHelper.GetNumberOfElements(); cc++)
     {
     vtkSMProxy* current = reprHelper.GetAsProxy(cc);
-    if (current && current->GetXMLName() &&
-      strcmp(current->GetXMLName(), "ScalarBarWidgetRepresentation") == 0 &&
-      current->GetProperty("LookupTable"))
+    if (current && current->GetXMLName()
+        && strcmp(current->GetXMLName(), "ScalarBarWidgetRepresentation") == 0
+        && current->GetProperty("LookupTable"))
       {
       if (vtkSMPropertyHelper(current, "LookupTable").GetAsProxy() == this)
         {
@@ -613,10 +738,10 @@ vtkSMProxy* vtkSMTransferFunctionProxy::FindScalarBarRepresentation(vtkSMProxy* 
       }
     }
   return NULL;
-}
+  }
 
 //----------------------------------------------------------------------------
 void vtkSMTransferFunctionProxy::PrintSelf(ostream& os, vtkIndent indent)
-{
+  {
   this->Superclass::PrintSelf(os, indent);
-}
+  }

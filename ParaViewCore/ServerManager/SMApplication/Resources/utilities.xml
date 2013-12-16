@@ -69,7 +69,7 @@
                             number_of_elements="1"></StringVectorProperty>
     </Proxy>
 
-    <TransferFunctionProxy class="vtkDiscretizableColorTransferFunction"
+    <TransferFunctionProxy class="vtkDiscretizableColorTransferFunctionCollection"
                            name="PVLookupTable"
                            post_push="Build"
                            processes="dataserver|renderserver|client">
@@ -100,16 +100,28 @@
                      command="SetScalarOpacityFunction">
       </ProxyProperty>
 
+       <ProxyProperty name="GradientLinearOpacityFunction"
+                     command="SetGradientLinearOpacityFunction">
+      </ProxyProperty>
+	<ProxyProperty name="GradientGaussianOpacityFunction"
+                     command="SetGradientGaussianOpacityFunction">
+      </ProxyProperty>
+      <ProxyProperty name="ScalarGaussianOpacityFunction"
+                     command="SetScalarGaussianOpacityFunction">
+      </ProxyProperty>
+      <ProxyProperty name="TwoDTransferFunction"
+                     command="SetTwoDTransferFunction">
+      </ProxyProperty>
       <DoubleVectorProperty clean_command="RemoveAllPoints"
                             command="AddRGBPoint"
                             name="RGBPoints"
                             number_of_elements_per_command="4"
                             repeat_command="1">
         <Documentation>
-          Specify the control points that form the color-transfer-function. These are
+        Specify the control points that form the color-transfer-function. These are
           a list of 4-tuples of the form (x, r, g, b) where x is the data value,
           and r,g,b are there color components in the range [0,1].
-        </Documentation>
+          </Documentation>
       </DoubleVectorProperty>
       <IntVectorProperty command="SetUseLogScale"
                          default_values="0"
@@ -251,6 +263,10 @@
         <Property name="EnableOpacityMapping" function="EnableOpacityMapping" />
         <Property name="RGBPoints" function="XRGBPoints" />
         <Property name="ScalarOpacityFunction" function="ScalarOpacityFunction" />
+        <Property name="GradientLinearOpacityFunction" function="GradientLinearOpacityFunction" />
+        <Property name="GradientGaussianOpacityFunction" function="GradientGaussianOpacityFunction" />
+        <Property name="ScalarGaussianOpacityFunction" function="ScalarGaussianOpacityFunction" />
+        <Property name="TwoDTransferFunction" function="TwoDTransferFunction" />
         <Property name="UseLogScale" function="UseLogScale" />
         <Property name="LockScalarRange" function="LockScalarRange" />
       </PropertyGroup>
@@ -1215,6 +1231,51 @@
                          panel_visibility="never" >
         <BooleanDomain name="bool" />
       </IntVectorProperty>
+    </TransferFunctionProxy>
+  </ProxyGroup>
+  <ProxyGroup name="gaussian_piecewise_functions">
+    <TransferFunctionProxy class="vtkGaussianPiecewiseFunction"
+           name="GaussianPiecewiseFunction"
+           processes="client|renderserver|dataserver">
+      <DoubleVectorProperty animateable="0"
+                            clean_command="RemoveAllGaussians"
+                            command="AddGaussian"
+                            default_values="0.5 0.5 0.25 0.0 0.0"
+                            name="Points"
+                            number_of_elements="5"
+                            number_of_elements_per_command="5"
+                            repeat_command="1"></DoubleVectorProperty>
+      <IntVectorProperty command="SetAllowMultipleGaussiansSamePoint"
+                         default_values="1"
+                         name="AllowMultipleGaussiansSamePoint"
+                         number_of_elements="1"
+                         panel_visibility="never" >
+        <BooleanDomain name="bool" />
+      </IntVectorProperty>
+      <DoubleVectorProperty command="SetRange"
+                            default_values="0 1"
+                            name="Range"
+                            number_of_elements="2"
+                            panel_visibility="never"></DoubleVectorProperty>
+    </TransferFunctionProxy>
+  </ProxyGroup>
+  <ProxyGroup name="two_dimenisonal_piecewise_functions">
+    <TransferFunctionProxy class="vtkTwoDTransferFunction"
+           name="TwoDTransferFunction"
+           processes="client|renderserver|dataserver">
+            <DoubleVectorProperty animateable="0"
+                            clean_command="RemoveAllRegions"
+                            command="AddRegion"
+                            default_values="0.5 0.5 0.25 0.25 0.0 1.0"
+                            name="Points"
+                            number_of_elements="6"
+                            number_of_elements_per_command="6"
+                            repeat_command="1"></DoubleVectorProperty>
+      <DoubleVectorProperty command="SetRange"
+                            default_values="0 1 0 1"
+                            name="Range"
+                            number_of_elements="4"
+                            panel_visibility="never"></DoubleVectorProperty>
     </TransferFunctionProxy>
   </ProxyGroup>
   <ProxyGroup name="transfer_functions">

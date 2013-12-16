@@ -29,6 +29,18 @@
 #
 #==========================================================================
 set (Module_SRCS
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.cxx
+  #
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.h
+  #
   pqAboutDialogReaction.cxx
   pqAboutDialogReaction.h
   pqAlwaysConnectedBehavior.cxx
@@ -117,6 +129,10 @@ set (Module_SRCS
   pqFontPropertyWidget.h
   pqHelpReaction.cxx
   pqHelpReaction.h
+  pqHistogramDialog.cxx
+  pqHistogramDialog.h
+  pqHistogramWidget.cxx
+  pqHistogramWidget.h
   pqIgnoreSourceTimeReaction.cxx
   pqIgnoreSourceTimeReaction.h
   pqInputDataTypeDecorator.cxx
@@ -207,6 +223,10 @@ set (Module_SRCS
   pqToggleInteractionViewMode.h
   pqTransferFunctionWidgetPropertyWidget.cxx
   pqTransferFunctionWidgetPropertyWidget.h
+  pqTwoDHistogramDialog.cxx
+  pqTwoDHistogramDialog.h
+  pqTwoDHistogramWidget.cxx
+  pqTwoDHistogramWidget.h
   pqUndoRedoBehavior.cxx
   pqUndoRedoBehavior.h
   pqUndoRedoReaction.cxx
@@ -228,6 +248,12 @@ set (Module_SRCS
 )
 
 set (Module_MOC_HDRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisAbstractOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/Qvis2DTransferFunctionWidget.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisColourBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/QvisGaussianOpacityBar.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/Qvis/pqTransferFunctionEditor.h
+  #
   pqAboutDialogReaction.h
   pqAlwaysConnectedBehavior.h
   pqAnimationTimeToolbar.h
@@ -272,6 +298,8 @@ set (Module_MOC_HDRS
   pqFixPathsInStateFilesBehavior.h
   pqFontPropertyWidget.h
   pqHelpReaction.h
+  pqHistogramDialog.h
+  pqHistogramWidget.h
   pqIgnoreSourceTimeReaction.h
   pqInputDataTypeDecorator.h
   pqListPropertyWidget.h
@@ -316,6 +344,8 @@ set (Module_MOC_HDRS
   pqTimerLogReaction.h
   pqToggleInteractionViewMode.h
   pqTransferFunctionWidgetPropertyWidget.h
+  pqTwoDHistogramDialog.h
+  pqTwoDHistogramWidget.h
   pqUndoRedoBehavior.h
   pqUndoRedoReaction.h
   pqVCRToolbar.h
@@ -353,9 +383,12 @@ set (Module_UI_FILES
   Resources/UI/pqEditMenuBuilder.ui
   Resources/UI/pqFileMenuBuilder.ui
   Resources/UI/pqFontPropertyWidget.ui
+  Resources/UI/pqHistogramDialog.ui
   Resources/UI/pqMainControlsToolbar.ui
   Resources/UI/pqPipelineBrowserContextMenu.ui
   Resources/UI/pqTransferFunctionWidgetPropertyWidgetDialog.ui
+  Resources/UI/pqTransferFunctionEditor.ui
+  Resources/UI/pqTwoDHistogramDialog.ui
   Resources/UI/pqVCRToolbar.ui
 )
 
@@ -389,6 +422,10 @@ vtk_module_library(pqApplicationComponents
   ${__Module_RESOURCE_SRCS}
   ${__Module_MOC_SRCS}
   ${__Module_UI_SRCS})
+
+#if(BUILD_TESTING)
+#  add_subdirectory(Qvis/Testing/Cxx)
+#endif()
 
 #IF (NOT PV_INSTALL_NO_DEVELOPMENT)
 #  # Headers
