@@ -638,9 +638,24 @@ int vtkSMArrayListDomain::SetDefaultValues(vtkSMProperty* prop, bool use_uncheck
   vtkSMPropertyHelper helper(prop);
   helper.SetUseUnchecked(use_unchecked_values);
 
+  std::string regex_copy;
+  unsigned int size = this->GetNumberOfStrings();
+  if (size>0 && svp->GetDefaultUsesRegex())
+    {
+      vtkStringList *list = vtkStringList::New();
+      for(unsigned int i=0; i<size; i++)
+        {
+        list->AddString(this->GetString(i));
+        }
+      // all char*s are invalid after list->Delete, so use local copy
+      const char *def = svp->GetDefaultValue(list);
+      regex_copy = def ? def : "";
+      list->Delete();
+    }
+
   // If vtkSMStringVectorProperty has a default value which is in domain, just
   // use it.
-  const char* defaultValue = svp->GetDefaultValue(0);
+  const char* defaultValue = regex_copy.size()>0 ? regex_copy.c_str() : svp->GetDefaultValue(0);
   unsigned int temp;
   if (defaultValue && this->IsInDomain(defaultValue, temp))
     {
