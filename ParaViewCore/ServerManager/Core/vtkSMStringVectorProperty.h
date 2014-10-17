@@ -171,6 +171,17 @@ public:
    */
   virtual void ResetToXMLDefaults() VTK_OVERRIDE;
 
+  // Description:
+  // If this string vector has regular expression searches attached
+  // then provide a hook so that the a string list domain can pass in a list
+  // of possible strings from which a default can be selected
+  bool GetDefaultUsesRegex();
+
+  // Description:
+  // Using the regular expression list, pick one of the possible string
+  // to be used as the default value
+  const char* GetDefaultValue(vtkStringList *list);
+
 protected:
   vtkSMStringVectorProperty();
   ~vtkSMStringVectorProperty();
