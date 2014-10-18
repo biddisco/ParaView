@@ -180,7 +180,7 @@ protected:
   // Save concrete property values into the XML state property declaration
   virtual void SaveStateValues(vtkPVXMLElement* propElement);
 
-private:
+protected:
   vtkSMStringVectorProperty(const vtkSMStringVectorProperty&); // Not implemented
   void operator=(const vtkSMStringVectorProperty&); // Not implemented
 
