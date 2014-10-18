@@ -49,7 +49,7 @@ int vtkSMDataExportDomain::SetDefaultValues(vtkSMProperty* property)
     return 1;
     }
 
-  return this->Superclass::SetDefaultValues(property);
+  return this->Superclass::SetDefaultValues(property,false);
 }
 
 //---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ int vtkSMDataExportDomain::ReadXMLAttributes(
   }
   temp += ":";
   if (temp!="") {
-    this->AddString(temp.c_str());
+//    this->AddString(temp.c_str());
     vtkSMDataExportProperty::SafeDownCast(prop)->SetDefaultValue(temp.c_str());
   }
   return 1;

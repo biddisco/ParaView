@@ -1414,8 +1414,6 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
       row_streched = true;
       rowCount++;
       }
-      rowCount++;
-      }
     else if (pt == pqSMAdaptor::DATA_EXPORT)
       {
       vtkSMDataExportDomain* doDomain = vtkSMDataExportDomain::SafeDownCast(
@@ -1431,6 +1429,8 @@ void pqNamedWidgets::createWidgets(QGridLayout* panelLayout, vtkSMProxy* pxy, bo
       panelLayout->addWidget(group, rowCount, 0, 1, 2); 
       panelLayout->setRowStretch(rowCount, 1);
       row_streched = true;
+      rowCount++;
+      }
     }
   iter->Delete();
   if (!row_streched && !summaryOnly)
