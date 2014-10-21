@@ -375,6 +375,9 @@ void pqPropertiesPanel::setPanelMode(int val)
   this->Internals->Ui.PropertiesRestoreDefaults->setVisible(has_source);
 
   this->Internals->Ui.PropertiesFrame->setVisible(has_source);
+  this->Internals->Ui.PropertiesSaveAsDefaults->setVisible(has_source);
+  this->Internals->Ui.PropertiesRestoreDefaults->setVisible(has_source);
+
   this->Internals->Ui.ViewFrame->setVisible(has_view);
   this->Internals->Ui.ViewSaveAsDefaults->setVisible(has_view);
   this->Internals->Ui.ViewRestoreDefaults->setVisible(has_view);
