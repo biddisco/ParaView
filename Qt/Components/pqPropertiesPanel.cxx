@@ -771,6 +771,7 @@ void pqPropertiesPanel::apply()
   this->Internals->AutoApplyTimer.stop();
 
   BEGIN_UNDO_SET("Apply");
+  emit this->preapplied();
 
   bool onlyApplyCurrentPanel =
     vtkPVGeneralSettings::GetInstance()->GetAutoApplyActiveOnly();

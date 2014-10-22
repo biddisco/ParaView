@@ -101,13 +101,13 @@ public slots:
   ///
   /// This is triggered when the user clicks the "Apply" button on the
   /// properties panel.
-  void apply();
+  virtual void apply();
 
   /// Reset the changes made.
   ///
   /// This is triggered when the user clicks the "Reset" button on the
   /// properties panel.
-  void reset();
+  virtual void reset();
 
   /// Shows the help dialog.
   ///
@@ -152,6 +152,10 @@ public slots:
   void viewSaveAsDefaults();
 
 signals:
+  /// This signal is emitted after the user clicks the apply button
+  /// but before any properties have been applied
+  void preapplied();
+
   /// This signal is emitted after the user clicks the apply button.
   void applied();
 
@@ -204,10 +208,10 @@ private slots:
 
 protected:
   /// Update the panel to show the widgets for the given pair.
-  void updatePanel(pqOutputPort* port);
-  void updatePropertiesPanel(pqPipelineSource* source);
-  void updateDisplayPanel(pqDataRepresentation* repr);
-  void updateViewPanel (pqView* view);
+  virtual void updatePanel(pqOutputPort* port);
+  virtual void updatePropertiesPanel(pqPipelineSource* source);
+  virtual void updateDisplayPanel(pqDataRepresentation* repr);
+  virtual void updateViewPanel (pqView* view);
 
 private:
   static bool AutoApply;
