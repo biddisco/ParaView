@@ -128,7 +128,21 @@ bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv)
     // main processes waits in MPI_Init() and calls exit() when
     // the others are done, causing apparent memory leaks for any objects
     // created before MPI_Init().
-    MPI_Init(&argc, &argv);
+    int provided, rank, size;
+    int required = MPI_THREAD_MULTIPLE;
+    (void)MPI_Init_thread(&argc, &argv, required, &provided);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    //
+    if (rank == 0) {
+      if (provided != MPI_THREAD_MULTIPLE) {
+        std::cout << "MPI_THREAD_MULTIPLE not set, you may need to recompile your "
+          << "MPI distribution with threads enabled" << std::endl;
+        }
+      else {
+        std::cout << "MPI_THREAD_MULTIPLE is OK (DSM override)" << std::endl;
+        }
+      }
 
     // restore CWD to what it was before the MPI intialization.
     vtksys::SystemTools::ChangeDirectory(cwd.c_str());
