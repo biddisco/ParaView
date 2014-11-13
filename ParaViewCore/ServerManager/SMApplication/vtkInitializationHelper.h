@@ -42,7 +42,7 @@ public:
   // Alternative API to initialize the server manager. This takes in  the
   // command line arguments and the vtkPVOptions instance to use to process the
   // command line options.
-  static void Initialize(int argc, char**argv, int type, vtkPVOptions* options);
+  static void Initialize(int argc, char**argv, int type, vtkPVOptions* options, int mpi_comm=0);
 
   // Description:
   // Finalizes the server manager. Do not use the server manager

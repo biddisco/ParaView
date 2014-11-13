@@ -110,7 +110,7 @@ void vtkInitializationHelper::Initialize(const char* executable,
 
 //----------------------------------------------------------------------------
 void vtkInitializationHelper::Initialize(int argc, char**argv,
-  int type, vtkPVOptions* options)
+  int type, vtkPVOptions* options, int mpi_comm)
 {
   if (vtkProcessModule::GetProcessModule())
     {
@@ -144,7 +144,7 @@ void vtkInitializationHelper::Initialize(int argc, char**argv,
     }
   }
   vtkProcessModule::Initialize(
-    static_cast<vtkProcessModule::ProcessTypes>(type), usedsm, argc, argv);
+    static_cast<vtkProcessModule::ProcessTypes>(type), argc, argv, mpi_comm);
 
   vtksys_ios::ostringstream sscerr;
   if (argv && !options->Parse(argc, argv))
