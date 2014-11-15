@@ -86,7 +86,7 @@ public:
   // for the process and setup some environment e.g. DISPLAY.
   // Initializes the ProcessModule.
   // for the process and setup some environment e.g. DISPLAY.
-  static bool Initialize(ProcessTypes type, int& argc, char** &argv, int mpi_comm=0);
+  static bool Initialize(ProcessTypes type, int& argc, char** &argv, int *mpi_comm=0);
 
   // Description:
   // Finalizes and cleans up the process.
