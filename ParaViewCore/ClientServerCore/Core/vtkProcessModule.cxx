@@ -79,7 +79,7 @@ vtkSmartPointer<vtkProcessModule> vtkProcessModule::Singleton;
 vtkSmartPointer<vtkMultiProcessController> vtkProcessModule::GlobalController;
 
 //----------------------------------------------------------------------------
-bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, int mpi_comm)
+bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, int *mpi_comm)
 {
   return vtkProcessModule::Initialize(type, false, argc, argv);
 }
@@ -139,15 +139,24 @@ bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char**
   else if (mpi_comm != 0) 
     {
     std::cout << "Overriding global MPI communicator creation with user supplied one" << std::endl;
+    MPI_Comm *mpicomm = static_cast<MPI_Comm*>(mpi_comm);
+    int myrank, numprocs;
+    MPI_Comm_rank(*mpicomm, &myrank);
+    MPI_Comm_size(*mpicomm, &numprocs);
     // create an opaque communicator from our actual MPI_Comm
-    vtkMPICommunicatorOpaqueComm comm(static_cast<MPI_Comm*>(&mpi_comm));
+    vtkMPICommunicatorOpaqueComm comm(mpicomm);
     // create a vtkCommunicator and initialize it with the external communicator
-    vtkSmartPointer<vtkMPICommunicator> communicator = vtkSmartPointer<vtkMPICommunicator>::New();
+    vtkMPICommunicator *communicator = vtkMPICommunicator::New();
     communicator->InitializeExternal(&comm);
+    vtkMPICommunicator::SetWorldCommunicator(communicator);
+
     // create a vtkMPIController and make it the global controller
     vtkSmartPointer<vtkMPIController> controller = vtkSmartPointer<vtkMPIController>::New();
+    vtkProcessModule::GlobalController = controller;
+    controller->SetCommunicator(communicator);
     controller->Initialize(NULL, NULL, 1);
     vtkMPIController::SetGlobalController(controller);
+    vtkProcessModule::GlobalController = controller;
     vtkProcessModule::FinalizeMPI = false;
     }
   else if (use_mpi || mpi_already_initialized)

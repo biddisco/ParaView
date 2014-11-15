@@ -110,7 +110,7 @@ void vtkInitializationHelper::Initialize(const char* executable,
 
 //----------------------------------------------------------------------------
 void vtkInitializationHelper::Initialize(int argc, char**argv,
-  int type, vtkPVOptions* options, int mpi_comm)
+  int type, vtkPVOptions* options, int *mpi_comm)
 {
   if (vtkProcessModule::GetProcessModule())
     {
