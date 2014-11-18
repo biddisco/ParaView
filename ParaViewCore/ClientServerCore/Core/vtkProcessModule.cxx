@@ -79,12 +79,12 @@ vtkSmartPointer<vtkProcessModule> vtkProcessModule::Singleton;
 vtkSmartPointer<vtkMultiProcessController> vtkProcessModule::GlobalController;
 
 //----------------------------------------------------------------------------
-bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, int *mpi_comm)
+bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char** &argv)
 {
   return vtkProcessModule::Initialize(type, false, argc, argv);
 }
 //----------------------------------------------------------------------------
-bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char** &argv)
+bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, int *mpi_comm)
 {
   setlocale(LC_NUMERIC,"C");
 
@@ -172,14 +172,16 @@ bool vtkProcessModule::Initialize(ProcessTypes type, bool dsm, int &argc, char**
       }
 
     vtkProcessModule::GlobalController = vtkSmartPointer<vtkMPIController>::New();
+/*
     if (dsm) {
       vtkProcessModule::GlobalController->Initialize(
         &argc, &argv, 2);
     }
     else {
+*/
       vtkProcessModule::GlobalController->Initialize(
         &argc, &argv, /*initializedExternally*/1);
-    }
+//    }
 
     }
 #else
