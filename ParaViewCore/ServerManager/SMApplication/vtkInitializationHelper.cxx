@@ -165,7 +165,7 @@ void vtkInitializationHelper::Initialize(const char* executable,
 
 //----------------------------------------------------------------------------
 void vtkInitializationHelper::Initialize(int argc, char**argv,
-  int type, vtkPVOptions* options, int mpi_comm)
+  int type, vtkPVOptions* options)
 {
   if (vtkProcessModule::GetProcessModule())
     {
@@ -184,7 +184,7 @@ void vtkInitializationHelper::Initialize(int argc, char**argv,
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   vtkProcessModule::Initialize(
-    static_cast<vtkProcessModule::ProcessTypes>(type), argc, argv, mpi_comm);
+    static_cast<vtkProcessModule::ProcessTypes>(type), argc, argv);
 
   vtksys_ios::ostringstream sscerr;
   if (argv && !options->Parse(argc, argv) )

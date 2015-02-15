@@ -100,7 +100,7 @@ vtkSmartPointer<vtkProcessModule> vtkProcessModule::Singleton;
 vtkSmartPointer<vtkMultiProcessController> vtkProcessModule::GlobalController;
 
 //----------------------------------------------------------------------------
-bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, int mpi_comm)
+bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv)
 {
   setlocale(LC_NUMERIC,"C");
 
@@ -134,7 +134,7 @@ bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, in
   // initialize MPI only on all processes if paraview is compiled w/MPI.
   int mpi_already_initialized = 0;
   MPI_Initialized(&mpi_already_initialized);
-  if ((mpi_already_initialized == 0) && use_mpi && (mpi_comm == 0))
+  if (mpi_already_initialized == 0 && use_mpi)
     {
     // MPICH changes the current working directory after MPI_Init. We fix that
     // by changing the CWD back to the original one after MPI_Init.
@@ -167,21 +167,7 @@ bool vtkProcessModule::Initialize(ProcessTypes type, int &argc, char** &argv, in
     vtkProcessModule::FinalizeMPI = true;
     } // END if MPI is already initialized
 
-  else if (mpi_comm != 0) 
-    {
-    std::cout << "Overriding global MPI communicator creation with user supplied one" << std::endl;
-    // create an opaque communicator from our actual MPI_Comm
-    vtkMPICommunicatorOpaqueComm comm(static_cast<MPI_Comm*>(&mpi_comm));
-    // create a vtkCommunicator and initialize it with the external communicator
-    vtkSmartPointer<vtkMPICommunicator> communicator = vtkSmartPointer<vtkMPICommunicator>::New();
-    communicator->InitializeExternal(&comm);
-    // create a vtkMPIController and make it the global controller
-    vtkSmartPointer<vtkMPIController> controller = vtkSmartPointer<vtkMPIController>::New();
-    controller->Initialize(NULL, NULL, 1);
-    vtkMPIController::SetGlobalController(controller);
-    vtkProcessModule::FinalizeMPI = false;
-    }
-  else if (use_mpi || mpi_already_initialized)
+  if (use_mpi || mpi_already_initialized)
     {
     if(vtkMPIController* controller = vtkMPIController::SafeDownCast(
          vtkMultiProcessController::GetGlobalController()))
