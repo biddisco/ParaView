@@ -147,6 +147,24 @@ public:
 #endif
     this->Ui.OpacityTable->horizontalHeader()->setStretchLastSection(true);
     }
+
+  void render()
+  {
+    pqDataRepresentation* repr =
+      pqActiveObjects::instance().activeRepresentation();
+    if (repr)
+      {
+      repr->renderViewEventually();
+      return;
+      }
+    pqView* activeView = pqActiveObjects::instance().activeView();
+    if (activeView)
+      {
+      activeView->render();
+      return;
+      }
+    pqApplicationCore::instance()->render();
+  }
 };
 
 //-----------------------------------------------------------------------------
@@ -167,6 +185,12 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
       SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
       this, SIGNAL(xrgbPointsChanged()));
     }
+  QObject::connect(&pqActiveObjects::instance(),
+    SIGNAL(representationChanged(pqRepresentation*)),
+    this, SLOT(updateButtonEnableState()));
+  QObject::connect(&pqActiveObjects::instance(),
+    SIGNAL(viewChanged(pqView*)),
+    this, SLOT(updateButtonEnableState()));
 
   QObject::connect(
     ui.OpacityEditor, SIGNAL(currentPointChanged(vtkIdType)),
@@ -231,6 +255,13 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
     qCritical("Missing 'XRGBPoints' property. Widget may not function correctly.");
     }
 
+  smproperty = smproxy->GetProperty("LockScalarRange");
+  if (smproperty)
+    {
+    this->addPropertyLink(
+      this, "lockScalarRange", SIGNAL(lockScalarRangeChanged()), smproperty);
+    }
+
   ui.OpacityEditor->hide();
   smproperty = smgroup->GetProperty("ScalarOpacityFunction");
   if (smproperty)
@@ -264,19 +295,6 @@ pqColorOpacityEditorWidget::pqColorOpacityEditorWidget(
   else
     {
     ui.UseLogScale->hide();
-    }
-
-  smproperty = smgroup->GetProperty("LockScalarRange");
-  if (smproperty)
-    {
-    this->addPropertyLink(
-      this, "lockScalarRange", SIGNAL(lockScalarRangeChanged()), smproperty);
-    QObject::connect(ui.AutoRescaleRange, SIGNAL(toggled(bool)),
-      this, SIGNAL(lockScalarRangeChanged()));
-    }
-  else
-    {
-    ui.AutoRescaleRange->hide();
     }
 
   // if proxy has a property named IndexedLookup, we hide this entire widget
@@ -530,15 +548,14 @@ void pqColorOpacityEditorWidget::useLogScaleClicked(bool log_space)
 //-----------------------------------------------------------------------------
 bool pqColorOpacityEditorWidget::lockScalarRange() const
 {
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  return !ui.AutoRescaleRange->isChecked();
+  return vtkSMPropertyHelper(this->proxy(), "LockScalarRange").GetAsInt() ? true : false;
 }
 
 //-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::setLockScalarRange(bool val)
 {
-  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
-  ui.AutoRescaleRange->setChecked(!val);
+  vtkSMPropertyHelper(this->proxy(), "LockScalarRange").Set(val ? 1 : 0);
+  this->proxy()->UpdateVTKObjects();
 }
 
 //-----------------------------------------------------------------------------
@@ -585,6 +602,21 @@ void pqColorOpacityEditorWidget::currentDataEdited()
 }
 
 //-----------------------------------------------------------------------------
+void pqColorOpacityEditorWidget::updateButtonEnableState()
+{
+  pqDataRepresentation* repr =
+    pqActiveObjects::instance().activeRepresentation();
+  bool hasRepresentation = repr != NULL;
+  pqView* activeView = pqActiveObjects::instance().activeView();
+  bool hasView = activeView != NULL;
+
+  Ui::ColorOpacityEditorWidget &ui = this->Internals->Ui;
+  ui.ResetRangeToData->setEnabled(hasRepresentation);
+  ui.ResetRangeToDataOverTime->setEnabled(hasRepresentation);
+  ui.ResetRangeToVisibleData->setEnabled(hasRepresentation && hasView);
+}
+
+//-----------------------------------------------------------------------------
 void pqColorOpacityEditorWidget::resetRangeToData()
 {
   pqDataRepresentation* repr =
@@ -596,7 +628,7 @@ void pqColorOpacityEditorWidget::resetRangeToData()
     }
   BEGIN_UNDO_SET("Reset transfer function ranges using data range");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(repr->getProxy());
-  repr->renderViewEventually();
+  this->Internals->render();
   emit this->changeFinished();
   END_UNDO_SET();
 }
@@ -624,7 +656,7 @@ void pqColorOpacityEditorWidget::resetRangeToDataOverTime()
     // disable auto-rescale of transfer function since the user has set on
     // explicitly (BUG #14371).
     this->setLockScalarRange(true);
-    repr->renderViewEventually();
+    this->Internals->render();
     emit this->changeFinished();
     END_UNDO_SET();
     }
@@ -663,7 +695,7 @@ void pqColorOpacityEditorWidget::resetRangeToVisibleData()
 
   BEGIN_UNDO_SET("Reset transfer function ranges using visible data");
   vtkSMPVRepresentationProxy::RescaleTransferFunctionToVisibleRange(repProxy, rvproxy);
-  repr->renderViewEventually();
+  this->Internals->render();
   END_UNDO_SET();
 }
 
@@ -696,9 +728,7 @@ void pqColorOpacityEditorWidget::resetRangeToCustom(double min, double max)
   // disable auto-rescale of transfer function since the user has set on
   // explicitly (BUG #14371).
   this->setLockScalarRange(true);
-  pqDataRepresentation* repr =
-    pqActiveObjects::instance().activeRepresentation();
-  repr->renderViewEventually();
+  this->Internals->render();
   emit this->changeFinished();
   END_UNDO_SET();
 }

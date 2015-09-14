@@ -2246,6 +2246,9 @@
                          name="UseGradientBackground"
                          number_of_elements="1">
         <BooleanDomain name="bool" />
+        <Hints>
+          <GlobalPropertyLink type="ColorPalette" property="UseGradientBackground" />
+        </Hints>
       </IntVectorProperty>
       <IntVectorProperty command="SetTexturedBackground"
                          default_values="0"
@@ -3118,7 +3121,7 @@
                          default_values="0"
                          name="CubeAxesVisibility"
                          number_of_elements="1"
-                         panel_visibility="never">
+                         panel_visibility="advanced">
         <BooleanDomain name="bool" />
         <Documentation>Set the visibility for the cube axes.</Documentation>
       </IntVectorProperty>
@@ -3338,7 +3341,7 @@
                proxyname="CubeAxesRepresentation"></Proxy>
         <ExposedProperties>
           <PropertyGroup label="Cube Axes"
-                         panel_visibility="default"
+                         panel_visibility="advanced"
                          panel_widget="CubeAxes">
             <Property exposed_name="CubeAxesColor"
                       name="Color" />
@@ -3402,8 +3405,8 @@
                       name="YLabelFormat" />
             <Property exposed_name="CubeAxesZLabelFormat"
                       name="ZLabelFormat" />
-      <Property name="StickyAxes" />
-      <Property name="CenterStickyAxes" />
+            <Property name="StickyAxes" />
+            <Property name="CenterStickyAxes" />
           </PropertyGroup>
         </ExposedProperties>
         <ShareProperties subproxy="SurfaceRepresentation">
@@ -4772,7 +4775,7 @@
                           name="input_array_any"></InputArrayDomain>
       </InputProperty>
       <DoubleVectorProperty command="SetPointLabelColor"
-                            default_values="0.5 0.5 0.5"
+                            default_values="1 1 0"
                             name="PointLabelColor"
                             number_of_elements="3">
         <DoubleRangeDomain max="1 1 1"

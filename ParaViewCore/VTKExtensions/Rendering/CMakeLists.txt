@@ -48,6 +48,7 @@ set(Module_SRCS
   vtkPVAxesWidget.cxx
   vtkPVCenterAxesActor.cxx
   vtkPVDefaultPass.cxx
+  vtkPVDiscretizableColorTransferFunction.cxx
   vtkPVGeometryFilter.cxx
   vtkPVInteractorStyle.cxx
   vtkPVJoystickFly.cxx
@@ -160,3 +161,5 @@ vtk_module_library(vtkPVVTKExtensionsRendering ${Module_SRCS})
 if(PARAVIEW_USE_MPI)
   vtk_mpi_link(${vtk-module})
 endif()
+include(vtkOpenGL)
+vtk_opengl_link(vtkPVVTKExtensionsRendering)

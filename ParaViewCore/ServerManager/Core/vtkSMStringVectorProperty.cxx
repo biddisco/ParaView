@@ -23,9 +23,8 @@
 #include "vtkStringList.h"
 #include "vtkSMStateLocator.h"
 
-#include <vtksys/ios/sstream>
+#include <sstream>
 #include <vtksys/RegularExpression.hxx>
-
 vtkStandardNewMacro(vtkSMStringVectorProperty);
 
 class vtkSMStringVectorProperty::vtkInternals :

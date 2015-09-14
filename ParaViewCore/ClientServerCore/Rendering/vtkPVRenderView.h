@@ -96,6 +96,13 @@ public:
   // @CallOnAllProcessess
   virtual void Initialize(unsigned int id);
 
+
+  // Description:
+  // Overridden to call InvalidateCachedSelection() whenever the render window
+  // parameters change.
+  virtual void SetSize(int, int);
+  virtual void SetPosition(int, int);
+
   // Description:
   // Gets the non-composited renderer for this view. This is typically used for
   // labels, 2D annotations etc.
@@ -433,7 +440,7 @@ public:
 
   // Description:
   // Set the vtkPVGridAxes3DActor to use for the view.
-  void SetGridAxes3DActor(vtkPVGridAxes3DActor*);
+  virtual void SetGridAxes3DActor(vtkPVGridAxes3DActor*);
 
   //*****************************************************************
   // Forwarded to orientation axes widget.
@@ -448,8 +455,8 @@ public:
 
   //*****************************************************************
   // Forward to vtkPVInteractorStyle instances.
-  void SetCenterOfRotation(double x, double y, double z);
-  void SetRotationFactor(double factor);
+  virtual void SetCenterOfRotation(double x, double y, double z);
+  virtual void SetRotationFactor(double factor);
 
   //*****************************************************************
   // Forward to vtkLightKit.

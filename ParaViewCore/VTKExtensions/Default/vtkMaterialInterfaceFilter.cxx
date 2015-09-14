@@ -70,13 +70,13 @@
 #include "vtkTriangleFilter.h"
 #include "vtkAppendPolyData.h"
 // STL
-#include "vtksys/ios/fstream"
-using vtksys_ios::ofstream;
-#include "vtksys/ios/sstream"
-using vtksys_ios::ostringstream;
-#include "vector"
+#include <fstream>
+using std::ofstream;
+#include <sstream>
+using std::ostringstream;
+#include <vector>
 using std::vector;
-#include "string"
+#include <string>
 using std::string;
 #include "algorithm"
 // ansi c
@@ -9952,7 +9952,7 @@ int vtkMaterialInterfaceFilter::WriteStatisticsOutputToTextFile()
     vtkErrorMacro("Could not open " << fileName.str() << ".");
     return 0;
     }
-  fout.setf(vtksys_ios::ios::scientific, vtksys_ios::ios::floatfield);
+  fout.setf(std::ios::scientific, std::ios::floatfield);
   fout.precision(6);
 
   // Write the csv file in block order. The format will be:

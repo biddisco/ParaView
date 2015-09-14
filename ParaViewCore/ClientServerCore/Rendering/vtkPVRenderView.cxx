@@ -693,6 +693,7 @@ void vtkPVRenderView::SetGridAxes3DActor(vtkPVGridAxes3DActor* gridActor)
   if (this->GridAxes3DActor != gridActor)
     {
     vtkPVRendererCuller* culler = vtkPVRendererCuller::SafeDownCast(this->Culler.GetPointer());
+    // we currently don't support grid axes in tile-display mode.
     const bool in_tile_display_mode = this->InTileDisplayMode();
     if (this->GridAxes3DActor)
       {
@@ -798,6 +799,13 @@ bool vtkPVRenderView::PrepareSelect(int fieldAssociation)
   this->Selector->SetRenderer(this->GetRenderer());
   this->Selector->SetFieldAssociation(fieldAssociation);
   this->Selector->SetSynchronizedWindows(this->SynchronizedWindows);
+
+  // This is used when in interactive selection and changing the camera
+  if (this->RenderView->GetRenderer()->GetActiveCamera()->GetMTime() > 
+      this->Selector->GetMTime())
+    {
+    this->Selector->Modified();
+    }
   return true;
 }
 
@@ -2413,6 +2421,26 @@ void vtkPVRenderView::UpdateAnnotationText()
     this->BuildAnnotationText(stream);
     this->Annotation->SetText(stream.str().c_str());
     }
+}
+
+//----------------------------------------------------------------------------
+void vtkPVRenderView::SetSize(int dx, int dy)
+{
+  if (this->Size[0] != dx || this->Size[1] != dy)
+    {
+    this->InvalidateCachedSelection();
+    }
+  this->Superclass::SetSize(dx, dy);
+}
+
+//----------------------------------------------------------------------------
+void vtkPVRenderView::SetPosition(int x, int y)
+{
+  if (this->Position[0] != x || this->Position[1] != y)
+    {
+    this->InvalidateCachedSelection();
+    }
+  this->Superclass::SetPosition(x, y);
 }
 
 //----------------------------------------------------------------------------

@@ -477,6 +477,11 @@ void vtkIceTCompositePass::Render(const vtkRenderState* render_state)
   vtkMatrix4x4 *unused;
   cam->GetKeyMatrices(render_state->GetRenderer(), wcvc, norms, vcdc, unused);
   float background[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+
+  GLint physical_viewport[4];
+  glGetIntegerv(GL_VIEWPORT, physical_viewport);
+  icetPhysicalRenderSize(physical_viewport[2], physical_viewport[3]);
+
   IceTImage renderedImage =
     icetDrawFrame(vcdc->Element[0],
                   wcvc->Element[0],
@@ -554,9 +559,8 @@ void vtkIceTCompositePass::CreateProgram(vtkOpenGLRenderWindow *context)
 #ifdef VTKGL2
   this->Program = new vtkOpenGLHelper;
   this->Program->Program =
-    context->GetShaderCache()->ReadyShader(vtkTextureObjectVS,
-                                           vtkCompositeZPassFS,
-                                           "");
+    context->GetShaderCache()->ReadyShaderProgram(
+      vtkTextureObjectVS, vtkCompositeZPassFS, "");
   if (!this->Program->Program)
     {
     vtkErrorMacro("Shader program failed to build.");
@@ -660,13 +664,14 @@ void vtkIceTCompositePass::Draw(const vtkRenderState* render_state,
     vtkMatrix4x4 *wcvc;
     vtkMatrix3x3 *norms;
     vtkMatrix4x4 *vcdc;
-    vtkMatrix4x4 *unused;
-    cam->GetKeyMatrices(render_state->GetRenderer(), wcvc, norms, vcdc, unused);
+    vtkMatrix4x4 *wcdc;
+    cam->GetKeyMatrices(render_state->GetRenderer(), wcvc, norms, vcdc, wcdc);
     for (int i = 0; i < 16; i++)
       {
       *(vcdc->Element[0] + i) = proj_matrix[i];
       *(wcvc->Element[0] + i) = mv_matrix[i];
       }
+    vtkMatrix4x4::Multiply4x4(wcvc, vcdc, wcdc);
     this->RenderPass->Render(render_state);
     cam->Modified();
 
@@ -969,7 +974,7 @@ void vtkIceTCompositePass::PushIceTDepthBufferToScreen(
     }
 
 #ifdef VTKGL2
-  context->GetShaderCache()->ReadyShader(this->Program->Program);
+  context->GetShaderCache()->ReadyShaderProgram(this->Program->Program);
   this->ZTexture->Activate();
   this->Program->Program->SetUniformi("depth", this->ZTexture->GetTextureUnit());
   this->ZTexture->CopyToFrameBuffer(0, 0, w - 1, h - 1,

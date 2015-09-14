@@ -24,7 +24,6 @@
 #include "vtkSMIdTypeVectorProperty.h"
 #include "vtkSMInputProperty.h"
 #include "vtkSMIntVectorProperty.h"
-#include "vtkSMNamedPropertyIterator.h"
 #include "vtkSMProperty.h"
 #include "vtkSMPropertyIterator.h"
 #include "vtkSMProxy.h"
@@ -32,17 +31,17 @@
 #include "vtkSMStringVectorProperty.h"
 #include "vtkStringList.h"
 
-#include <vtksys/ios/sstream>
-#include <vtksys/String.hxx>
+#include <sstream>
 #include <vtksys/SystemTools.hxx>
 #include "vtk_jsoncpp.h"
 
 #include <algorithm>
+#include <string>
 #include <cfloat>
 
 #define vtkSMSettingsDebugMacro(x)\
   { if (vtksys::SystemTools::GetEnv("PV_SETTINGS_DEBUG")) {     \
-  vtksys_ios::ostringstream vtkerror;                           \
+  std::ostringstream vtkerror;                           \
   vtkerror << x << endl;                                        \
   vtkOutputWindowDisplayText(vtkerror.str().c_str());} }
 
@@ -129,10 +128,7 @@ public:
   //----------------------------------------------------------------------------
   const Json::Value & GetSettingBelowPriority(const char* settingName, double priority)
   {
-    if (!this->SettingCollectionsAreSorted)
-      {
-      this->SortSettingCollections();
-      }
+    this->SortCollectionsIfNeeded();
 
     // Iterate over settings, checking higher priority settings first
     for (size_t i = 0; i < this->SettingCollections.size(); ++i)
@@ -156,10 +152,7 @@ public:
   //----------------------------------------------------------------------------
   const Json::Value & GetSettingAtOrBelowPriority(const char* settingName, double priority)
   {
-    if (!this->SettingCollectionsAreSorted)
-      {
-      this->SortSettingCollections();
-      }
+    this->SortCollectionsIfNeeded();
 
     // Iterate over settings, checking higher priority settings first
     for (size_t i = 0; i < this->SettingCollections.size(); ++i)
@@ -416,7 +409,7 @@ public:
           !property->GetNoCustomDefault())
         {
         // Build the JSON reference string
-        vtksys_ios::ostringstream settingStringStream;
+        std::ostringstream settingStringStream;
         settingStringStream << settingPrefix
                             << "." << proxyName
                             << "." << propertyName;
@@ -469,6 +462,7 @@ public:
   void SetSetting(const char* settingName, const std::vector< T > & values)
   {
     this->CreateCollectionIfNeeded();
+    this->SortCollectionsIfNeeded();
 
     // Just set settings in the highest-priority settings group for now.
     std::string root, leaf;
@@ -643,6 +637,7 @@ public:
   bool SetPropertySetting(const char* settingName, vtkSMProperty* property)
   {
     this->CreateCollectionIfNeeded();
+    this->SortCollectionsIfNeeded();
 
     if (vtkSMIntVectorProperty* intVectorProperty =
         vtkSMIntVectorProperty::SafeDownCast(property))
@@ -667,7 +662,8 @@ public:
   // Description:
   // Set proxy settings to the highest-priority collection.
   bool SetProxySettings(vtkSMProxy* proxy,
-                        vtkSMNamedPropertyIterator* propertyIt)
+                        vtkSMPropertyIterator* propertyIt,
+                        bool skipPropertiesWithDynamicDomains)
   {
     if (!proxy)
       {
@@ -677,7 +673,8 @@ public:
     std::string jsonPrefix(".");
     jsonPrefix.append(proxy->GetXMLGroup());
 
-    return this->SetProxySettings(jsonPrefix.c_str(), proxy, propertyIt);
+    return this->SetProxySettings(jsonPrefix.c_str(), proxy, propertyIt,
+      skipPropertiesWithDynamicDomains);
   }
 
   //----------------------------------------------------------------------------
@@ -685,20 +682,21 @@ public:
   // Set proxy settings in the highest-priority collection under
   // the setting prefix.
   bool SetProxySettings(const char* settingPrefix, vtkSMProxy* proxy,
-                        vtkSMNamedPropertyIterator* propertyIt)
+                        vtkSMPropertyIterator* propertyIt,
+                        bool skipPropertiesWithDynamicDomains)
   {
     if (!proxy)
       {
       return false;
       }
-
     this->CreateCollectionIfNeeded();
+    this->SortCollectionsIfNeeded();
 
     double highestPriority = this->SettingCollections[0].Priority;
 
     // Get reference to JSON value
     const char* proxyName = proxy->GetXMLName();
-    vtksys_ios::ostringstream settingStringStream;
+    std::ostringstream settingStringStream;
     settingStringStream << settingPrefix << "." << proxyName;
     std::string settingString(settingStringStream.str());
     const char* settingCString = settingString.c_str();
@@ -708,28 +706,18 @@ public:
 
     bool propertySet = false;
     vtkSmartPointer<vtkSMPropertyIterator> iter;
-    iter.TakeReference(proxy->NewPropertyIterator());
+    if (propertyIt)
+      {
+      iter = propertyIt;
+      }
+    else
+      {
+      iter.TakeReference(proxy->NewPropertyIterator());
+      }
     for (iter->Begin(); !iter->IsAtEnd(); iter->Next())
       {
       vtkSMProperty* property = iter->GetProperty();
       if (!property) continue;
-      // save defaults only for properties listed
-      if (propertyIt)
-        {
-        bool found = false;
-        for (propertyIt->Begin(); ! propertyIt->IsAtEnd(); propertyIt->Next())
-          {
-          if (! strcmp(property->GetXMLName(), propertyIt->GetKey()))
-            {
-            found = true;
-            break;
-            }
-          }
-        if (! found)
-          {
-          continue;
-          }
-        }
 
       // Check to see if we save only to QSettings or to both QSettings
       // and the JSON file.
@@ -748,7 +736,7 @@ public:
         }
 
       const char* propertyName = iter->GetKey();
-      vtksys_ios::ostringstream propertySettingStringStream;
+      std::ostringstream propertySettingStringStream;
       propertySettingStringStream << settingStringStream.str() << "."
                                   << propertyName;
       std::string propertySettingString(propertySettingStringStream.str());
@@ -761,6 +749,13 @@ public:
         {
         continue;
         }
+      else if (skipPropertiesWithDynamicDomains &&
+        property->HasDomainsWithRequiredProperties())
+        {
+        // skip properties that have domains that change at runtime. Such
+        // properties are typically serialized in state files not in settings.
+        continue;
+        }
       else if (property->IsValueDefault())
         {
         // Remove existing JSON entry only if there is no
@@ -768,8 +763,8 @@ public:
         // lower-priority setting that is not default, we want to be
         // able to set the value back to the default in the higher
         // priority setting collection.
-        Json::Value lowerPriorityValue = this->GetSettingBelowPriority(propertySettingCString,
-                                                                       highestPriority);
+        const Json::Value & lowerPriorityValue = this->GetSettingBelowPriority(propertySettingCString,
+                                                                               highestPriority);
         if (lowerPriorityValue.isNull())
           {
           if (!proxyValue.removeMember(property->GetXMLName()).isNull())
@@ -884,6 +879,17 @@ public:
       }
   }
 
+  //----------------------------------------------------------------------------
+  // Description:
+  // Sort the collections if needed
+  void SortCollectionsIfNeeded()
+  {
+    if (!this->SettingCollectionsAreSorted)
+      {
+      this->SortSettingCollections();
+      this->SettingCollectionsAreSorted = true;
+      }
+  }
 
 };
 
@@ -1061,7 +1067,7 @@ bool vtkSMSettings::SaveSettingsToFile(const std::string & filePath)
     }
 
   // Get directory component of filePath and create it if it doesn't exist.
-  vtksys_stl::string directory =
+  std::string directory =
     vtksys::SystemTools::GetParentDirectory(filePath.c_str());
   bool createdDirectory = vtksys::SystemTools::MakeDirectory(directory.c_str());
   if (!createdDirectory)
@@ -1278,17 +1284,19 @@ void vtkSMSettings::SetSetting(const char* settingName, unsigned int index, cons
 }
 
 //----------------------------------------------------------------------------
-void vtkSMSettings::SetProxySettings(vtkSMProxy* proxy,
-                                     vtkSMNamedPropertyIterator* propertyIt)
+void vtkSMSettings::SetProxySettings(
+  vtkSMProxy* proxy, vtkSMPropertyIterator* propertyIt,
+  bool skipPropertiesWithDynamicDomains)
 {
-  this->Internal->SetProxySettings(proxy, propertyIt);
+  this->Internal->SetProxySettings(proxy, propertyIt, skipPropertiesWithDynamicDomains);
 }
 
 //----------------------------------------------------------------------------
-void vtkSMSettings::SetProxySettings(const char* prefix, vtkSMProxy* proxy,
-                                     vtkSMNamedPropertyIterator* propertyIt)
+void vtkSMSettings::SetProxySettings(const char* prefix,
+  vtkSMProxy* proxy, vtkSMPropertyIterator* propertyIt,
+  bool skipPropertiesWithDynamicDomains)
 {
-  this->Internal->SetProxySettings(prefix, proxy, propertyIt);
+  this->Internal->SetProxySettings(prefix, proxy, propertyIt, skipPropertiesWithDynamicDomains);
 }
 
 //----------------------------------------------------------------------------

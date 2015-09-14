@@ -35,7 +35,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-#include "vtksys/ios/sstream"
+#include <sstream>
 
 vtkStandardNewMacro(vtkSMArrayListDomain);
 
@@ -100,7 +100,7 @@ struct vtkSMArrayListDomainArrayInformation
     }
 };
 
-struct vtkSMArrayListDomainInternals
+class vtkSMArrayListDomainInternals
 {
 public:
   std::vector<vtkSMArrayListDomainInformationKey> InformationKeys;
@@ -175,45 +175,6 @@ private:
       }
     return true;
     }
-
-  // Given composite data set information, check whether the arrays
-  // associated with the field data in the leaf blocks have a single
-  // tuple. We do this to limit which field arrays are available to
-  // the domain.
-  bool FieldArrayHasOneTuplePerCompositeDataSetLeaf(vtkPVCompositeDataInformation* info, const char* arrayName)
-  {
-    for (unsigned int i = 0; i < info->GetNumberOfChildren(); ++i)
-      {
-      vtkPVDataInformation* childInfo = info->GetDataInformation(i);
-      if (childInfo)
-        {
-        vtkPVCompositeDataInformation* compositeChildInfo = childInfo->GetCompositeDataInformation();
-        if (compositeChildInfo->GetNumberOfChildren() == 0)
-          {
-          // We have found a leaf in the dataset. Check whether the field
-          // array with the given name has just one tuple.
-          vtkPVDataSetAttributesInformation* fieldDataInfo = childInfo->GetFieldDataInformation();
-          vtkPVArrayInformation* childArrayInfo = fieldDataInfo->GetArrayInformation(arrayName);
-          if (childArrayInfo && childArrayInfo->GetNumberOfTuples() != 1)
-            {
-            return false;
-            }
-          }
-        else
-          {
-          // Recurse on the composite data information in the child
-          if (!this->FieldArrayHasOneTuplePerCompositeDataSetLeaf(compositeChildInfo, arrayName))
-            {
-            return false;
-            }
-          }
-        }
-      }
-
-    // If we got here, everything checks out
-    return true;
-  }
-
 };
 
 //---------------------------------------------------------------------------
@@ -266,7 +227,7 @@ void vtkSMArrayListDomainInternals::BuildArrayList(
         }
 
       // Then, check if the array name is acceptable
-      if (self->IsFilteredArrayName(arrayInfo->GetName()))
+      if (self->IsFilteredArray(dataInfo, type, arrayInfo->GetName()))
         {
         continue;
         }
@@ -281,21 +242,6 @@ void vtkSMArrayListDomainInternals::BuildArrayList(
       // Next, check if the array is acceptable based on the information-key
       // magic.
       if (!this->AreArrayInformationKeysAcceptable(arrayInfo))
-        {
-        continue;
-        }
-
-      // Next, if the array is a field data array, ensure that it has just one tuple per block
-      bool validFieldArray = true;
-      if (type == vtkSMInputArrayDomain::FIELD && dataInfo->GetCompositeDataSetType() >= 0)
-        {
-          vtkPVCompositeDataInformation* cdi = dataInfo->GetCompositeDataInformation();
-          assert(cdi);
-
-          validFieldArray = this->FieldArrayHasOneTuplePerCompositeDataSetLeaf(cdi, arrayInfo->GetName());
-        }
-
-      if (!validFieldArray)
         {
         continue;
         }
@@ -573,7 +519,7 @@ int vtkSMArrayListDomain::ReadXMLAttributes(
     {
     // data_type can be a space delimited list of types
     // vlaid for the domain
-    vtksys_ios::istringstream dataTypeStream(data_type);
+    std::istringstream dataTypeStream(data_type);
 
     while (dataTypeStream.good())
       {
@@ -754,7 +700,7 @@ int vtkSMArrayListDomain::SetDefaultValues(vtkSMProperty* prop, bool use_uncheck
         svp->GetElements(values.GetPointer());
         }
 
-      vtksys_ios::ostringstream ass;
+      std::ostringstream ass;
       ass << info->FieldAssociation;
       values->SetString(3, ass.str().c_str());
       values->SetString(4, info->ArrayName.c_str());
@@ -887,7 +833,7 @@ void vtkSMArrayListDomain::PrintSelf(ostream& os, vtkIndent indent)
 vtkStdString vtkSMArrayListDomain::CreateMangledName(
   vtkPVArrayInformation *arrayInfo, int component)
 {
-  vtksys_ios::ostringstream stream;
+  std::ostringstream stream;
   if ( component != arrayInfo->GetNumberOfComponents() )
     {
     stream << arrayInfo->GetName() << "_" <<
@@ -940,7 +886,7 @@ int vtkSMArrayListDomain::ComponentIndexFromMangledName(
 }
 
 //---------------------------------------------------------------------------
-bool vtkSMArrayListDomain::IsFilteredArrayName(const char*)
+bool vtkSMArrayListDomain::IsFilteredArray(vtkPVDataInformation*, int, const char*)
 {
   return false;
 }
