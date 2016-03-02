@@ -354,6 +354,7 @@ protected:
   bool SuppressLOD;
   bool RequestGhostCellsIfNeeded;
   double DataBounds[6];
+  class vtkBoundsExtentTranslator *translator;
 
   vtkPiecewiseFunction* PWF;
 

@@ -50,6 +50,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkTransform.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkBoundsExtentTranslator.h"
 
 #ifdef PARAVIEW_USE_OSPRAY
 #include "vtkOSPRayActorNode.h"
@@ -108,6 +109,7 @@ vtkGeometryRepresentation::vtkGeometryRepresentation()
   this->MultiBlockMaker = vtkGeometryRepresentationMultiBlockMaker::New();
   this->Decimator = vtkQuadricClustering::New();
   this->LODOutlineFilter = vtkPVGeometryFilter::New();
+  this->translator = NULL;
 
   // setup the selection mapper so that we don't need to make any selection
   // conversions after rendering.
@@ -286,6 +288,19 @@ int vtkGeometryRepresentation::ProcessViewRequest(
       }
     }
 
+    if (this->translator) 
+      {
+      const int whole_extents[6] = {-1,0,-1,0,-1,0};
+      const double origin[3] = {0,0,0};
+      const double spacing[3] = {1,1,1};
+      vtkPVRenderView* view = vtkPVRenderView::SafeDownCast(inInfo->Get(vtkPVRenderView::VIEW()));
+      vtkPKdTree *tree = this->translator->GetKdTree();
+
+      vtkPVRenderView::SetOrderedCompositingInformation(
+          inInfo, this, this->translator, 
+          whole_extents, origin, spacing, tree);
+      }
+
     // Finally, let the view know about the geometry bounds. The view uses this
     // information for resetting camera and clip planes. Since this
     // representation allows users to transform the geometry, we need to ensure
@@ -379,6 +394,12 @@ int vtkGeometryRepresentation::RequestUpdateExtent(
   vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   this->Superclass::RequestUpdateExtent(request, inputVector, outputVector);
+
+  vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+  void *t = inInfo ? inInfo->Get(vtkBoundsExtentTranslator::META_DATA()) : NULL;
+  if (t) {
+    this->translator = vtkBoundsExtentTranslator::SafeDownCast((vtkObjectBase*)t); 
+  }
 
   // ensure that the ghost-level information is setup correctly to avoid
   // internal faces for unstructured grids.
