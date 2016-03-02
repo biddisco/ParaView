@@ -640,6 +640,11 @@ void vtkPVDataDeliveryManager::RedistributeDataForOrderedCompositing(
       // skip redistribution.
       continue;
       }
+    else if (userKdTree) {
+      // skip redistribution.
+      item.SetRedistributedDataObject(item.GetDeliveredDataObject());
+      continue;
+      }
 
     // release old memory (not necessarily, but try).
     item.SetRedistributedDataObject(NULL);

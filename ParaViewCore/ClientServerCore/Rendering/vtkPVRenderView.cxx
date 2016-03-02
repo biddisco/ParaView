@@ -91,6 +91,7 @@
 #include "vtkVector.h"
 #include "vtkWeakPointer.h"
 #include "vtkWindowToImageFilter.h"
+#include "vtkBoundsExtentTranslator.h"
 
 #ifdef PARAVIEW_USE_PISTON
 #include "vtkPistonMapper.h"
