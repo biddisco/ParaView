@@ -89,6 +89,7 @@
 #include "vtkVector.h"
 #include "vtkWeakPointer.h"
 #include "vtkWindowToImageFilter.h"
+#include "vtkBoundsExtentTranslator.h"
 
 #ifdef VTKGL2
 #include "vtkLightingMapPass.h"
