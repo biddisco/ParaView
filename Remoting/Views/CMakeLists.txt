@@ -9,6 +9,7 @@ set(classes
   vtkAMRStreamingPriorityQueue
   vtkAMRStreamingVolumeRepresentation
   vtkBoundingRectContextDevice2D
+  vtkBoundsExtentTranslator
   vtkCaveSynchronizedRenderers
   vtkCellGridRepresentation
   vtkChartRepresentation

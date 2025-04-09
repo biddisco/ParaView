@@ -5,6 +5,7 @@
 
 #include "vtkAlgorithmOutput.h"
 #include "vtkBoundingBox.h"
+#include "vtkBoundsExtentTranslator.h"
 #include "vtkCallbackCommand.h"
 #include "vtkCommand.h"
 #include "vtkCompositeCellGridMapper.h"
@@ -406,12 +407,23 @@ int vtkGeometryRepresentation::ProcessViewRequest(
     // rendering nodes as and when needed.
     vtkPVView::SetPiece(inInfo, this, this->MultiBlockMaker->GetOutputDataObject(0));
 
-    if (this->UseDataPartitions == true)
+    if (this->BoundsExtentTranslator)
+    {
+      // The upstream filter has provided explicit bounds for each partition.
+      // Use those bounds for ordered-compositing redistribution.
+      vtkPVRenderView::SetOrderedCompositingConfiguration(inInfo, this,
+        vtkPVRenderView::USE_BOUNDS_FOR_REDISTRIBUTION,
+        this->BoundsExtentTranslator->GetWholeBounds());
+      outInfo->Set(vtkPVRenderView::NEED_ORDERED_COMPOSITING(), 1);
+    }
+    else if (this->UseDataPartitions == true)
     {
       // We want to use this representation's data bounds to redistribute all other data in the
       // scene if ordered compositing is needed.
       vtkPVRenderView::SetOrderedCompositingConfiguration(
         inInfo, this, vtkPVRenderView::USE_BOUNDS_FOR_REDISTRIBUTION);
+      outInfo->Set(
+        vtkPVRenderView::NEED_ORDERED_COMPOSITING(), this->NeedsOrderedCompositing() ? 1 : 0);
     }
     else
     {
@@ -420,10 +432,9 @@ int vtkGeometryRepresentation::ProcessViewRequest(
       // if ordered is needed.
       vtkPVRenderView::SetOrderedCompositingConfiguration(inInfo, this,
         vtkPVRenderView::DATA_IS_REDISTRIBUTABLE | vtkPVRenderView::USE_DATA_FOR_LOAD_BALANCING);
+      outInfo->Set(
+        vtkPVRenderView::NEED_ORDERED_COMPOSITING(), this->NeedsOrderedCompositing() ? 1 : 0);
     }
-
-    outInfo->Set(
-      vtkPVRenderView::NEED_ORDERED_COMPOSITING(), this->NeedsOrderedCompositing() ? 1 : 0);
 
     // Finally, let the view know about the geometry bounds. The view uses this
     // information for resetting camera and clip planes. Since this
@@ -516,6 +527,19 @@ int vtkGeometryRepresentation::RequestUpdateExtent(
   vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector)
 {
   this->Superclass::RequestUpdateExtent(request, inputVector, outputVector);
+
+  // capture any bounds-extent-translator metadata from upstream so that the
+  // view can use it for ordered-compositing redistribution.
+  this->BoundsExtentTranslator = nullptr;
+  if (inputVector[0]->GetNumberOfInformationObjects() > 0)
+  {
+    vtkInformation* inInfo = inputVector[0]->GetInformationObject(0);
+    if (inInfo->Has(vtkBoundsExtentTranslator::META_DATA()))
+    {
+      this->BoundsExtentTranslator = vtkBoundsExtentTranslator::SafeDownCast(
+        inInfo->Get(vtkBoundsExtentTranslator::META_DATA()));
+    }
+  }
 
   // ensure that the ghost-level information is setup correctly to avoid
   // internal faces for unstructured grids.

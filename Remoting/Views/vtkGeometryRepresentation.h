@@ -20,6 +20,7 @@
 #include "vtkParaViewDeprecation.h" // for PV_DEPRECATED
 #include "vtkProperty.h"            // needed for VTK_POINTS etc.
 #include "vtkRemotingViewsModule.h" // needed for exports
+#include "vtkSmartPointer.h"        // for vtkSmartPointer
 #include "vtkVector.h"              // for vtkVector.
 
 #include <set>           // needed for std::set
@@ -27,6 +28,7 @@
 #include <unordered_map> // needed for std::unordered_map
 #include <vector>        // needed for std::vector
 
+class vtkBoundsExtentTranslator;
 class vtkCompositeDataDisplayAttributes;
 class vtkMapper;
 class vtkPiecewiseFunction;
@@ -553,6 +555,8 @@ protected:
   vtkPiecewiseFunction* PWF;
 
   bool UseDataPartitions;
+
+  vtkSmartPointer<vtkBoundsExtentTranslator> BoundsExtentTranslator;
 
   bool UseShaderReplacements;
   std::string ShaderReplacementsString;
