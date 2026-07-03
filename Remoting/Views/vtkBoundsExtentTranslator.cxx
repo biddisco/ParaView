@@ -31,6 +31,11 @@ vtkStandardNewMacro(vtkBoundsExtentTranslator);
 //----------------------------------------------------------------------------
 vtkInformationKeyMacro(vtkBoundsExtentTranslator, META_DATA, ObjectMetaData);
 //----------------------------------------------------------------------------
+void vtkBoundsExtentTranslator::PrintSelf(ostream& os, vtkIndent indent)
+{
+  this->Superclass::PrintSelf(os, indent);
+}
+//----------------------------------------------------------------------------
 vtkBoundsExtentTranslator::vtkBoundsExtentTranslator()
 {
   this->MaximumGhostDistance = 0;
