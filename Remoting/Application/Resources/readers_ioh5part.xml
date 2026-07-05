@@ -112,10 +112,8 @@
          panel_visibility="advanced">
         <BooleanDomain name="bool"/>
       </IntVectorProperty>
-      <Hints>
-        <ReaderFactory extensions="h5part"
-                       file_description="H5Part particle files" />
-      </Hints>
+      <!-- Disabled extension association so the plugin's H5Part reader is used. -->
+      <Hints/>
     </SourceProxy>
   </ProxyGroup>
 </ServerManagerConfiguration>
