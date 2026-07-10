@@ -431,11 +431,26 @@ void vtkIceTCompositePass::Render(const vtkRenderState* render_state)
   }
 #endif
 
+  // IceT's GL layer (gl_draw.c, gl_image.c) makes raw GL calls —
+  // glClearColor, glBlendFunc, glEnable/glDisable(GL_BLEND),
+  // glClear, glPushAttrib/glPopAttrib, glPixelStorei, glReadPixels,
+  // glMatrixMode, glDrawPixels — that bypass vtkOpenGLState.  Save
+  // the entire vtkOpenGLState before icetDrawFrame and restore it
+  // afterwards so both the cache and the actual GL state are correct
+  // for the rest of the render pipeline (volumetric pass, overlay,
+  // next frame's REQUEST_RENDER, etc.).
+  ostate->Push();
+
   // here is where the actual drawing occurs
   vtkOpenGLRenderUtilities::MarkDebugEvent("vtkIceTCompositePass: icetDrawFrame Start");
   IceTImage renderedImage =
     icetDrawFrame(this->Projection->Element[0], this->ModelView->Element[0], background);
   vtkOpenGLRenderUtilities::MarkDebugEvent("vtkIceTCompositePass: icetDrawFrame End");
+
+  // Restore the vtkOpenGLState (both cache and actual GL state) to
+  // what it was before icetDrawFrame.  Pop() makes raw GL calls to
+  // restore the actual state and pops the stack to restore the cache.
+  ostate->Pop();
 
   IceTDrawCallbackHandle = nullptr;
   IceTDrawCallbackState = nullptr;
