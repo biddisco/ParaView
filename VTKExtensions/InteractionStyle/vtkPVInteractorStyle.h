@@ -59,6 +59,31 @@ public:
    */
   void OnChar() override;
 
+  ///@{
+  /**
+   * Override mouse wheel zoom to fire StartInteractionEvent once,
+   * then InteractionEvent + Render on every wheel event, and
+   * EndInteractionEvent after a short delay (WheelInteractionTimeout)
+   * once scrolling stops.  This matches button-based interaction
+   * behaviour where many InteractiveRender (LOD) calls happen during
+   * the interaction and StillRender only fires when it ends.
+   */
+  void OnMouseWheelForward() override;
+  void OnMouseWheelBackward() override;
+  void OnTimer() override;
+  ///@}
+
+  ///@{
+  /**
+   * Set/get the timeout in milliseconds after the last wheel event
+   * before EndInteractionEvent fires and a full-resolution StillRender
+   * is performed.  Defaults to 500 ms; vtkPVRenderView sets this from
+   * the NonInteractiveRenderDelay property.
+   */
+  vtkSetClampMacro(WheelInteractionTimeout, int, 100, 10000);
+  vtkGetMacro(WheelInteractionTimeout, int);
+  ///@}
+
   /**
    * Access to adding or removing manipulators.
    */
@@ -141,12 +166,24 @@ protected:
   double CenterOfRotation[3];
   double RotationFactor;
 
+  // Wheel-zoom interaction: instead of firing Start/EndInteractionEvent
+  // on every wheel event (which causes an immediate StillRender after
+  // each LOD render), we keep the interaction "alive" with a timer.
+  // StartInteractionEvent fires once, then each wheel event does an
+  // InteractiveRender (LOD).  When the user stops scrolling for
+  // WheelInteractionTimeout ms, the timer fires EndInteractionEvent
+  // -> StillRender (full quality).
+  bool WheelInteracting = false;
+  int WheelTimerId = -1;
+  int WheelInteractionTimeout = 500; // ms
+
   // The CameraInteractors also store there button and modifier.
   vtkCollection* CameraManipulators;
 
   void OnButtonDown(int button, int shift, int control);
   void OnButtonUp(int button);
   void ResetLights();
+  void WheelZoomCommon(double factor);
 
   vtkPVInteractorStyle(const vtkPVInteractorStyle&) = delete;
   void operator=(const vtkPVInteractorStyle&) = delete;

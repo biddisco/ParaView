@@ -72,6 +72,16 @@ void vtkPVInteractorStyle::OnButtonDown(int button, int shift, int control)
     return;
   }
 
+  // If a wheel-zoom interaction timer is still pending, cancel it.
+  // The button-based interaction takes over; otherwise the timer
+  // would fire EndInteractionEvent mid-rotation, killing LOD.
+  if (this->WheelInteracting && this->WheelTimerId != -1)
+  {
+    this->Interactor->DestroyTimer(this->WheelTimerId);
+    this->WheelTimerId = -1;
+    this->WheelInteracting = false;
+  }
+
   // Get the renderer.
   this->FindPokedRenderer(
     this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1]);
@@ -182,6 +192,76 @@ void vtkPVInteractorStyle::OnChar()
       rwi->ExitCallback();
       break;
   }
+}
+
+//-------------------------------------------------------------------------
+void vtkPVInteractorStyle::WheelZoomCommon(double factor)
+{
+  this->FindPokedRenderer(
+    this->Interactor->GetEventPosition()[0], this->Interactor->GetEventPosition()[1]);
+  if (this->CurrentRenderer == nullptr)
+  {
+    return;
+  }
+
+  // Start interaction only on the first wheel event of a scroll gesture.
+  // Subsequent wheel events just do InteractiveRender (LOD) without
+  // firing Start/EndInteractionEvent, which would trigger an immediate
+  // StillRender and replace the LOD view.
+  if (!this->WheelInteracting)
+  {
+    this->WheelInteracting = true;
+    this->InvokeEvent(vtkCommand::StartInteractionEvent);
+  }
+  else if (this->WheelTimerId != -1)
+  {
+    // Cancel the pending end-of-interaction timer; user is still scrolling.
+    this->Interactor->DestroyTimer(this->WheelTimerId);
+    this->WheelTimerId = -1;
+  }
+
+  // Adjust the camera using the same factor as the superclass.
+  this->Dolly(pow(1.1, factor));
+
+  // Mark that an interaction happened and render (LOD, because
+  // vtkSMViewProxyInteractorHelper::Interacting is still true).
+  this->InvokeEvent(vtkCommand::InteractionEvent);
+  this->Interactor->Render();
+
+  // Start (or restart) a one-shot timer.  When it fires without being
+  // cancelled by another wheel event, the interaction ends and a
+  // full-resolution StillRender is performed.
+  this->WheelTimerId = this->Interactor->CreateOneShotTimer(this->WheelInteractionTimeout);
+}
+
+//-------------------------------------------------------------------------
+void vtkPVInteractorStyle::OnMouseWheelForward()
+{
+  double factor = this->MotionFactor * 0.2 * this->MouseWheelMotionFactor;
+  this->WheelZoomCommon(factor);
+}
+
+//-------------------------------------------------------------------------
+void vtkPVInteractorStyle::OnMouseWheelBackward()
+{
+  double factor = this->MotionFactor * -0.2 * this->MouseWheelMotionFactor;
+  this->WheelZoomCommon(factor);
+}
+
+//-------------------------------------------------------------------------
+void vtkPVInteractorStyle::OnTimer()
+{
+  if (this->WheelInteracting && this->WheelTimerId != -1)
+  {
+    // The wheel-interaction timeout expired with no new wheel events.
+    // End the interaction, which triggers a full-resolution StillRender.
+    this->WheelTimerId = -1;
+    this->WheelInteracting = false;
+    this->InvokeEvent(vtkCommand::EndInteractionEvent);
+    return;
+  }
+
+  this->Superclass::OnTimer();
 }
 
 //-------------------------------------------------------------------------

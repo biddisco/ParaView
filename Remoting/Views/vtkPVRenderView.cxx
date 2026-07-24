@@ -1577,7 +1577,6 @@ void vtkPVRenderView::Update()
   vtkTypeUInt64 gsize;
   this->AllReduce(lsize, gsize, vtkCommunicator::SUM_OP);
   const double geometry_size = gsize / 1024.0;
-
   // Update decisions about lod-rendering and remote-rendering.
   this->UseLODForInteractiveRender = this->ShouldUseLODRendering(geometry_size);
   this->UseDistributedRenderingForRender =
@@ -3448,6 +3447,23 @@ void vtkPVRenderView::SetMouseWheelZoomsToCursor(bool value)
   if (this->ThreeDInteractorStyle)
   {
     this->ThreeDInteractorStyle->SetMouseWheelZoomsToCursor(value);
+  }
+}
+
+//----------------------------------------------------------------------------
+void vtkPVRenderView::SetNonInteractiveRenderDelay(double seconds)
+{
+  // Forward to the interactor styles as the wheel-interaction timeout
+  // (converted to ms).  When the delay is 0 (the default), use 500 ms
+  // so that wheel zoom shows LOD during scrolling.
+  int timeoutMs = seconds > 0.0 ? static_cast<int>(seconds * 1000) : 500;
+  if (this->TwoDInteractorStyle)
+  {
+    this->TwoDInteractorStyle->SetWheelInteractionTimeout(timeoutMs);
+  }
+  if (this->ThreeDInteractorStyle)
+  {
+    this->ThreeDInteractorStyle->SetWheelInteractionTimeout(timeoutMs);
   }
 }
 

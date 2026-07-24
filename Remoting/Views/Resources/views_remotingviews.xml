@@ -454,7 +454,8 @@
           rotation speed is multipied by this factor. Default value is 1.
         </Documentation>
       </DoubleVectorProperty>
-      <DoubleVectorProperty default_values="0"
+      <DoubleVectorProperty command="SetNonInteractiveRenderDelay"
+                         default_values="0"
                          name="NonInteractiveRenderDelay"
                          panel_visibility="never"
                          number_of_elements="1">

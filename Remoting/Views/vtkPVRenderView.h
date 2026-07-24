@@ -810,6 +810,15 @@ public:
   virtual void SetMouseWheelZoomsToCursor(bool value);
   virtual void SetCamera2DMouseWheelMotionFactor(double factor);
   virtual void SetCamera3DMouseWheelMotionFactor(double factor);
+
+  /**
+   * Set the delay (in seconds) after an interactive render before
+   * switching to a full-res render.  Also forwarded to the interactor
+   * styles as the wheel-interaction timeout (converted to ms).  When
+   * the delay is 0 (the default), a 500 ms timeout is used so that
+   * wheel zoom shows LOD during scrolling.
+   */
+  virtual void SetNonInteractiveRenderDelay(double seconds);
   ///@}
 
   /**
