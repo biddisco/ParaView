@@ -250,6 +250,25 @@ int vtkSMStringListDomain::SetDefaultValues(vtkSMProperty* prop, bool use_unchec
       {
         helper.Set(0, defaultValue);
       }
+      else if (svp->GetDefaultUsesRegex())
+      {
+        // try regex defaults: build a list of all strings in the
+        // domain and let the property pick one using its regex list.
+        vtkNew<vtkStringList> list;
+        for (unsigned int i = 0; i < num_string; i++)
+        {
+          list->AddString(this->GetString(i));
+        }
+        defaultValue = svp->GetDefaultValue(list);
+        if (defaultValue)
+        {
+          helper.Set(0, defaultValue);
+        }
+        else
+        {
+          helper.Set(0, this->GetString(0));
+        }
+      }
       else
       {
         // now just pick the first string from the domain.

@@ -166,6 +166,19 @@ public:
    */
   const char* GetDefaultValue(int idx);
 
+  /**
+   * If this string vector has regular expression searches attached
+   * then return true, so that a string list domain can pass in a list
+   * of possible strings from which a default can be selected.
+   */
+  bool GetDefaultUsesRegex();
+
+  /**
+   * Using the regular expression list, pick one of the possible
+   * strings to be used as the default value.
+   */
+  const char* GetDefaultValue(vtkStringList* list);
+
   void ClearUncheckedElements() override;
 
   bool IsValueDefault() override;

@@ -10,6 +10,8 @@
 #include "vtkSMVectorPropertyTemplate.h"
 #include "vtkStringList.h"
 
+#include <vtksys/RegularExpression.hxx>
+
 #include <algorithm>
 #include <sstream>
 
@@ -19,6 +21,7 @@ class vtkSMStringVectorProperty::vtkInternals : public vtkSMVectorPropertyTempla
 {
 public:
   std::vector<int> ElementTypes;
+  std::vector<std::string> RegexDefaults;
 
   vtkInternals(vtkSMStringVectorProperty* ivp)
     : vtkSMVectorPropertyTemplate<std::string>(ivp)
@@ -311,6 +314,37 @@ int vtkSMStringVectorProperty::ReadXMLAttributes(vtkSMProxy* proxy, vtkPVXMLElem
   delete[] eTypes;
 
   numEls = this->GetNumberOfElements();
+  //
+  // We only allow regex searches for 1 element string selection (array lists)
+  //
+  if (numEls == 1)
+  {
+    const char* tmp = element->GetAttribute("default_regex");
+    const char* delimiter = element->GetAttribute("default_regex_delimiter");
+    if (tmp && delimiter)
+    {
+      std::string initVal = tmp;
+      std::string delim = delimiter;
+      std::string::size_type pos1 = 0;
+      std::string::size_type pos2 = 0;
+      for (int i = 0; pos2 != std::string::npos; i++)
+      {
+        if (i != 0)
+        {
+          pos1 += delim.size();
+        }
+        pos2 = initVal.find(delim, pos1);
+        std::string v = pos1 == pos2 ? "" : initVal.substr(pos1, pos2 - pos1);
+        this->Internals->RegexDefaults.push_back(v);
+        pos1 = pos2;
+      }
+    }
+    else if (tmp)
+    {
+      this->Internals->DefaultValues.push_back(tmp);
+    }
+  }
+
   if (numEls > 0)
   {
     const char* tmp = element->GetAttribute("default_values");
@@ -349,6 +383,29 @@ int vtkSMStringVectorProperty::ReadXMLAttributes(vtkSMProxy* proxy, vtkPVXMLElem
 const char* vtkSMStringVectorProperty::GetDefaultValue(int idx)
 {
   return this->Internals->GetDefaultValue(idx).c_str();
+}
+
+//---------------------------------------------------------------------------
+bool vtkSMStringVectorProperty::GetDefaultUsesRegex()
+{
+  return this->Internals->RegexDefaults.size() > 0;
+}
+
+//---------------------------------------------------------------------------
+const char* vtkSMStringVectorProperty::GetDefaultValue(vtkStringList* list)
+{
+  for (unsigned int i = 0; i < this->Internals->RegexDefaults.size(); i++)
+  {
+    vtksys::RegularExpression regex(this->Internals->RegexDefaults[i]);
+    for (int j = 0; j < list->GetNumberOfStrings(); j++)
+    {
+      if (regex.find(list->GetString(j)))
+      {
+        return list->GetString(j);
+      }
+    }
+  }
+  return nullptr;
 }
 
 //---------------------------------------------------------------------------
